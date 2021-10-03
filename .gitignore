@@ -1,0 +1,36 @@
+.DS_Store
+node_modules
+/back/dist
+/back/.env
+/back/uploaded
+/front/dist
+build
+/back/package-lock.json
+/front/package-lock.json
+/front/.env
+/front/.env.production
+/back/build
+/back/front
+/back/ecosystem.config.js
+
+
+# local env files
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

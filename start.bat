@@ -1,0 +1,6 @@
+@ECHO OFF
+ECHO Starting Vue...
+start cmd /k "CD front && npm run serve"
+
+ECHO Starting Node.js...
+start cmd /k "CD back && npm run start"
