@@ -159,6 +159,7 @@ $box-corner: 15px;
   width: 35px;
   height: 35px;
   padding: 10px;
+  cursor: pointer;
   background: #ffffff00;
   transition: all 0.3s;
 

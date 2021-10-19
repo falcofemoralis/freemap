@@ -10,6 +10,7 @@
       <ol-source-osm />
     </ol-tile-layer>
 
+    <!-- CREATING LAYER -->
     <ol-vector-layer>
       <ol-source-vector>
         <ol-interaction-draw v-if="drawEnable" :type="type" @drawend="drawend">
@@ -29,11 +30,28 @@
         ></ol-style-text>
       </ol-style>
     </ol-vector-layer>
+
+    <!-- DATA LAYER -->
+    <ol-vector-layer>
+      <ol-source-vector
+        url="https://openlayers.org/en/latest/examples/data/geojson/line-samples.geojson"
+        :format="geoJson"
+      >
+      </ol-source-vector>
+
+      <ol-style :overrideStyleFunction="overrideStyleFunction">
+        <ol-style-stroke color="green" :width="3"></ol-style-stroke>
+        <ol-style-fill color="rgba(255,255,255,0.1)"></ol-style-fill>
+        <ol-style-text>
+          <ol-style-fill color="#fff"></ol-style-fill>
+        </ol-style-text>
+      </ol-style>
+    </ol-vector-layer>
   </ol-map>
 </template>
 
 <script>
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
 import EditorObjectType from "@/constants/EditorObjectType.js";
 
 export default {
@@ -44,6 +62,12 @@ export default {
   },
   setup(props, context) {
     const type = ref("Polygon");
+    const format = inject("ol-format");
+    const geoJson = new format.GeoJSON();
+
+    const overrideStyleFunction = (feature, style) => {
+      style.getText().setText(feature.get("name"));
+    };
 
     watch(
       () => props.selectedType,
@@ -72,10 +96,11 @@ export default {
     return {
       drawend,
       type,
+      geoJson,
+      overrideStyleFunction,
     };
   },
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
