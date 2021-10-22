@@ -1,9 +1,8 @@
 import express from "express";
 import cors from "cors";
 import fileUpload from "express-fileupload";
-import dotenv from 'dotenv';
 import history from "connect-history-api-fallback";
-dotenv.config();
+import { mapRouter } from "./routers/map.router";
 
 export var root: string = __dirname;
 export var storageRoot: string = __dirname + '/storage';
@@ -21,7 +20,8 @@ app.use(fileUpload({
     limits: { fileSize: 500 * 1024 * 1024 }
 }));
 
-app.use(history())
+app.use('/api/map', mapRouter);
+app.use(history());
 app.use(express.static('images'));
 app.use(express.static('front'));
 

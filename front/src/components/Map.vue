@@ -4,7 +4,7 @@
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
   >
-    <ol-view ref="view" :zoom="2" />
+    <ol-view ref="view" :rotation="0" :zoom="4" projection="EPSG:3857" />
 
     <ol-tile-layer>
       <ol-source-osm />
@@ -12,7 +12,7 @@
 
     <!-- CREATING LAYER -->
     <ol-vector-layer>
-      <ol-source-vector>
+      <ol-source-vector projection="EPSG:3857">
         <ol-interaction-draw v-if="drawEnable" :type="type" @drawend="drawend">
         </ol-interaction-draw>
       </ol-source-vector>
@@ -23,19 +23,17 @@
         <ol-style-circle :radius="7">
           <ol-style-fill color="blue"></ol-style-fill>
         </ol-style-circle>
-        <ol-style-text
-          :scale="3"
-          :overflow="true"
-          font="Roboto"
-        ></ol-style-text>
+        <ol-style-text>
+          <ol-style-fill color="#fff"></ol-style-fill>
+        </ol-style-text>
       </ol-style>
     </ol-vector-layer>
 
     <!-- DATA LAYER -->
     <ol-vector-layer>
       <ol-source-vector
-        url="https://openlayers.org/en/latest/examples/data/geojson/line-samples.geojson"
         :format="geoJson"
+        url="http://localhost:3000/api/map/data"
       >
       </ol-source-vector>
 
@@ -85,9 +83,12 @@ export default {
 
     function drawend(event) {
       const name = prompt("prompt", "Enter place name");
+
+      console.log(event.target.sketchCoords_);
       const obj = {
-        coord: event.target.sketchCoords_,
+        coordinates: event.target.sketchCoords_,
         name: name,
+        type: event.target.type_,
       };
 
       context.emit("saveObject", obj);

@@ -58,12 +58,14 @@
 import { ref } from "vue";
 import Map from "@/components/Map.vue";
 import EditorObjectType from "@/constants/EditorObjectType.js";
+import { MapApi } from "@/services/MapService.js";
 
 export default {
   components: {
     Map,
   },
   setup() {
+    //   const mapData = ref(await MapApi.getMapData());
     const drawEnable = ref(false);
     const selectedType = ref(null);
 
@@ -74,7 +76,7 @@ export default {
 
     function handleSaveObject(obj) {
       drawEnable.value = false;
-      console.log(obj);
+      MapApi.addMapData(obj);
     }
 
     function redo() {}
