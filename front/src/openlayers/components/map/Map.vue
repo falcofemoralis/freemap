@@ -48,7 +48,12 @@ export default {
     map.on("dblclick", (event) => emit("dblclick", event));
     map.on("singleclick", (event) => emit("singleclick", event));
     map.on("pointerdrag", (event) => emit("pointerdrag", event));
-    map.on("pointermove", (event) => emit("pointermove", event));
+    map.on("pointermove", (event) => {
+      const pixel = map.getEventPixel(event.originalEvent);
+      const hit = map.hasFeatureAtPixel(pixel);
+      map.getViewport().style.cursor = hit ? "pointer" : "";
+      emit("pointermove", event);
+    });
 
     map.on("movestart", (event) => emit("movestart", event));
     map.on("moveend", (event) => emit("moveend", event));

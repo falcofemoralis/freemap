@@ -22,19 +22,28 @@
         <ol-style-stroke color="black" :width="2"></ol-style-stroke>
         <ol-style-fill color="rgba(255,0,0,0.1)"></ol-style-fill>
         <ol-style-text>
-          <ol-style-fill color="#fff"></ol-style-fill>
+          <ol-style-stroke :width="3"></ol-style-stroke>
+          <ol-style-fill color="#FF1A00"></ol-style-fill>
         </ol-style-text>
       </ol-style>
     </ol-vector-layer>
 
     <!-- Select Layer -->
-    <ol-interaction-select
+    <!--    <ol-interaction-select
       @select="featureSelected"
       :condition="selectCondition"
     >
       <ol-style>
         <ol-style-stroke color="green" :width="10"></ol-style-stroke>
         <ol-style-fill color="rgba(255,255,255,0.5)"></ol-style-fill>
+      </ol-style>
+    </ol-interaction-select> -->
+
+    <!-- Hover Layer -->
+    <ol-interaction-select :condition="hoverCondition">
+      <ol-style>
+        <ol-style-stroke color="yellow" :width="10"></ol-style-stroke>
+        <ol-style-fill color="rgba(255,0,0,0.5)"></ol-style-fill>
       </ol-style>
     </ol-interaction-select>
 
@@ -50,7 +59,8 @@
         <ol-style-stroke color="green" :width="3"></ol-style-stroke>
         <ol-style-fill color="rgba(255,255,255,0.1)"></ol-style-fill>
         <ol-style-text>
-          <ol-style-fill color="#fff"></ol-style-fill>
+          <ol-style-stroke :width="3"></ol-style-stroke>
+          <ol-style-fill color="#FF1A00"></ol-style-fill>
         </ol-style-text>
       </ol-style>
     </ol-vector-layer>
@@ -73,7 +83,10 @@ export default {
     const format = inject("ol-format");
     const geoJson = new format.GeoJSON();
     const type = ref("Polygon");
-    const selectCondition = inject("ol-selectconditions").click;
+    const selectConditions = inject("ol-selectconditions");
+    const selectCondition = selectConditions.click;
+    const hoverCondition = selectConditions.pointerMove;
+
     const router = useRouter();
     const route = useRoute();
 
@@ -144,15 +157,16 @@ export default {
     }
 
     return {
-      drawend,
-      overrideStyleFunction,
-      featureSelected,
-      centerChanged,
-
       view,
       type,
       geoJson,
       selectCondition,
+      hoverCondition,
+
+      drawend,
+      overrideStyleFunction,
+      featureSelected,
+      centerChanged,
     };
   },
 };

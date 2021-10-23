@@ -23,7 +23,17 @@ export default {
       let s = new Select({
         ...properties,
         style: new Style(),
+        filter: function (feature) {
+          const featureExtent = feature.getGeometry().getExtent();
+          const mapExtent = map.getView().calculateExtent(map.getSize());
+
+          return (
+            featureExtent[0] - mapExtent[0] > 0 &&
+            featureExtent[1] - mapExtent[1] > 0
+          );
+        },
       });
+
       s.on("select", (event) => {
         emit("select", event);
       });
