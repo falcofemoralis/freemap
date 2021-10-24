@@ -4,7 +4,11 @@
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
   >
-    <ol-view ref="view" projection="EPSG:3857" @centerChanged="centerChanged" />
+    <ol-view
+      ref="view"
+      projection="EPSG:3857"
+      @centerChanged="posChangedListener"
+    />
 
     <!-- Map Layer -->
     <ol-tile-layer>
@@ -14,7 +18,11 @@
     <!-- Create Layer -->
     <ol-vector-layer>
       <ol-source-vector projection="EPSG:3857">
-        <ol-interaction-draw v-if="drawEnable" :type="type" @drawend="drawend">
+        <ol-interaction-draw
+          v-if="drawEnable"
+          :type="type"
+          @drawend="drawendListener"
+        >
         </ol-interaction-draw>
       </ol-source-vector>
 
@@ -30,7 +38,7 @@
 
     <!-- Select Layer -->
     <!--    <ol-interaction-select
-      @select="featureSelected"
+      @select="featureSelectedListener"
       :condition="selectCondition"
     >
       <ol-style>
@@ -83,13 +91,17 @@ export default {
     const format = inject("ol-format");
     const geoJson = new format.GeoJSON();
     const type = ref("Polygon");
+    const router = useRouter();
+    const route = useRoute();
     const selectConditions = inject("ol-selectconditions");
     const selectCondition = selectConditions.click;
     const hoverCondition = selectConditions.pointerMove;
+    let pathChanged = false;
 
-    const router = useRouter();
-    const route = useRoute();
-
+    /**
+     * Отслеживание измненение координат в url. Метод срабатывает при первичном заходе на сайт.
+     * Карта будет выставленна в соотвествии с координатами и зумом из параметров url
+     */
     const query = computed(() => route.query);
     const queryWatch = watch(query, (updatedquery) => {
       if (updatedquery.pos && updatedquery.z) {
@@ -99,6 +111,9 @@ export default {
       }
     });
 
+    /**
+     * Отслеживание выбраного типа при создании объекта
+     */
     watch(
       () => props.selectedType,
       (current) => {
@@ -113,7 +128,11 @@ export default {
       }
     );
 
-    function drawend(event) {
+    /**
+     * Листенер завершения создания объекта
+     * @param {Object} event - Созданный объект openlayers
+     */
+    function drawendListener(event) {
       const name = prompt("prompt", "Enter place name");
       const obj = {
         coordinates: event.target.sketchCoords_,
@@ -128,6 +147,11 @@ export default {
       context.emit("saveObject", obj);
     }
 
+    /**
+     * Метод переопределения стиля
+     * @param {Object} feature - Объект данных
+     * @param {Object} style - Объект стиля
+     */
     function overrideStyleFunction(feature, style) {
       const text = style.getText();
       const featureName = feature.get("name");
@@ -137,19 +161,27 @@ export default {
       }
     }
 
-    function featureSelected() {
+    /**
+     * Листенер выбора данных
+     * @param {Object} feature - Объект данных
+     */
+    function featureSelectedListener() {
       //console.log(event);
     }
 
-    let pathChanged = false;
-    function centerChanged(center) {
+    /**
+     * Листенер изменения координат. Меняется текущий url с добавление координат и текущего зума
+     * @param {Array} сoordinates - Координаты
+     */
+    function posChangedListener(сoordinates) {
       if (!pathChanged) {
-        if (center) {
-          router.replace(`?pos=${center}&z=${view.value.getZoom()}`);
+        if (сoordinates) {
+          router.replace(`?pos=${сoordinates}&z=${view.value.getZoom()}`);
         }
 
         pathChanged = true;
 
+        // Измненения url каждые 250 мс
         setTimeout(() => {
           pathChanged = false;
         }, 250);
@@ -163,10 +195,10 @@ export default {
       selectCondition,
       hoverCondition,
 
-      drawend,
+      drawendListener,
       overrideStyleFunction,
-      featureSelected,
-      centerChanged,
+      featureSelectedListener,
+      posChangedListener,
     };
   },
 };

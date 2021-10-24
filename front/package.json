@@ -30,7 +30,6 @@
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.0.0",
-    "prettier": "^2.2.1",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2"
   },
@@ -41,13 +40,20 @@
     },
     "extends": [
       "plugin:vue/vue3-essential",
-      "eslint:recommended",
-      "@vue/prettier"
+      "eslint:recommended"
     ],
     "parserOptions": {
+      "ecmaVersion": 2020,
       "parser": "babel-eslint"
     },
-    "rules": {}
+    "rules": {
+      "no-constant-condition": [
+        "error",
+        {
+          "checkLoops": false
+        }
+      ]
+    }
   },
   "browserslist": [
     "> 1%",

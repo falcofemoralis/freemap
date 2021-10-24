@@ -4,7 +4,7 @@
       class="main__map"
       :drawEnable="drawEnable"
       :selectedType="selectedType"
-      @saveObject="handleSaveObject"
+      @saveObject="saveObjectListener"
     />
     <div class="main__searchBox"></div>
     <div class="main__layersBox"></div>
@@ -12,19 +12,19 @@
       <img
         class="box__btn box__btn-left"
         :src="require('@/assets/ic_path.png')"
-        @click="handleAddObject(EditorObjectType.PATH)"
+        @click="createObject(EditorObjectType.PATH)"
         alt="Add path"
       />
       <img
         class="box__btn"
         :src="require('@/assets/ic_polygon.png')"
-        @click="handleAddObject(EditorObjectType.BUILDING)"
+        @click="createObject(EditorObjectType.BUILDING)"
         alt="Add building"
       />
       <img
         class="box__btn box__btn-right"
         :src="require('@/assets/ic_area.png')"
-        @click="handleAddObject(EditorObjectType.AREA)"
+        @click="createObject(EditorObjectType.AREA)"
         alt="Add area"
       />
     </div>
@@ -65,24 +65,41 @@ export default {
     Map,
   },
   setup() {
-    //   const mapData = ref(await MapApi.getMapData());
-    const drawEnable = ref(false);
-    const selectedType = ref(null);
+    const drawEnable = ref(false); // Логическое значение включеного редактора создания объекта
+    const selectedType = ref(null); // Выбранный тип создаваемого объекта
 
-    function handleAddObject(type) {
+    /**
+     * Включение создания нового объекта.
+     * @param {EditorObjectType} type - Тип создаваемого объекта.
+     */
+    function createObject(type) {
       drawEnable.value = true;
       selectedType.value = type;
     }
 
-    function handleSaveObject(obj) {
+    /**
+     * Листенер сохранения объекта.
+     * @param {Object} obj - новый созданный объект.
+     */
+    function saveObjectListener(obj) {
       drawEnable.value = false;
       MapApi.addMapData(obj);
     }
 
+    /**
+     * Отмена отмены действия при создании объекта
+     */
     function redo() {}
 
+    /**
+     * Отмена действия при создании объекта
+     */
     function undo() {}
 
+    /**
+     * Прослушиватель нажатой клавиши ESC.
+     * При ее нажатии будет прекращенно создание объекта.
+     */
     window.addEventListener("keyup", function (event) {
       if (event.key === "Escape") {
         drawEnable.value = false;
@@ -92,9 +109,10 @@ export default {
     return {
       drawEnable,
       selectedType,
-      handleSaveObject,
-      handleAddObject,
       EditorObjectType,
+
+      createObject,
+      saveObjectListener,
       redo,
       undo,
     };
