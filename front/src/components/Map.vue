@@ -1,6 +1,6 @@
 <template>
   <ol-map
-    class="map__layout"
+    class="map"
     :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true"
   >
@@ -19,8 +19,8 @@
     <ol-vector-layer>
       <ol-source-vector projection="EPSG:3857">
         <ol-interaction-draw
-          v-if="drawEnable"
-          :type="type"
+          v-if="drawType"
+          :type="drawType"
           @drawend="drawendListener"
         >
         </ol-interaction-draw>
@@ -79,18 +79,16 @@
 import { ref, watch, inject, computed } from "vue";
 import EditorObjectType from "@/constants/EditorObjectType.js";
 import { useRouter, useRoute } from "vue-router";
+import { useStore } from "vuex";
 
 export default {
   name: "Map",
-  props: {
-    drawEnable: Boolean,
-    selectedType: String,
-  },
   setup(props, context) {
+    const store = useStore();
     const view = ref(null);
     const format = inject("ol-format");
     const geoJson = new format.GeoJSON();
-    const type = ref("Polygon");
+    const drawType = ref(null);
     const router = useRouter();
     const route = useRoute();
     const selectConditions = inject("ol-selectconditions");
@@ -114,20 +112,20 @@ export default {
     /**
      * Отслеживание выбраного типа при создании объекта
      */
-    watch(
-      () => props.selectedType,
-      (current) => {
-        switch (current) {
-          case EditorObjectType.PATH:
-            type.value = "LineString";
-            break;
-          case EditorObjectType.BUILDING:
-            type.value = "Polygon";
-            break;
-        }
+    const selectedType = computed(() => store.getters.getSelectedType);
+    watch(selectedType, (current) => {
+      console.log(current);
+      switch (current) {
+        case EditorObjectType.PATH:
+          drawType.value = "LineString";
+          break;
+        case EditorObjectType.BUILDING:
+          drawType.value = "Polygon";
+          break;
+        default:
+          drawType.value = null;
       }
-    );
-
+    });
     /**
      * Листенер завершения создания объекта
      * @param {Object} event - Созданный объект openlayers
@@ -144,6 +142,7 @@ export default {
         name: name,
       });
 
+      store.dispatch("setSelectedtype", null);
       context.emit("saveObject", obj);
     }
 
@@ -190,7 +189,7 @@ export default {
 
     return {
       view,
-      type,
+      drawType,
       geoJson,
       selectCondition,
       hoverCondition,
@@ -204,4 +203,10 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.map {
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+}
+</style>
