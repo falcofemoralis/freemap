@@ -48,7 +48,7 @@
     </ol-interaction-select> -->
 
     <!-- Hover Layer -->
-    <ol-interaction-select :condition="hoverCondition">
+    <ol-interaction-select v-if="!drawType" :condition="hoverCondition">
       <ol-style>
         <ol-style-stroke color="yellow" :width="10"></ol-style-stroke>
         <ol-style-fill color="rgba(255,0,0,0.5)"></ol-style-fill>
