@@ -1,12 +1,11 @@
 <template>
-  <div class="layersBox">
-    <button
-      v-if="currentMapType != MapType.OSM"
-      @click="changeCurrentMapType(MapType.OSM)"
-    >
-      osm
-    </button>
-    <button v-else @click="changeCurrentMapType(MapType.GOOGLE)">google</button>
+  <div class="layersBox" @click="changeCurrentMapType">
+    <div class="layersBox__label">
+      <span class="layersBox__label-text" v-if="currentMapType == MapType.OSM"
+        >Карта</span
+      >
+      <span class="layersBox__label-text" v-else>Земля</span>
+    </div>
   </div>
 </template>
 
@@ -24,11 +23,15 @@ export default {
 
     /**
      * Смена типа текущей карты
-     * @param {MapType} type - тип карты на которую будет менятся текущая карта
      */
-    function changeCurrentMapType(type) {
-      currentMapType.value = type;
-      store.dispatch("setMapType", type);
+    function changeCurrentMapType() {
+      if (currentMapType.value == MapType.OSM) {
+        currentMapType.value = MapType.GOOGLE;
+      } else {
+        currentMapType.value = MapType.OSM;
+      }
+
+      store.dispatch("setMapType", currentMapType.value);
     }
 
     return {
@@ -45,10 +48,21 @@ export default {
 @import "@/styles/interface/widgets";
 
 .layersBox {
-  @extend %box;
+  position: absolute;
   bottom: 25px;
   left: 15px;
   width: 80px;
   height: 80px;
+  cursor: pointer;
+
+  &__label {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    top: 70%;
+    color: #fff;
+  }
 }
 </style>

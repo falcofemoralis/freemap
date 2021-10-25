@@ -95,6 +95,19 @@
 
     <!-- ToolBox Map Layer -->
     <ol-overviewmap-control
+      className="toolbox-map"
+      :collapsed="false"
+      :collapsible="false"
+      :rotateWithView="true"
+    >
+      <ol-tile-layer>
+        <ol-source-xyz :url="mapType" />
+      </ol-tile-layer>
+    </ol-overviewmap-control>
+
+    <!-- Layer type Selection Layer -->
+    <ol-overviewmap-control
+      className="layers-map"
       :collapsed="false"
       :collapsible="false"
       :rotateWithView="true"
@@ -267,17 +280,10 @@ export default {
 
 <style lang="scss">
 @import "@/styles/interface/widgets";
-$map-border: 15px;
 
-.ol-overviewmap {
-  @extend %box;
-  width: 90px !important;
-  height: 90px !important;
-  right: 60px !important;
-  bottom: 25px !important;
+%olmap {
+  border-radius: $box-corner !important;
   position: absolute !important;
-  left: unset !important;
-  border-radius: $map-border !important;
 
   .ol-overviewmap-map {
     height: 100% !important;
@@ -289,7 +295,35 @@ $map-border: 15px;
   .ol-layer canvas {
     height: 100% !important;
     width: 100% !important;
-    border-radius: $map-border !important;
+    border-radius: $box-corner !important;
+  }
+
+  button {
+    display: none !important;
+  }
+}
+
+.toolbox-map {
+  @extend %box;
+  @extend %olmap;
+  width: 90px !important;
+  height: 90px !important;
+  right: 60px !important;
+  bottom: 25px !important;
+  left: unset !important;
+}
+
+.layers-map {
+  @extend %box;
+  @extend %olmap;
+  bottom: 25px !important;
+  left: 15px !important;
+  width: 80px !important;
+  height: 80px !important;
+  right: unset !important;
+
+  .ol-overlaycontainer-stopevent {
+    display: none;
   }
 }
 </style>
