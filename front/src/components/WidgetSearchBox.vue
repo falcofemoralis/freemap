@@ -3,7 +3,9 @@
 </template>
 
 <script>
-export default {};
+export default {
+  name: "WidgetSearchBox",
+};
 </script>
 
 <style lang="scss" scoped>

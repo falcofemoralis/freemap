@@ -12,7 +12,7 @@
 
     <!-- Map Layer -->
     <ol-tile-layer>
-      <ol-source-osm />
+      <ol-source-xyz :url="mapType" />
     </ol-tile-layer>
 
     <!-- Create Layer -->
@@ -126,6 +126,9 @@ export default {
           drawType.value = null;
       }
     });
+
+    const mapType = computed(() => store.getters.getMapType);
+
     /**
      * Листенер завершения создания объекта
      * @param {Object} event - Созданный объект openlayers
@@ -193,6 +196,7 @@ export default {
       geoJson,
       selectCondition,
       hoverCondition,
+      mapType,
 
       drawendListener,
       overrideStyleFunction,

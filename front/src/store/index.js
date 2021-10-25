@@ -1,8 +1,10 @@
 import { createStore } from "vuex";
-import editor from "./modules/editor"
+import mapEditor from "./modules/mapEditor"
+import mapTools from "./modules/mapTools"
 
 export default createStore({
   modules: {
-    editor
+    mapEditor,
+    mapTools
   }
 });
