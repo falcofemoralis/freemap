@@ -1,16 +1,15 @@
 <template>
-  <div class="toolsBox">
-    <div class="toolsBox__map"></div>
-    <div class="toolsBox__compass"></div>
-    <div class="toolsBox__z"></div>
-    <div class="toolsBox__ruler"></div>
-    <div class="toolsBox__geolocation"></div>
+  <div class="toolBox">
+    <div class="toolBox__compass"></div>
+    <div class="toolBox__z"></div>
+    <div class="toolBox__ruler"></div>
+    <div class="toolBox__geolocation"></div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "WidgetToolsBox",
+  name: "WidgetToolBox",
 };
 </script>
 
@@ -24,15 +23,7 @@ export default {
   border-radius: 40px;
 }
 
-.toolsBox {
-  &__map {
-    @extend %box;
-    width: 90px;
-    height: 90px;
-    right: 60px;
-    bottom: 25px;
-  }
-
+.toolBox {
   &__compass {
     @extend %circleBox;
     right: 170px;

@@ -4,7 +4,7 @@
     <WidgetSearchBox />
     <WidgetLayersBox />
     <WidgetEditorBox />
-    <WidgetToolsBox />
+    <WidgetToolBox />
   </div>
 </template>
 
@@ -13,7 +13,7 @@ import Map from "@/components/Map.vue";
 import WidgetEditorBox from "@/components/WidgetEditorBox.vue";
 import WidgetSearchBox from "@/components/WidgetSearchBox.vue";
 import WidgetLayersBox from "@/components/WidgetLayersBox.vue";
-import WidgetToolsBox from "@/components/WidgetToolsBox.vue";
+import WidgetToolBox from "@/components/WidgetToolBox.vue";
 
 import { MapApi } from "@/services/MapService.js";
 
@@ -23,7 +23,7 @@ export default {
     WidgetEditorBox,
     WidgetSearchBox,
     WidgetLayersBox,
-    WidgetToolsBox,
+    WidgetToolBox,
   },
   setup() {
     /**

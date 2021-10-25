@@ -6,7 +6,7 @@
   >
     <ol-view
       ref="view"
-      projection="EPSG:3857"
+      :projection="projection"
       @centerChanged="posChangedListener"
     />
 
@@ -17,7 +17,7 @@
 
     <!-- Create Layer -->
     <ol-vector-layer>
-      <ol-source-vector projection="EPSG:3857">
+      <ol-source-vector :projection="projection">
         <ol-interaction-draw
           v-if="drawType"
           :type="drawType"
@@ -37,7 +37,7 @@
     </ol-vector-layer>
 
     <!-- Select Layer -->
-    <!--    <ol-interaction-select
+    <ol-interaction-select
       @select="featureSelectedListener"
       :condition="selectCondition"
     >
@@ -45,7 +45,7 @@
         <ol-style-stroke color="green" :width="10"></ol-style-stroke>
         <ol-style-fill color="rgba(255,255,255,0.5)"></ol-style-fill>
       </ol-style>
-    </ol-interaction-select> -->
+    </ol-interaction-select>
 
     <!-- Hover Layer -->
     <ol-interaction-select v-if="!drawType" :condition="hoverCondition">
@@ -56,7 +56,7 @@
     </ol-interaction-select>
 
     <!-- Data Layer -->
-    <ol-vector-layer :renderBuffer="1000">
+    <ol-vector-layer :renderBuffer="200">
       <ol-source-vector
         :format="geoJson"
         url="http://localhost:3000/api/map/data"
@@ -72,6 +72,37 @@
         </ol-style-text>
       </ol-style>
     </ol-vector-layer>
+
+    <!-- User location Layer -->
+    <ol-geolocation
+      v-if="!usePosition"
+      :projection="projection"
+      @positionChanged="geoLocationChangeListener"
+    >
+      <template v-slot="slotProps">
+        <ol-vector-layer :zIndex="2">
+          <ol-source-vector>
+            <ol-feature ref="positionFeature">
+              <ol-geom-point :coordinates="slotProps.position"></ol-geom-point>
+              <!--  <ol-style>
+                <ol-style-icon :src="hereIcon" :scale="0.1"></ol-style-icon>
+              </ol-style> -->
+            </ol-feature>
+          </ol-source-vector>
+        </ol-vector-layer>
+      </template>
+    </ol-geolocation>
+
+    <!-- ToolBox Map Layer -->
+    <ol-overviewmap-control
+      :collapsed="false"
+      :collapsible="false"
+      :rotateWithView="true"
+    >
+      <ol-tile-layer>
+        <ol-source-xyz :url="mapType" />
+      </ol-tile-layer>
+    </ol-overviewmap-control>
   </ol-map>
 </template>
 
@@ -88,6 +119,8 @@ export default {
     const view = ref(null);
     const format = inject("ol-format");
     const geoJson = new format.GeoJSON();
+    const projection = ref("EPSG:3857");
+
     const drawType = ref(null);
     const router = useRouter();
     const route = useRoute();
@@ -95,6 +128,7 @@ export default {
     const selectCondition = selectConditions.click;
     const hoverCondition = selectConditions.pointerMove;
     let pathChanged = false;
+    let usePosition = ref(false);
 
     /**
      * Отслеживание измненение координат в url. Метод срабатывает при первичном заходе на сайт.
@@ -105,6 +139,7 @@ export default {
       if (updatedquery.pos && updatedquery.z) {
         view.value.setCenter(updatedquery.pos.split(","));
         view.value.setZoom(updatedquery.z);
+        usePosition.value = true;
         queryWatch();
       }
     });
@@ -190,18 +225,32 @@ export default {
       }
     }
 
+    /**
+     * Листенер получения координат пользователя
+     * @param {Object} loc - координаты юзера
+     */
+    function geoLocationChangeListener(loc) {
+      console.log(loc);
+      view.value.fit([loc[0], loc[1], loc[0], loc[1]], {
+        maxZoom: 14,
+      });
+    }
+
     return {
       view,
       drawType,
       geoJson,
+      projection,
       selectCondition,
       hoverCondition,
       mapType,
+      usePosition,
 
       drawendListener,
       overrideStyleFunction,
       featureSelectedListener,
       posChangedListener,
+      geoLocationChangeListener,
     };
   },
 };
@@ -212,5 +261,35 @@ export default {
   z-index: 0;
   height: 100%;
   width: 100%;
+}
+</style>
+
+
+<style lang="scss">
+@import "@/styles/interface/widgets";
+$map-border: 15px;
+
+.ol-overviewmap {
+  @extend %box;
+  width: 90px !important;
+  height: 90px !important;
+  right: 60px !important;
+  bottom: 25px !important;
+  position: absolute !important;
+  left: unset !important;
+  border-radius: $map-border !important;
+
+  .ol-overviewmap-map {
+    height: 100% !important;
+    width: 100% !important;
+    margin: unset !important;
+    border: unset !important;
+  }
+
+  .ol-layer canvas {
+    height: 100% !important;
+    width: 100% !important;
+    border-radius: $map-border !important;
+  }
 }
 </style>
