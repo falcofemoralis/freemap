@@ -1,10 +1,8 @@
 <template>
   <div class="layersBox" @click="changeCurrentMapType">
     <div class="layersBox__label">
-      <span class="layersBox__label-text" v-if="currentMapType == MapType.OSM"
-        >Карта</span
-      >
-      <span class="layersBox__label-text" v-else>Земля</span>
+      <span v-if="currentMapType == MapType.GOOGLE">Земля</span>
+      <span v-else>Карта</span>
     </div>
   </div>
 </template>
@@ -48,12 +46,14 @@ export default {
 @import "@/styles/interface/widgets";
 
 .layersBox {
-  position: absolute;
+  @extend %box;
   bottom: 25px;
   left: 15px;
-  width: 80px;
-  height: 80px;
+  width: 76px;
+  height: 76px;
   cursor: pointer;
+  background: rgba($color: #000000, $alpha: 0.2);
+  border: #fff solid 2px;
 
   &__label {
     width: 100%;

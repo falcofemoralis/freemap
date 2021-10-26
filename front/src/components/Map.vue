@@ -94,7 +94,7 @@
     </ol-geolocation>
 
     <!-- ToolBox Map Layer -->
-    <ol-overviewmap-control
+    <!--     <ol-overviewmap-control
       className="toolbox-map"
       :collapsed="false"
       :collapsible="false"
@@ -103,7 +103,7 @@
       <ol-tile-layer>
         <ol-source-xyz :url="mapType" />
       </ol-tile-layer>
-    </ol-overviewmap-control>
+    </ol-overviewmap-control> -->
 
     <!-- Layer type Selection Layer -->
     <ol-overviewmap-control
@@ -303,7 +303,7 @@ export default {
   }
 }
 
-.toolbox-map {
+/* .toolbox-map {
   @extend %box;
   @extend %olmap;
   width: 90px !important;
@@ -312,18 +312,18 @@ export default {
   bottom: 25px !important;
   left: unset !important;
 }
-
+ */
 .layers-map {
-  @extend %box;
   @extend %olmap;
   bottom: 25px !important;
   left: 15px !important;
   width: 80px !important;
   height: 80px !important;
   right: unset !important;
-
-  .ol-overlaycontainer-stopevent {
+  background-color: rgba(255, 255, 255, 0) !important;
+  padding: unset !important;
+  /*  .ol-overlaycontainer-stopevent {
     display: none;
-  }
+  } */
 }
 </style>
