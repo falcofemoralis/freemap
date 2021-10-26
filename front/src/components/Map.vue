@@ -21,6 +21,7 @@
         <ol-interaction-draw
           v-if="drawType"
           :type="drawType"
+          @drawstart="drawstartListener"
           @drawend="drawendListener"
         >
         </ol-interaction-draw>
@@ -38,6 +39,7 @@
 
     <!-- Select Layer -->
     <ol-interaction-select
+      v-if="!drawType"
       @select="featureSelectedListener"
       :condition="selectCondition"
     >
@@ -178,6 +180,15 @@ export default {
     const mapType = computed(() => store.getters.getMapType);
 
     /**
+     * Листенер начала создания объекта
+     * @param {Object} event - Созданный объект openlayers
+     */
+    function drawstartListener(event, draw) {
+      store.dispatch("setDraw", draw);
+      store.dispatch("setGeometry", event.feature.getGeometry());
+    }
+
+    /**
      * Листенер завершения создания объекта
      * @param {Object} event - Созданный объект openlayers
      */
@@ -259,6 +270,7 @@ export default {
       mapType,
       usePosition,
 
+      drawstartListener,
       drawendListener,
       overrideStyleFunction,
       featureSelectedListener,

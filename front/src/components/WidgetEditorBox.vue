@@ -38,7 +38,7 @@
         v-if="selectedType == EditorObjectType.PATH"
         class="box__btn box__btn-right"
         :src="require('@/assets/ic_completed.png')"
-        @click="redo()"
+        @click="completed()"
         alt="redo"
       />
     </div>
@@ -55,6 +55,7 @@ export default {
   setup() {
     const store = useStore();
     const selectedType = computed(() => store.getters.getSelectedType);
+    let lastCoordinates = new Array();
 
     /**
      * Включение создания нового объекта.
@@ -64,15 +65,38 @@ export default {
       store.dispatch("setSelectedtype", type);
     }
 
+    //const draw = computed(() => store.getters.getDraw);
+
     /**
      * Отмена отмены действия при создании объекта
      */
-    function redo() {}
+    function redo() {
+      const coordinates = lastCoordinates.pop();
+      if (coordinates) {
+        store.getters.getDraw.appendCoordinates(Array(coordinates));
+      }
+    }
 
     /**
      * Отмена действия при создании объекта
      */
-    function undo() {}
+    function undo() {
+      const geometryCoordinates = store.getters.getGeometry.getCoordinates();
+
+      if (geometryCoordinates.length > 1) {
+        lastCoordinates.push(
+          geometryCoordinates[geometryCoordinates.length - 2]
+        );
+        store.getters.getDraw.removeLastPoint();
+      }
+    }
+
+    /**
+     * Заврешения создания объекта (только для линий)
+     */
+    function completed() {
+      store.getters.getDraw.finishDrawing();
+    }
 
     /**
      * Прослушиватель нажатой клавиши ESC.
@@ -91,6 +115,7 @@ export default {
       createObject,
       redo,
       undo,
+      completed,
     };
   },
 };
