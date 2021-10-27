@@ -1,19 +1,15 @@
 <template>
   <div class="main">
-    <Map @saveObject="saveObjectListener" />
+    <Map />
     <WidgetSearchBox />
     <WidgetLayersBox />
     <WidgetEditorBox />
     <WidgetToolBox />
-    <TabCreate
-      :createdObject="createdObject"
-      @completeCreate="completeCreateListener"
-    />
+    <TabCreate @createComplete="createCompleteListener" />
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
 import Map from "@/components/Map.vue";
 import WidgetEditorBox from "@/components/WidgetEditorBox.vue";
 import WidgetSearchBox from "@/components/WidgetSearchBox.vue";
@@ -32,36 +28,16 @@ export default {
     TabCreate,
   },
   setup() {
-    const createdObject = ref(null);
-    let createdFeature = null;
-
     /**
-     * Листенер сохранения объекта.
-     * @param {Object} obj - новый созданный объект.
-     * @param {Object} feature - объект карты
+     * Отправка нового объекта на сервер
+     * @param {Object} obj - новый объект
      */
-    function saveObjectListener(obj, feature) {
-      createdObject.value = obj;
-      createdFeature = feature;
-    }
-
-    function completeCreateListener(obj) {
-      createdFeature.setProperties({
-        name: obj.name,
-      });
-
-      createdObject.value = null;
-      createdFeature = null;
-
+    function createCompleteListener(obj) {
       MapApi.addMapData(obj);
     }
 
     return {
-      createdObject,
-      createdFeature,
-
-      saveObjectListener,
-      completeCreateListener,
+      createCompleteListener,
     };
   },
 };

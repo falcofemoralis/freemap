@@ -1,33 +1,31 @@
 <template>
-  <div v-if="obj" class="tab">
-    <input v-model="obj.name" placeholder="Enter name" />
+  <div v-if="createdObject" class="tab">
+    <input v-model="createdObject.name" placeholder="Enter name" />
     <button @click="complete">Complete</button>
   </div>
 </template>
 
 <script>
-import { ref, watch } from "vue";
+import { computed } from "vue";
+import { useStore } from "vuex";
 
 export default {
   name: "TabCreate",
-  props: {
-    createdObject: {
-      required: true,
-    },
-  },
   setup(props, context) {
-    const obj = ref(null);
+    const store = useStore();
 
-    watch(props, () => {
-      obj.value = props.createdObject;
-    });
-
+    const createdObject = computed(() => store.getters.getCreatedObject);
     function complete() {
-      context.emit("completeCreate", obj.value);
+      createdObject.value.feature.setProperties({
+        name: createdObject.value.name,
+      });
+
+      context.emit("createComplete", createdObject.value);
+      store.dispatch("setCreatedobject", null);
     }
 
     return {
-      obj,
+      createdObject,
 
       complete,
     };

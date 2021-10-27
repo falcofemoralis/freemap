@@ -129,7 +129,7 @@ import { useStore } from "vuex";
 
 export default {
   name: "Map",
-  setup(props, context) {
+  setup() {
     const store = useStore();
     const view = ref(null);
     const format = inject("ol-format");
@@ -193,18 +193,14 @@ export default {
      * @param {Object} event - Созданный объект openlayers
      */
     function drawendListener(event) {
-      //  const name = prompt("prompt", "Enter place name");
       const obj = {
         coordinates: event.target.sketchCoords_,
         type: event.target.type_,
+        feature: event.feature,
       };
 
-      /*   event.feature.setProperties({
-        name: name,
-      }); */
-
       store.dispatch("setSelectedtype", null);
-      context.emit("saveObject", obj, event.feature);
+      store.dispatch("setCreatedobject", obj);
     }
 
     /**
