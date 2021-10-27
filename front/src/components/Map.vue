@@ -193,19 +193,18 @@ export default {
      * @param {Object} event - Созданный объект openlayers
      */
     function drawendListener(event) {
-      const name = prompt("prompt", "Enter place name");
+      //  const name = prompt("prompt", "Enter place name");
       const obj = {
         coordinates: event.target.sketchCoords_,
-        name: name,
         type: event.target.type_,
       };
 
-      event.feature.setProperties({
+      /*   event.feature.setProperties({
         name: name,
-      });
+      }); */
 
       store.dispatch("setSelectedtype", null);
-      context.emit("saveObject", obj);
+      context.emit("saveObject", obj, event.feature);
     }
 
     /**
