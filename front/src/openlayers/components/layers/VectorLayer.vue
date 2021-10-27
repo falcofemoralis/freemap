@@ -36,7 +36,9 @@ export default {
     }
 
     properties.style = lineStyleFunction; */
-    const vectorLayer = computed(() => new VectorLayer(properties));
+    const vectorLayer = computed(
+      () => new VectorLayer({ ...properties, renderBuffer: 5000 })
+    );
 
     watch(properties, () => {
       vectorLayer.value.setProperties(properties);

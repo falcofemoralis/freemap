@@ -58,7 +58,7 @@
     </ol-interaction-select>
 
     <!-- Data Layer -->
-    <ol-vector-layer :renderBuffer="200">
+    <ol-vector-layer>
       <ol-source-vector
         :format="geoJson"
         url="http://localhost:3000/api/map/data"
