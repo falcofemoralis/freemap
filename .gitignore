@@ -1,17 +1,17 @@
 .DS_Store
 node_modules
-/back/dist
-/back/.env
-/back/uploaded
-/front/dist
+/back-openfreemap/dist
+/back-openfreemap/.env
+/back-openfreemap/uploaded
+/front-openfreemap/dist
 build
-/back/package-lock.json
-/front/package-lock.json
-/front/.env
-/front/.env.production
-/back/build
-/back/front
-/back/ecosystem.config.js
+/back-openfreemap/package-lock.json
+/front-openfreemap/package-lock.json
+/front-openfreemap/.env
+/front-openfreemap/.env.production
+/back-openfreemap/build
+/back-openfreemap/front
+/back-openfreemap/ecosystem.config.js
 
 
 # local env files

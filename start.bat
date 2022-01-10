@@ -1,6 +1,6 @@
 @ECHO OFF
 ECHO Starting Vue...
-start cmd /k "CD front && npm run serve"
+start cmd /k "CD front-openfreemap && npm run serve"
 
 ECHO Starting Node.js...
-start cmd /k "CD back && npm run start"
+start cmd /k "CD back-openfreemap && npm run start:dev"

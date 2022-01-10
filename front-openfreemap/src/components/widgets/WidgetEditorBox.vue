@@ -1,0 +1,272 @@
+<template>
+  <div>
+    <div class="editorBox rcc">
+      <img
+        class="box__btn box__btn-left"
+        :src="require('@/assets/ic_path.png')"
+        @click="createEdit(EditType.PATH)"
+        alt="Add path"
+      />
+      <img
+        class="box__btn"
+        :src="require('@/assets/ic_polygon.png')"
+        @click="createEdit(EditType.BUILDING)"
+        alt="Add building"
+      />
+      <img
+        class="box__btn box__btn-right"
+        :src="require('@/assets/ic_area.png')"
+        @click="createEdit(EditType.AREA)"
+        alt="Add area"
+      />
+    </div>
+    <div class="editorCtrlBox" v-if="selectedEditType">
+      <img
+        class="box__btn box__btn-left"
+        :src="require('@/assets/ic_undo.png')"
+        @click="undo()"
+        alt="undo"
+      />
+      <img
+        class="box__btn"
+        :class="{ 'box__btn-right': selectedEditType !== EditType.PATH }"
+        :src="require('@/assets/ic_redo.png')"
+        @click="redo()"
+        alt="redo"
+      />
+      <img
+        v-if="selectedEditType === EditType.PATH"
+        class="box__btn box__btn-right"
+        :src="require('@/assets/ic_completed.png')"
+        @click="completeDrawing"
+        alt="redo"
+      />
+    </div>
+    <TabCreate v-if="isTabCreateOpen" @created="onCreatedHandler" />
+  </div>
+</template>
+
+<script lang="ts">
+import { useStore } from 'vuex';
+import { computed, defineComponent, inject, ref } from 'vue';
+import Map from 'ol/Map';
+import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
+import { Draw, Modify, Snap } from 'ol/interaction';
+import { Vector as VectorLayer } from 'ol/layer';
+import { OSM, Vector as VectorSource } from 'ol/source';
+import GeometryType from '@/constants/GeometryType';
+import { Feature, View } from 'ol';
+import CreatedObject from '@/types/CreatedObject';
+import { DrawEvent } from 'ol/interaction/Draw';
+import TabCreate from '@/components/tabs/TabCreate.vue';
+import { Geometry, Polygon } from 'ol/geom';
+import EditType from '@/constants/EditType';
+
+export default defineComponent({
+  name: 'WidgetEditorBox',
+  components: { TabCreate },
+  setup() {
+    const store = useStore();
+    const map = inject<Map>('map');
+    const selectedEditType = ref<EditType | null>(null); // выбранный тип создания объекта
+    const isTabCreateOpen = ref<boolean>(false); // переключать бокового меню создания объекта
+    const lastCoordinates = new Array<Array<number>>(); // координаты точек полигонов объекта геометрии
+    let feature: Feature<Geometry> | null = null; // обьект геометрии на карте, который создается
+    let draw: Draw; // взаимодействие с создаваемый обьектом геометрии
+
+    const style = new Style({
+      fill: new Fill({
+        color: 'rgba(255, 255, 255, 0.2)'
+      }),
+      stroke: new Stroke({
+        color: '#ffcc33',
+        width: 2
+      }),
+      image: new Circle({
+        radius: 7,
+        fill: new Fill({
+          color: '#ffcc33'
+        })
+      }),
+      text: new Text({
+        font: '12px Calibri,sans-serif',
+        fill: new Fill({ color: '#000' }),
+        stroke: new Stroke({
+          color: '#fff', width: 2
+        })
+      })
+    });
+
+    /* Edit object init */
+    const source = new VectorSource();
+    const baseLayer = new VectorLayer({
+      source,
+      style: function(feature) {
+        style.getText().setText(feature.get('name'));
+        return [style];
+      },
+      renderBuffer: 5000
+    });
+    map?.addLayer(baseLayer);
+
+    /**
+     * Инициализация создания нового объекта
+     * @param {EditType} type - тип создаваемого объекта
+     */
+    function createEdit(type: EditType) {
+      selectedEditType.value = type;
+      store.dispatch('toggleIsDrawing');
+
+      addInteractions(type);
+    }
+
+    /**
+     * Добавление объекта Draw на карту
+     * @param {EditType} type  - тип полигона
+     */
+    function addInteractions(type: EditType) {
+      let geomType: GeometryType = GeometryType.POLYGON;
+      switch (type) {
+        case EditType.BUILDING:
+        case EditType.AREA:
+          geomType = GeometryType.POLYGON;
+          break;
+        case EditType.PATH:
+          geomType = GeometryType.LINESTRING;
+          break;
+      }
+
+      map?.removeInteraction(draw);
+
+      draw = new Draw({
+        source,
+        type: geomType as string
+      });
+
+      draw.on('drawstart', ((event: DrawEvent) => {
+        feature = event.feature; // запоминание текущего создаваемого объекта геометрии
+      }));
+
+      draw.on('drawend', (() => {
+        if (!isTabCreateOpen.value) {
+          completeDrawing();
+        }
+      }));
+
+      map?.addInteraction(draw);
+    }
+
+    /**
+     * Завершение создания полигонов
+     */
+    function completeDrawing() {
+      isTabCreateOpen.value = true;
+      resetDrawing();
+    }
+
+    /**
+     * Обработчик завершения создания нового объекта геометрии
+     * @param {string} name - имя объекта
+     */
+    function onCreatedHandler(name: string) {
+      const polygon = feature?.getGeometry() as Polygon;
+
+      if (selectedEditType.value != null) {
+        const createdObject: CreatedObject = {
+          type: selectedEditType.value,
+          coordinates: polygon.getCoordinates(),
+          name
+        };
+
+        feature?.setProperties({ name });
+
+        // todo use server API
+        console.log(createdObject);
+        store.dispatch('postCreatedObject', createdObject);
+      }
+
+      // reset values
+      feature = null;
+      selectedEditType.value = null;
+      isTabCreateOpen.value = false;
+    }
+
+    /**
+     * Отмена действия при создании объекта
+     */
+    function undo() {
+      const geometryCoordinates = (feature?.getGeometry() as Polygon)?.getCoordinates()[0];
+
+      console.log(geometryCoordinates);
+      if (geometryCoordinates && geometryCoordinates.length > 1) {
+        lastCoordinates.push(geometryCoordinates[geometryCoordinates.length - 2]);
+        draw.removeLastPoint();
+      }
+    }
+
+    /**
+     * Отмена отмены действия при создании объекта
+     */
+    function redo() {
+      const coordinates = lastCoordinates.pop();
+
+      if (coordinates) {
+        draw.appendCoordinates(Array(coordinates));
+      }
+    }
+
+    /**
+     * Переустановка данных в изначальную позицию
+     */
+    function resetDrawing() {
+      draw.abortDrawing();
+      map?.removeInteraction(draw);
+      store.dispatch('toggleIsDrawing');
+    }
+
+    /**
+     * Прослушиватель нажатой клавиши ESC.
+     * При ее нажатии будет прекращенно создание объекта.
+     */
+    window.addEventListener('keyup', function(event) {
+      if (event.key === 'Escape') {
+        selectedEditType.value = null;
+        resetDrawing();
+      }
+    });
+
+    return {
+      EditType,
+
+      selectedEditType,
+      isTabCreateOpen,
+
+      createEdit,
+      onCreatedHandler,
+      completeDrawing,
+      undo,
+      redo
+    };
+  }
+});
+</script>
+
+<style lang="scss" scoped>
+@import "~@/styles/interface/widgets";
+
+.editorBox {
+  @extend %box;
+  bottom: 25px;
+  left: 125px;
+  width: auto;
+  height: auto;
+}
+
+.editorCtrlBox {
+  @extend %box;
+  width: auto;
+  height: 55px;
+  bottom: 25px;
+  left: 315px;
+}
+</style>
