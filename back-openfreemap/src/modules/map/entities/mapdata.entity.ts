@@ -18,7 +18,7 @@ export class MapData {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ type: 'longtext' })
   coordinates: string;
 
   @ManyToOne(() => ObjectType)

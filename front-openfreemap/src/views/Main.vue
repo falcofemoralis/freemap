@@ -57,6 +57,13 @@ export default defineComponent({
       setMapLayer(store.getters.getMapType);
     });
 
+    // отображение курсора на объектах
+    map.on('pointermove', event => {
+      const pixel = map.getEventPixel(event.originalEvent);
+      const hit = map.hasFeatureAtPixel(pixel);
+      map.getViewport().style.cursor = hit ? 'pointer' : '';
+    });
+
     /**
      * Отслеживание изменений выбранного типа слоя карты
      */

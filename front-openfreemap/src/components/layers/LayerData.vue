@@ -52,9 +52,7 @@ export default defineComponent({
       })
     });
 
-   // const url = ref('https://ahocevar.com/geoserver/wfs?service=wfs&request=getfeature&typename=topp:states&cql_filter=STATE_NAME=\'Idaho\'&outputformat=application/json');
-
-
+    // const url = ref('https://ahocevar.com/geoserver/wfs?service=wfs&request=getfeature&typename=topp:states&cql_filter=STATE_NAME=\'Idaho\'&outputformat=application/json');
     /* Data object init */
     const baseLayer = new VectorLayer({
       source: new VectorSource({
@@ -68,6 +66,20 @@ export default defineComponent({
       renderBuffer: 5000
     });
     map?.addLayer(baseLayer);
+
+    function featureFilter(feature: Feature<Geometry>) {
+      const featureExtent = feature.getGeometry()?.getExtent();
+      const mapExtent = map?.getView().calculateExtent(map.getSize());
+
+      console.log(featureExtent);
+      if (featureExtent && mapExtent) {
+        return (
+          featureExtent[0] - mapExtent[0] > 0 &&
+          featureExtent[1] - mapExtent[1] > 0
+        );
+      }
+    }
+
 
     /* Select init */
     const selected = new Style({
@@ -86,7 +98,7 @@ export default defineComponent({
       return selected;
     }
 
-    const selectEvent = new Select({ style: selectStyle as any }); // any fixes bug
+    const selectEvent = new Select({ style: selectStyle as any, filter: featureFilter as any }); // any fixes bug
     selectEvent.on('select', (event: SelectEvent) => {
       isSelectTabOpen.value = true;
     });
@@ -109,7 +121,7 @@ export default defineComponent({
       return hovered;
     }
 
-    const hoverEvent = new Select({ condition: pointerMove, style: hoverStyle as any }); // any fixes bug
+    const hoverEvent = new Select({ condition: pointerMove, style: hoverStyle as any, filter: featureFilter as any }); // any fixes bug
     map?.addInteraction(hoverEvent);
 
     const isDrawingEnabled = computed(() => store.getters.getIsDrawing);
