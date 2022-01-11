@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TabSelect v-if="isSelectTabOpen" />
+    <TabSelect v-if="isSelectTabOpen" @close="isSelectTabOpen = false" />
   </div>
 </template>
 
@@ -71,7 +71,7 @@ export default defineComponent({
       const featureExtent = feature.getGeometry()?.getExtent();
       const mapExtent = map?.getView().calculateExtent(map.getSize());
 
-      console.log(featureExtent);
+     // console.log(featureExtent);
       if (featureExtent && mapExtent) {
         return (
           featureExtent[0] - mapExtent[0] > 0 &&
@@ -126,7 +126,7 @@ export default defineComponent({
 
     const isDrawingEnabled = computed(() => store.getters.getIsDrawing);
     watch(isDrawingEnabled, (current) => {
-      console.log(current);
+     // console.log(current);
       if (current) {
         map?.removeInteraction(selectEvent);
         map?.removeInteraction(hoverEvent);

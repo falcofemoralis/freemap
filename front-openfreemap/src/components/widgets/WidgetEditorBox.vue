@@ -1,5 +1,8 @@
 <template>
   <div>
+    <Suspense>
+      <TabCreate v-if="isTabCreateOpen" :editType="selectedEditType" @created="onCreatedHandler" />
+    </Suspense>
     <div class="editorBox rcc">
       <img
         class="box__btn box__btn-left"
@@ -42,7 +45,6 @@
         alt="redo"
       />
     </div>
-    <TabCreate v-if="isTabCreateOpen" @created="onCreatedHandler" />
   </div>
 </template>
 
@@ -115,7 +117,9 @@ export default defineComponent({
      */
     function createEdit(type: EditType) {
       selectedEditType.value = type;
-      store.dispatch('toggleIsDrawing');
+      if(!store.getters.getIsDrawing){
+        store.dispatch('toggleIsDrawing');
+      }
 
       addInteractions(type);
     }
@@ -161,29 +165,22 @@ export default defineComponent({
      */
     function completeDrawing() {
       isTabCreateOpen.value = true;
+
       resetDrawing();
     }
 
     /**
      * Обработчик завершения создания нового объекта геометрии
-     * @param {string} name - имя объекта
+     * @param {CreatedObject} createdObject - новый объект
      */
-    function onCreatedHandler(name: string) {
+    function onCreatedHandler(createdObject: CreatedObject) {
       const polygon = feature?.getGeometry() as Polygon;
 
-      if (selectedEditType.value != null) {
-        const createdObject: CreatedObject = {
-          type: selectedEditType.value,
-          coordinates: polygon.getCoordinates(),
-          name
-        };
+      createdObject.coordinates = polygon.getCoordinates()
+      feature?.setProperties({  name: createdObject.name });
+      store.dispatch('postCreatedObject', createdObject);
 
-        feature?.setProperties({ name });
-
-        // todo use server API
-        console.log(createdObject);
-        store.dispatch('postCreatedObject', createdObject);
-      }
+      console.log(createdObject);
 
       // reset values
       feature = null;

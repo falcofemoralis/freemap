@@ -1,8 +1,11 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MapService } from './map.service';
 import { MapData } from './entities/mapdata.entity';
-import { MapDataDto } from './dto/mapdata.dto';
-import { ObjectType } from './entities/objectype.entity';
+import { MapDataDto } from 'shared/dto/map/mapdata.dto';
+//import { ObjectType } from './entities/objectype.entity';
+import { ObjectTypeDto } from 'shared/dto/map/objecttype.dto';
+//import { ObjectSubtype } from './entities/objectsubtype.entity';
+import { ObjectSubTypeDto } from 'shared/dto/map/objectsubtype.dto';
 
 @Controller('map')
 export class MapController {
@@ -46,13 +49,24 @@ export class MapController {
     mapData.coordinates = mapDataDto.coordinates;
     mapData.type = await this.mapService.getObjectTypeById(mapDataDto.typeId);
     mapData.subtype = await this.mapService.getObjectSubtypeById(mapDataDto.subtypeId);
+    mapData.address = mapDataDto.address;
+    mapData.links = mapDataDto.links;
 
     await this.mapService.create(mapData);
   }
 
+  @Get('test')
+  async getTest(): Promise<string> {
+    return 'test';
+  }
+
   @Get('getObjectTypes')
-  async getObjectTypes(): Promise<Array<ObjectType>> {
-    const types = await this.mapService.getAllObjectTypes();
-    return types;
+  async getObjectTypes(): Promise<Array<ObjectTypeDto>> {
+    return  await this.mapService.getAllObjectTypes();
+  }
+
+  @Get('getObjectSubTypes')
+  async getObjectSubTypes(): Promise<Array<ObjectSubTypeDto>> {
+    return await this.mapService.getAllObjectSubTypes();
   }
 }

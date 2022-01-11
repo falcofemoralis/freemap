@@ -36,4 +36,8 @@ export class MapService {
   getAllObjectTypes(): Promise<Array<ObjectType>> {
     return this.objectTypeRepository.find();
   }
+
+  getAllObjectSubTypes(): Promise<Array<ObjectSubtype>> {
+    return this.objectSubtypeRepository.find();
+  }
 }

@@ -28,4 +28,10 @@ export class MapData {
   @ManyToOne(() => ObjectSubtype)
   @JoinColumn()
   subtype: ObjectSubtype;
+
+  @Column({ type: 'longtext', nullable: true })
+  address: string | null;
+
+  @Column({ type: 'longtext', nullable: true })
+  links: string | null;
 }

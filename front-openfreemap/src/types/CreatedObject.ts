@@ -1,7 +1,8 @@
-import EditType from '@/constants/EditType';
-
-export default interface CreatedObject{
-  type: EditType
-  name: string | null
-  coordinates: number[][][]
+export default class CreatedObject {
+  name: string | null = null;
+  coordinates: number[][][] | null = null;
+  typeId: number | null = null;
+  subtypeId: number | null = null;
+  address: string | null = null;
+  links: string | null = null
 }

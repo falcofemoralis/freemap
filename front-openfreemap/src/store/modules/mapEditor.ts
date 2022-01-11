@@ -1,9 +1,7 @@
 import { Actions, Getters, Module, Mutations } from 'vuex-smart-module';
 import { axiosInstance } from '@/api';
 import CreatedObject from '@/types/CreatedObject';
-import GeometryType from '@/constants/GeometryType';
-import EditType from '@/constants/EditType';
-import { ObjectTypeDto } from '@/types/dto/ObjectTypeDto';
+import { MapDataDto } from '../../../../shared/dto/map/mapdata.dto';
 
 // https://github.com/ktsn/vuex-smart-module
 class EditorState {
@@ -31,16 +29,17 @@ class EditorActions extends Actions<EditorState,
   }
 
   async postCreatedObject(createdObject: CreatedObject) {
-    const types = await axiosInstance.get<Array<ObjectTypeDto>>('/map/getObjectTypes');
-
-    const type = types.data.find((val) => val.key == createdObject.type);
-    if (type != null) {
-      const res = await axiosInstance.post('/map', {
+    if (createdObject.name && createdObject.coordinates && createdObject.typeId) {
+      const data: MapDataDto = {
         name: createdObject.name,
         coordinates: JSON.stringify(createdObject.coordinates),
-        typeId: type.id,
-        subtypeId: 1
-      });
+        typeId: createdObject.typeId,
+        subtypeId: createdObject.subtypeId,
+        address: createdObject.address,
+        links: createdObject.links
+      };
+
+      const res = await axiosInstance.post('/map', data);
 
       console.log(res);
     }

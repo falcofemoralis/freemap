@@ -14,6 +14,7 @@
       "webpack-env"
     ],
     "baseUrl": "src",
+    "outDir": "./dist",
     "paths": {
       "@/*": ["./*"]
     },
@@ -30,8 +31,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "src/openlayers/*.d.ts",
-    "src/**/*"
+    "src/**/*",
   ],
   "exclude": [
     "node_modules"
