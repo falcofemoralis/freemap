@@ -1,11 +1,11 @@
 <template>
   <div>
-    <TabSelect v-if="isSelectTabOpen" @close="isSelectTabOpen = false" />
+    <TabSelect v-if="isSelectTabOpen" @close="isSelectTabOpen = !isSelectTabOpen" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref, watch } from 'vue';
+import { computed, defineComponent, inject, reactive, ref, watch } from 'vue';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 import { Vector as VectorSource } from 'ol/source';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -28,6 +28,7 @@ export default defineComponent({
     const store = useStore();
     const map = inject<Map>('map');
     const isSelectTabOpen = ref(false);
+   // const selectedFeature = reactive()
 
     const style = new Style({
       fill: new Fill({
@@ -98,6 +99,9 @@ export default defineComponent({
       return selected;
     }
 
+    /**
+     * Событие открытия вкладки объекта
+     */
     const selectEvent = new Select({ style: selectStyle as any, filter: featureFilter as any }); // any fixes bug
     selectEvent.on('select', (event: SelectEvent) => {
       isSelectTabOpen.value = true;

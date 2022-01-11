@@ -6,15 +6,15 @@
     <div class="editorBox rcc">
       <img
         class="box__btn box__btn-left"
-        :src="require('@/assets/ic_path.png')"
-        @click="createEdit(EditType.PATH)"
-        alt="Add path"
-      />
-      <img
-        class="box__btn"
         :src="require('@/assets/ic_polygon.png')"
         @click="createEdit(EditType.BUILDING)"
         alt="Add building"
+      />
+      <img
+        class="box__btn"
+        :src="require('@/assets/ic_path.png')"
+        @click="createEdit(EditType.PATH)"
+        alt="Add path"
       />
       <img
         class="box__btn box__btn-right"
@@ -117,7 +117,7 @@ export default defineComponent({
      */
     function createEdit(type: EditType) {
       selectedEditType.value = type;
-      if(!store.getters.getIsDrawing){
+      if (!store.getters.getIsDrawing) {
         store.dispatch('toggleIsDrawing');
       }
 
@@ -176,8 +176,8 @@ export default defineComponent({
     function onCreatedHandler(createdObject: CreatedObject) {
       const polygon = feature?.getGeometry() as Polygon;
 
-      createdObject.coordinates = polygon.getCoordinates()
-      feature?.setProperties({  name: createdObject.name });
+      createdObject.coordinates = polygon.getCoordinates();
+      feature?.setProperties({ name: createdObject.name });
       store.dispatch('postCreatedObject', createdObject);
 
       console.log(createdObject);

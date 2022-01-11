@@ -27,14 +27,5 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.tab {
-  z-index: 5;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 400px;
-  height: 100%;
-  background: #fff;
-  box-shadow: 0px 4px 22px rgba(0, 0, 0, 0.25);
-}
+@import "~@/styles/interface/tabs.scss";
 </style>
