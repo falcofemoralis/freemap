@@ -1,7 +1,7 @@
 <template>
   <div>
     <Suspense>
-      <TabCreate v-if="isTabCreateOpen" @close="isTabCreateOpen = !isTabCreateOpen" :editType="selectedEditType" @created="onCreatedHandler" />
+      <TabCreate v-if="isTabCreateOpen" @close="closeTab" :editType="selectedEditType" @created="onCreatedHandler" />
     </Suspense>
     <div class="editorBox rcc">
       <img
@@ -166,6 +166,8 @@ export default defineComponent({
     function completeDrawing() {
       isTabCreateOpen.value = true;
 
+      console.log('isTabCreateOpen ' + isTabCreateOpen.value);
+
       resetDrawing();
     }
 
@@ -186,6 +188,7 @@ export default defineComponent({
       feature = null;
       selectedEditType.value = null;
       isTabCreateOpen.value = false;
+      store.dispatch('toggleIsDrawing');
     }
 
     /**
@@ -218,7 +221,6 @@ export default defineComponent({
     function resetDrawing() {
       draw.abortDrawing();
       map?.removeInteraction(draw);
-      store.dispatch('toggleIsDrawing');
     }
 
     /**
@@ -229,8 +231,24 @@ export default defineComponent({
       if (event.key === 'Escape') {
         selectedEditType.value = null;
         resetDrawing();
+        store.dispatch('toggleIsDrawing');
       }
     });
+
+    /**
+     * Закрытие вкладки создания объекта
+     */
+    function closeTab() {
+      isTabCreateOpen.value = false;
+      selectedEditType.value = null;
+
+      if (feature) {
+        baseLayer?.getSource().removeFeature(feature);
+      }
+      resetDrawing();
+
+      store.dispatch('toggleIsDrawing');
+    }
 
     return {
       EditType,
@@ -242,7 +260,8 @@ export default defineComponent({
       onCreatedHandler,
       completeDrawing,
       undo,
-      redo
+      redo,
+      closeTab
     };
   }
 });

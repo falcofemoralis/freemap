@@ -1,5 +1,5 @@
 <template>
-  <BaseTab @close="close">
+  <BaseTab>
     <div class="type">
       <div v-for="type in types" :key="type.id" class="type__frame"
            :class="{'type__selected': type.id === createdObject.typeId}">
@@ -55,11 +55,6 @@ export default defineComponent({
     }
   },
   async setup(props: any, context: any) {
-
-    function close() {
-      console.log('todo');
-    }
-
     /* init data */
     const types = ref<Array<ObjectTypeDto>>((await axiosInstance.get<Array<ObjectTypeDto>>('/map/getObjectTypes')).data);
     const subTypes = ref<Array<ObjectSubTypeDto>>((await axiosInstance.get<Array<ObjectSubTypeDto>>('/map/getObjectSubTypes')).data);
@@ -80,8 +75,7 @@ export default defineComponent({
       types,
       subTypes,
 
-      complete,
-      close
+      complete
     };
   }
 });

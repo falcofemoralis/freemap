@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TabSelect isOpen="isSelectTabOpen"  v-if="isSelectTabOpen" @close="isSelectTabOpen = !isSelectTabOpen" :feature="selectedFeature" />
+    <TabSelect v-if="isTabSelectOpen" @close="closeTab" :feature="selectedFeature" />
   </div>
 </template>
 
@@ -28,7 +28,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const map = inject<Map>('map');
-    const isSelectTabOpen = ref(false);
+    const isTabSelectOpen = ref(false);
     const selectedFeature = ref<MapFeatureDto>();
 
     /**
@@ -122,7 +122,8 @@ export default defineComponent({
      */
     const selectEvent = new Select({ style: selectStyle as any, filter: featureFilter as any }); // any fixes bug
     selectEvent.on('select', (event: SelectEvent) => {
-      isSelectTabOpen.value = true;
+      isTabSelectOpen.value = true;
+
       const features: MapFeatureDto[] = event.selected;
       if (features.length > 0) {
         selectedFeature.value = features[0];
@@ -161,7 +162,7 @@ export default defineComponent({
      */
     const isDrawingEnabled = computed(() => store.getters.getIsDrawing);
     watch(isDrawingEnabled, (current) => {
-      // console.log(current);
+      console.log('isDrawEnabled ' + current);
       if (current) {
         map?.removeInteraction(selectEvent);
         map?.removeInteraction(hoverEvent);
@@ -171,9 +172,17 @@ export default defineComponent({
       }
     });
 
+    function closeTab() {
+      selectEvent.changed();
+      isTabSelectOpen.value = false;
+      selectEvent.getFeatures().clear();
+    }
+
     return {
-      isSelectTabOpen,
-      selectedFeature
+      isTabSelectOpen,
+      selectedFeature,
+
+      closeTab
     };
   }
 });

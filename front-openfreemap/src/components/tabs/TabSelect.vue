@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
+import { defineComponent, reactive, ref, watch } from 'vue';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
 import { FeatureProperties } from '../../../../shared/dto/map/mapdata.dto';
@@ -23,12 +23,17 @@ export default defineComponent({
     }
   },
   setup(props: any, context: any) {
-    const text = ref('hello');
-    const featureProperties = reactive<FeatureProperties>((props.feature as Feature<Geometry>).getProperties() as FeatureProperties);
+    const featureProperties = ref<FeatureProperties>(getProperties(props.feature));
+    watch(() => props.feature, (sel: Feature<Geometry>) => {
+      featureProperties.value = getProperties(sel);
+    });
+
+    function getProperties(feature: Feature<Geometry>): FeatureProperties {
+      return feature.getProperties() as FeatureProperties;
+    }
 
     return {
-      text,
-      featureProperties,
+      featureProperties
     };
   }
 });
