@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TabSelect v-if="isSelectTabOpen" @close="isSelectTabOpen = !isSelectTabOpen" />
+    <TabSelect isOpen="isSelectTabOpen"  v-if="isSelectTabOpen" @close="isSelectTabOpen = !isSelectTabOpen" :feature="selectedFeature" />
   </div>
 </template>
 
@@ -18,6 +18,7 @@ import { useStore } from 'vuex';
 import { SelectEvent } from 'ol/interaction/Select';
 import TabSelect from '@/components/tabs/TabSelect.vue';
 import { axiosInstance } from '@/api';
+import { MapFeatureDto } from '../../../../shared/dto/map/mapdata.dto';
 
 export default defineComponent({
   name: 'LayerData',
@@ -28,8 +29,11 @@ export default defineComponent({
     const store = useStore();
     const map = inject<Map>('map');
     const isSelectTabOpen = ref(false);
-   // const selectedFeature = reactive()
+    const selectedFeature = ref<MapFeatureDto>();
 
+    /**
+     * Стиль объектов на карте
+     */
     const style = new Style({
       fill: new Fill({
         color: 'rgba(255, 255, 255, 0.2)'
@@ -55,9 +59,17 @@ export default defineComponent({
 
     // const url = ref('https://ahocevar.com/geoserver/wfs?service=wfs&request=getfeature&typename=topp:states&cql_filter=STATE_NAME=\'Idaho\'&outputformat=application/json');
     /* Data object init */
+    // https://stackoverflow.com/questions/27093482/is-it-possible-to-add-a-icon-symbol-to-a-polygon/27251137#27251137
+
+    /**
+     * Базовый слой с объектами
+     */
     const baseLayer = new VectorLayer({
       source: new VectorSource({
         format: new GeoJSON(),
+        /*       loader: (extent, resolution, projection) => {
+
+               }*/
         url: axiosInstance.defaults.baseURL + '/map'
       }),
       style: function(feature) {
@@ -68,11 +80,15 @@ export default defineComponent({
     });
     map?.addLayer(baseLayer);
 
+    /**
+     * Фильтр объектов на карте
+     * @param {Feature<Geometry>} feature - объект на карты
+     */
     function featureFilter(feature: Feature<Geometry>) {
       const featureExtent = feature.getGeometry()?.getExtent();
       const mapExtent = map?.getView().calculateExtent(map.getSize());
 
-     // console.log(featureExtent);
+      // console.log(featureExtent);
       if (featureExtent && mapExtent) {
         return (
           featureExtent[0] - mapExtent[0] > 0 &&
@@ -81,8 +97,10 @@ export default defineComponent({
       }
     }
 
-
     /* Select init */
+    /**
+     * Стиль выбраннного объекта
+     */
     const selected = new Style({
       fill: new Fill({
         color: '#eeeeee'
@@ -100,15 +118,22 @@ export default defineComponent({
     }
 
     /**
-     * Событие открытия вкладки объекта
+     * Событие нажатия на объект
      */
     const selectEvent = new Select({ style: selectStyle as any, filter: featureFilter as any }); // any fixes bug
     selectEvent.on('select', (event: SelectEvent) => {
       isSelectTabOpen.value = true;
+      const features: MapFeatureDto[] = event.selected;
+      if (features.length > 0) {
+        selectedFeature.value = features[0];
+      }
     });
     map?.addInteraction(selectEvent);
 
     /* Hover init */
+    /**
+     * Стиль наведенного объекта
+     */
     const hovered = new Style({
       fill: new Fill({
         color: '#eeeeee'
@@ -125,12 +150,18 @@ export default defineComponent({
       return hovered;
     }
 
+    /**
+     * Событие наведение на объект
+     */
     const hoverEvent = new Select({ condition: pointerMove, style: hoverStyle as any, filter: featureFilter as any }); // any fixes bug
     map?.addInteraction(hoverEvent);
 
+    /**
+     * Отслеживание включенного режима редактирования
+     */
     const isDrawingEnabled = computed(() => store.getters.getIsDrawing);
     watch(isDrawingEnabled, (current) => {
-     // console.log(current);
+      // console.log(current);
       if (current) {
         map?.removeInteraction(selectEvent);
         map?.removeInteraction(hoverEvent);
@@ -141,7 +172,8 @@ export default defineComponent({
     });
 
     return {
-      isSelectTabOpen
+      isSelectTabOpen,
+      selectedFeature
     };
   }
 });

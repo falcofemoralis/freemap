@@ -1,7 +1,7 @@
 import { Actions, Getters, Module, Mutations } from 'vuex-smart-module';
 import { axiosInstance } from '@/api';
 import CreatedObject from '@/types/CreatedObject';
-import { MapDataDto } from '../../../../shared/dto/map/mapdata.dto';
+import { MapObjectDto } from '../../../../shared/dto/map/mapobject.dto';
 
 // https://github.com/ktsn/vuex-smart-module
 class EditorState {
@@ -29,9 +29,10 @@ class EditorActions extends Actions<EditorState,
   }
 
   async postCreatedObject(createdObject: CreatedObject) {
-    if (createdObject.name && createdObject.coordinates && createdObject.typeId) {
-      const data: MapDataDto = {
+    if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId) {
+      const data: MapObjectDto = {
         name: createdObject.name,
+        desc: createdObject.desc,
         coordinates: JSON.stringify(createdObject.coordinates),
         typeId: createdObject.typeId,
         subtypeId: createdObject.subtypeId,

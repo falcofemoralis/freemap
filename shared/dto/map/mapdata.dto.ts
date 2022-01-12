@@ -1,8 +1,23 @@
+import { MapObjectDto } from './mapobject.dto';
+
+export type FeatureProperties = Omit<MapObjectDto, 'coordinates'>
+
+export interface MapFeatureDto {
+  type: string,
+  properties: FeatureProperties,
+  geometry: {
+    type: string,
+    coordinates: number[][][]
+  }
+}
+
 export interface MapDataDto {
-  readonly name: string;
-  readonly coordinates: string;
-  readonly typeId: number;
-  readonly subtypeId: number | null;
-  readonly address: string | null;
-  readonly links: string | null;
+  type: string,
+  crs: {
+    type: string,
+    properties: {
+      name: string
+    }
+  },
+  features: MapFeatureDto[]
 }

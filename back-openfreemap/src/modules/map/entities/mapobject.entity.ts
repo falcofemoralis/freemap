@@ -11,12 +11,15 @@ import { ObjectSubtype } from './objectsubtype.entity';
 import { ObjectType } from './objectype.entity';
 
 @Entity()
-export class MapData {
+export class MapObject {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'longtext' })
   name: string;
+
+  @Column({ type: 'longtext' })
+  desc: string;
 
   @Column({ type: 'longtext' })
   coordinates: string;

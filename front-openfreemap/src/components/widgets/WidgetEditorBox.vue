@@ -1,7 +1,7 @@
 <template>
   <div>
     <Suspense>
-      <TabCreate v-if="isTabCreateOpen" :editType="selectedEditType" @created="onCreatedHandler" />
+      <TabCreate v-if="isTabCreateOpen" @close="isTabCreateOpen = !isTabCreateOpen" :editType="selectedEditType" @created="onCreatedHandler" />
     </Suspense>
     <div class="editorBox rcc">
       <img
@@ -249,7 +249,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "~@/styles/interface/widgets";
+@import "~@/styles/interface/widget";
 
 .editorBox {
   @extend %box;

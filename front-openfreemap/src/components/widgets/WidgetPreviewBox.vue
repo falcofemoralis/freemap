@@ -76,7 +76,7 @@ export default  defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "~@/styles/interface/widgets";
+@import "~@/styles/interface/widget";
 
 .layersBox {
   @extend %box;
@@ -101,7 +101,7 @@ export default  defineComponent({
 </style>
 
 <style lang="scss">
-@import "~@/styles/interface/widgets";
+@import "~@/styles/interface/widget";
 
 %olmap {
   border-radius: $box-corner !important;

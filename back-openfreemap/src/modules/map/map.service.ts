@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MapData } from './entities/mapdata.entity';
+import { MapObject } from './entities/mapobject.entity';
 import { Repository } from 'typeorm';
 import { ObjectType } from './entities/objectype.entity';
 import { ObjectSubtype } from './entities/objectsubtype.entity';
@@ -8,8 +8,8 @@ import { ObjectSubtype } from './entities/objectsubtype.entity';
 @Injectable()
 export class MapService {
   constructor(
-    @InjectRepository(MapData)
-    private mapDataRepository: Repository<MapData>,
+    @InjectRepository(MapObject)
+    private mapObjectRepository: Repository<MapObject>,
     @InjectRepository(ObjectType)
     private objectTypeRepository: Repository<ObjectType>,
     @InjectRepository(ObjectSubtype)
@@ -17,12 +17,12 @@ export class MapService {
   ) {
   }
 
-  findAll(): Promise<MapData[]> {
-    return this.mapDataRepository.find({ relations: ['type'] });
+  findAll(): Promise<MapObject[]> {
+    return this.mapObjectRepository.find({ relations: ['type'] });
   }
 
-  create(mapData: MapData): Promise<MapData> {
-    return this.mapDataRepository.save(mapData);
+  create(mapObject: MapObject): Promise<MapObject> {
+    return this.mapObjectRepository.save(mapObject);
   }
 
   getObjectTypeById(id: number): Promise<ObjectType> {

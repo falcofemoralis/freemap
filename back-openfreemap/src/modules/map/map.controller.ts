@@ -1,11 +1,15 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MapService } from './map.service';
-import { MapData } from './entities/mapdata.entity';
-import { MapDataDto } from 'shared/dto/map/mapdata.dto';
-//import { ObjectType } from './entities/objectype.entity';
+import { MapObject } from './entities/mapobject.entity';
+import { MapObjectDto } from 'shared/dto/map/mapobject.dto';
 import { ObjectTypeDto } from 'shared/dto/map/objecttype.dto';
-//import { ObjectSubtype } from './entities/objectsubtype.entity';
 import { ObjectSubTypeDto } from 'shared/dto/map/objectsubtype.dto';
+import {
+  MapDataDto,
+  MapFeatureDto,
+  FeatureProperties
+} from 'shared/dto/map/mapdata.dto';
+import { map } from 'rxjs';
 
 @Controller('map')
 export class MapController {
@@ -14,23 +18,30 @@ export class MapController {
 
   @Get()
   async getMapData(): Promise<any> {
-    const data: MapData[] = await this.mapService.findAll();
+    const mapObjects: MapObject[] = await this.mapService.findAll();
 
-    const features: Array<any> = new Array<any>();
-    for (const obj of data) {
+    const features: Array<MapFeatureDto> = new Array<any>();
+    for (const obj of mapObjects) {
+      const featureProperties: FeatureProperties = {
+        name: obj.name,
+        desc: obj.desc,
+        typeId: obj.type.id,
+        subtypeId: obj.subtype?.id ?? null,
+        address: obj.address ?? null,
+        links: obj.links ?? null
+      };
+
       features.push({
         type: 'Feature',
-        properties: {
-          name: obj.name
-        },
+        properties: featureProperties,
         geometry: {
           type: obj.type.geometry,
-          coordinates: JSON.parse(obj.coordinates)
+          coordinates: JSON.parse(obj.coordinates) as number[][][]
         }
       });
     }
 
-    return {
+    const mapData: MapDataDto = {
       type: 'FeatureCollection',
       crs: {
         type: 'name',
@@ -40,29 +51,27 @@ export class MapController {
       },
       features: features
     };
+
+    return mapData;
   }
 
   @Post()
-  async addMapData(@Body() mapDataDto: MapDataDto) {
-    const mapData: MapData = new MapData();
-    mapData.name = mapDataDto.name;
-    mapData.coordinates = mapDataDto.coordinates;
-    mapData.type = await this.mapService.getObjectTypeById(mapDataDto.typeId);
-    mapData.subtype = await this.mapService.getObjectSubtypeById(mapDataDto.subtypeId);
-    mapData.address = mapDataDto.address;
-    mapData.links = mapDataDto.links;
+  async addMapObject(@Body() mapObjectDto: MapObjectDto) {
+    const mapObject: MapObject = new MapObject();
+    mapObject.name = mapObjectDto.name;
+    mapObject.desc = mapObjectDto.desc;
+    mapObject.coordinates = mapObjectDto.coordinates;
+    mapObject.type = await this.mapService.getObjectTypeById(mapObjectDto.typeId);
+    mapObject.subtype = await this.mapService.getObjectSubtypeById(mapObjectDto.subtypeId);
+    mapObject.address = mapObjectDto.address;
+    mapObject.links = mapObjectDto.links;
 
-    await this.mapService.create(mapData);
-  }
-
-  @Get('test')
-  async getTest(): Promise<string> {
-    return 'test';
+    await this.mapService.create(mapObject);
   }
 
   @Get('getObjectTypes')
   async getObjectTypes(): Promise<Array<ObjectTypeDto>> {
-    return  await this.mapService.getAllObjectTypes();
+    return await this.mapService.getAllObjectTypes();
   }
 
   @Get('getObjectSubTypes')

@@ -10,7 +10,7 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-@import "~@/styles/interface/widgets";
+@import "~@/styles/interface/widget";
 
 .searchBox {
   @extend %box;
