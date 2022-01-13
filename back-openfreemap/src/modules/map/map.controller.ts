@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UploadedFiles, UseGuards,
+  UseInterceptors
+} from '@nestjs/common';
 import { MapService } from './map.service';
 import { MapObject } from './entities/mapobject.entity';
 import { MapObjectDto } from 'shared/dto/map/mapobject.dto';
@@ -10,6 +17,8 @@ import {
   FeatureProperties
 } from 'shared/dto/map/mapdata.dto';
 import { map } from 'rxjs';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('map')
 export class MapController {
@@ -77,5 +86,11 @@ export class MapController {
   @Get('getObjectSubTypes')
   async getObjectSubTypes(): Promise<Array<ObjectSubTypeDto>> {
     return await this.mapService.getAllObjectSubTypes();
+  }
+
+  @Post('upload')
+  @UseInterceptors(FilesInterceptor('files'))
+  uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {
+    console.log(files);
   }
 }

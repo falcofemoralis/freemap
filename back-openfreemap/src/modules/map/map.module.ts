@@ -9,6 +9,6 @@ import { ObjectSubtype } from './entities/objectsubtype.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([MapObject, ObjectType, ObjectSubtype])],
   controllers: [MapController],
-  providers: [MapService],
+  providers: [MapService]
 })
 export class MapModule {}
