@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Get,
-  Post,
+  Post, Request,
   UploadedFiles, UseGuards,
   UseInterceptors
 } from '@nestjs/common';
@@ -20,10 +20,12 @@ import { map } from 'rxjs';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UserDataDto } from 'shared/dto/auth/userdata.dto';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('map')
 export class MapController {
-  constructor(private readonly mapService: MapService) {
+  constructor(private readonly mapService: MapService, private readonly authService: AuthService) {
   }
 
   @Get()
@@ -65,8 +67,11 @@ export class MapController {
     return mapData;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async addMapObject(@Body() mapObjectDto: MapObjectDto) {
+  async addMapObject(@Body() mapObjectDto: MapObjectDto, @Request() req) {
+    const userDataDto: UserDataDto = req.user;
+
     const mapObject: MapObject = new MapObject();
     mapObject.name = mapObjectDto.name;
     mapObject.desc = mapObjectDto.desc;
@@ -75,6 +80,7 @@ export class MapController {
     mapObject.subtype = await this.mapService.getObjectSubtypeById(mapObjectDto.subtypeId);
     mapObject.address = mapObjectDto.address;
     mapObject.links = mapObjectDto.links;
+    mapObject.user = await this.authService.getUser(userDataDto.id);
 
     await this.mapService.create(mapObject);
   }

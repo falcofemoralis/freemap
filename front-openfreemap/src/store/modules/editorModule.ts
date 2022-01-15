@@ -1,5 +1,5 @@
 import { Actions, Getters, Module, Mutations } from 'vuex-smart-module';
-import { axiosInstance } from '@/api';
+import { axiosInstance, getConfig } from '@/api';
 import CreatedObject from '@/types/CreatedObject';
 import { MapObjectDto } from '../../../../shared/dto/map/mapobject.dto';
 
@@ -28,7 +28,8 @@ class EditorActions extends Actions<EditorState,
     this.commit('toggleIsDrawing');
   }
 
-  async postCreatedObject(createdObject: CreatedObject) {
+  async postCreatedObject(payload: { createdObject: CreatedObject, token: string }) {
+    const { createdObject, token } = payload;
     if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId) {
       const mapObjectDto: MapObjectDto = {
         name: createdObject.name,
@@ -40,9 +41,7 @@ class EditorActions extends Actions<EditorState,
         links: createdObject.links
       };
 
-      const res = await axiosInstance.post('/map', mapObjectDto);
-
-      console.log(res);
+      const res = await axiosInstance.post('/map', mapObjectDto, getConfig(token));
     }
   }
 }

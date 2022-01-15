@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDto } from 'shared/dto/auth/user.dto';
 import { compare, hash } from 'bcrypt';
+import { UserDataDto } from 'shared/dto/auth/userdata.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,7 @@ export class AuthService {
   }
 
   async validateUser(login: string, pass: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({ login });
+    const user: User = await this.userRepository.findOne({ login });
 
     if (user && (await compare(pass, user.passwordHash))) {
       const { passwordHash, ...secureUser } = user;
@@ -27,7 +28,7 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { id: user.id };
+    const payload: UserDataDto = { id: user.id, login: user.login };
 
     return {
       accessToken: this.jwtService.sign(payload)

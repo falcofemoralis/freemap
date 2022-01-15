@@ -180,7 +180,7 @@ export default defineComponent({
 
       createdObject.coordinates = polygon.getCoordinates();
       feature?.setProperties({ name: createdObject.name });
-      store.dispatch('postCreatedObject', createdObject);
+      store.dispatch('postCreatedObject', { createdObject, token: store.getters.getToken });
 
       console.log(createdObject);
 

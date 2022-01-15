@@ -9,11 +9,16 @@ import {
 } from 'typeorm';
 import { ObjectSubtype } from './objectsubtype.entity';
 import { ObjectType } from './objectype.entity';
+import { User } from '../../auth/entities/user.entity';
 
 @Entity()
 export class MapObject {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @ManyToOne(() => User)
+  @JoinColumn()
+  user: User;
 
   @Column({ type: 'longtext' })
   name: string;
