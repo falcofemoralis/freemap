@@ -16,7 +16,7 @@ import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 
-export default  defineComponent({
+export default defineComponent({
   name: 'WidgetPreviewBox',
   setup() {
     const store = useStore();

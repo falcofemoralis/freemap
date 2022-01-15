@@ -41,4 +41,5 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "~@/styles/interface/tab.scss";
+@import "~@/styles/interface/elements.scss";
 </style>

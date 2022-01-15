@@ -1,4 +1,7 @@
-.tab {
+@import "~@/styles/base.scss";
+
+%tab {
+  @extend %shadow;
   z-index: 5;
   position: absolute;
   bottom: 0;
@@ -6,7 +9,6 @@
   width: 400px;
   height: 97%;
   background: #eeeeee;
-  box-shadow: 0px 4px 22px rgba(0, 0, 0, 0.25);
   transition: all .3s;
   display: flex;
   flex-direction: column;
@@ -31,48 +33,17 @@
   }
 
   &__selected {
+    @extend %shadow;
     background: #fff;
-    box-shadow: 4px 2px 20px 0px #dfdfdf;
     color: black;
   }
 
   &__list {
+    @extend %list;
+    box-sizing: border-box;
+    width: 100%;
     margin: 7px 0 7px 0;
     padding: 12px;
-    border: none;
     border-radius: 12px;
-    outline: none;
   }
-}
-
-.field {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  margin: 15px;
-
-  h4 {
-    color: #1c1a1a;
-  }
-
-  input {
-    outline: none;
-    margin: 7px 0 7px 0;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 4px 2px 20px 0px #dfdfdf;
-  }
-}
-
-.submit {
-  cursor: pointer;
-  height: 40px;
-  width: 120px;
-  background: #26bae8;
-  color: #fff;
-  outline: none;
-  border: none;
-  border-radius: 12px;
-  box-shadow: 4px 2px 20px 0px #dfdfdf;
 }

@@ -26,7 +26,7 @@ class ToolsActions extends Actions<ToolsState,
   }
 }
 
-export const mapTools = new Module({
+export const toolsModule = new Module({
   namespaced: false,
   state: ToolsState,
   getters: ToolsGetters,

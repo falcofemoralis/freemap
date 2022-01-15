@@ -5,19 +5,19 @@
     </Suspense>
     <div class="editorBox rcc">
       <img
-        class="box__btn box__btn-left"
+        class="editorBtn editorBtn-left"
         :src="require('@/assets/ic_polygon.png')"
         @click="createEdit(EditType.BUILDING)"
         alt="Add building"
       />
       <img
-        class="box__btn"
+        class="editorBtn"
         :src="require('@/assets/ic_path.png')"
         @click="createEdit(EditType.PATH)"
         alt="Add path"
       />
       <img
-        class="box__btn box__btn-right"
+        class="editorBtn editorBtn-right"
         :src="require('@/assets/ic_area.png')"
         @click="createEdit(EditType.AREA)"
         alt="Add area"
@@ -25,21 +25,21 @@
     </div>
     <div class="editorCtrlBox" v-if="selectedEditType">
       <img
-        class="box__btn box__btn-left"
+        class="editorBtn editorBtn-left"
         :src="require('@/assets/ic_undo.png')"
         @click="undo()"
         alt="undo"
       />
       <img
-        class="box__btn"
-        :class="{ 'box__btn-right': selectedEditType !== EditType.PATH }"
+        class="editorBtn"
+        :class="{ 'editorBtn-right': selectedEditType !== EditType.PATH }"
         :src="require('@/assets/ic_redo.png')"
         @click="redo()"
         alt="redo"
       />
       <img
         v-if="selectedEditType === EditType.PATH"
-        class="box__btn box__btn-right"
+        class="editorBtn editorBtn-right"
         :src="require('@/assets/ic_completed.png')"
         @click="completeDrawing"
         alt="redo"
@@ -272,6 +272,7 @@ export default defineComponent({
 
 .editorBox {
   @extend %box;
+  display: flex;
   bottom: 25px;
   left: 125px;
   width: auto;
@@ -284,5 +285,27 @@ export default defineComponent({
   height: 55px;
   bottom: 25px;
   left: 315px;
+}
+
+.editorBtn {
+  @extend %button;
+  width: 35px;
+  height: 35px;
+  padding: 10px;
+  background: #ffffff00;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #c5c5c5;
+    mix-blend-mode: difference;
+  }
+
+  &-left {
+    border-radius: $box-corner 0 0 $box-corner;
+  }
+
+  &-right {
+    border-radius: 0 $box-corner $box-corner 0;
+  }
 }
 </style>

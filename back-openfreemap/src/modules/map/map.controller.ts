@@ -19,6 +19,7 @@ import {
 import { map } from 'rxjs';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('map')
 export class MapController {
@@ -88,6 +89,7 @@ export class MapController {
     return await this.mapService.getAllObjectSubTypes();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(FilesInterceptor('files'))
   uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {

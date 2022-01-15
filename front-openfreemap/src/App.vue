@@ -13,7 +13,6 @@ export default defineComponent({
 });
 </script>
 
-<style src="./styles/position.css"></style>
 <style lang="scss">
 *,
 *::after,

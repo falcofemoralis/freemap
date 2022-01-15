@@ -1,21 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from './modules/user/user.service';
-import { User } from './modules/user/entities/user.entity';
+import { User } from './entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserDto } from 'shared/dto/auth/user.dto';
+import { compare, hash } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) {
   }
 
   async validateUser(login: string, pass: string): Promise<User | null> {
-    const user = await this.userService.findByLogin(login);
+    const user = await this.userRepository.findOne({ login });
 
-    if (user && user.password === pass) {
-      const { password, ...secureUser } = user;
+    if (user && (await compare(pass, user.passwordHash))) {
+      const { passwordHash, ...secureUser } = user;
       return secureUser;
     }
 
@@ -30,7 +34,14 @@ export class AuthService {
     };
   }
 
+  async register(userDto: UserDto): Promise<User> {
+    return await this.userRepository.save({
+      login: userDto.login,
+      passwordHash: await hash(userDto.password, 10) //salt or round
+    });
+  }
+
   async getUser(id: number): Promise<User> {
-    return this.userService.findById(id);
+    return this.userRepository.findOne({ id });
   }
 }

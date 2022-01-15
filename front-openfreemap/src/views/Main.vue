@@ -2,6 +2,7 @@
   <div class="main">
     <div class="map" ref="mapRef" />
     <LayerData />
+    <WidgetAccountBox />
     <WidgetEditorBox />
     <WidgetPreviewBox />
     <WidgetSearchBox />
@@ -23,9 +24,11 @@ import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
 import LayerData from '@/components/layers/LayerData.vue';
 import WidgetSearchBox from '@/components/widgets/WidgetSearchBox.vue';
 import WidgetToolBox from '@/components/widgets/WidgetToolBox.vue';
+import WidgetAccountBox from '@/components/widgets/WidgetAccountBox.vue';
 
 export default defineComponent({
   components: {
+    WidgetAccountBox,
     WidgetToolBox,
     WidgetSearchBox,
     LayerData,

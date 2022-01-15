@@ -30,7 +30,7 @@ class EditorActions extends Actions<EditorState,
 
   async postCreatedObject(createdObject: CreatedObject) {
     if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId) {
-      const data: MapObjectDto = {
+      const mapObjectDto: MapObjectDto = {
         name: createdObject.name,
         desc: createdObject.desc,
         coordinates: JSON.stringify(createdObject.coordinates),
@@ -40,14 +40,14 @@ class EditorActions extends Actions<EditorState,
         links: createdObject.links
       };
 
-      const res = await axiosInstance.post('/map', data);
+      const res = await axiosInstance.post('/map', mapObjectDto);
 
       console.log(res);
     }
   }
 }
 
-export const mapEditor = new Module({
+export const editorModule = new Module({
   namespaced: false,
   state: EditorState,
   getters: EditorGetters,

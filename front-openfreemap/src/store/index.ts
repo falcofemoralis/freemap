@@ -1,12 +1,14 @@
 import { Module, createStore } from 'vuex-smart-module';
-import { mapEditor } from '@/store/modules/mapEditor';
-import { mapTools } from '@/store/modules/mapTools';
+import { editorModule } from '@/store/modules/editorModule';
+import { toolsModule } from '@/store/modules/toolsModule';
+import { authModule } from '@/store/modules/authModule';
 
 const store = createStore(
   new Module({
     modules: {
-      mapEditor,
-      mapTools
+      editorModule,
+      toolsModule,
+      authModule
     }
   }),
   // Vuex store options
