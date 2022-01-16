@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ModalAccount v-if="isModalOpen" @close="toggleModal" @login="onLoginHandler" @register="onRegisterHandler" />
+    <ModalAccount v-if="isModalOpen" @close="toggleModal" />
     <div class="accountBox">
       <div v-if="isAuthed">
         MASTER IS HERE
@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import ModalAccount from '@/components/modals/ModalAccount.vue';
-import { User } from '@/types/User';
+import { CreatedUser } from '@/types/CreatedUser';
 import { computed, defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
 
@@ -28,25 +28,11 @@ export default defineComponent({
       isModalOpen.value = !isModalOpen.value;
     }
 
-    function onLoginHandler(user: User) {
-      store.dispatch('login', user);
-
-      toggleModal();
-    }
-
-    function onRegisterHandler(user: User) {
-      store.dispatch('register', user);
-
-      toggleModal();
-    }
-
     return {
       isModalOpen,
       isAuthed,
 
-      toggleModal,
-      onLoginHandler,
-      onRegisterHandler
+      toggleModal
     };
   }
 });

@@ -80,7 +80,7 @@ export class MapController {
     mapObject.subtype = await this.mapService.getObjectSubtypeById(mapObjectDto.subtypeId);
     mapObject.address = mapObjectDto.address;
     mapObject.links = mapObjectDto.links;
-    mapObject.user = await this.authService.getUser(userDataDto.id);
+    mapObject.user = await this.authService.getUserById(userDataDto.id);
 
     await this.mapService.create(mapObject);
   }

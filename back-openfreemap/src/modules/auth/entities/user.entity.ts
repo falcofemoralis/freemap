@@ -15,6 +15,9 @@ export class User {
   login: string;
 
   @Column({ type: 'longtext', nullable: false })
+  email: string;
+
+  @Column({ type: 'longtext', nullable: false })
   passwordHash?: string;
 
   @CreateDateColumn()

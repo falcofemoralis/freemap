@@ -1,7 +1,6 @@
 %button {
   cursor: pointer;
   border: none;
-  border-radius: 0;
   list-style: none;
   outline: none;
 }
@@ -26,5 +25,5 @@
 }
 
 %shadow {
-  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.25);
+  box-shadow: 6px 4px 22px rgba(0, 0, 0, 0.25);
 }

@@ -37,5 +37,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   padding: 10px;
+  border-radius: 15px;
 }
 </style>

@@ -38,11 +38,20 @@ export class AuthService {
   async register(userDto: UserDto): Promise<User> {
     return await this.userRepository.save({
       login: userDto.login,
-      passwordHash: await hash(userDto.password, 10) //salt or round
+      passwordHash: await hash(userDto.password, 10), //salt or round
+      email: userDto.email
     });
   }
 
-  async getUser(id: number): Promise<User> {
+  async getUserByLogin(login: string): Promise<User | null> {
+    return await this.userRepository.findOne({ login });
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findOne({ email });
+  }
+
+  async getUserById(id: number): Promise<User> {
     return this.userRepository.findOne({ id });
   }
 }

@@ -2,74 +2,104 @@
   <BaseModal>
     <div class="modalField">
       <h4>Логин</h4>
-      <input v-model="login" placeholder="Enter login" />
+      <input v-model="createdUser.login" placeholder="Enter login" />
     </div>
+
+    <div class="modalField" v-if="!isLogin">
+      <h4>Email</h4>
+      <input v-model="createdUser.email" type="email" placeholder="Enter email" />
+    </div>
+
     <div class="modalField">
       <h4>Пароль</h4>
-      <input v-model="password" type="password" placeholder="Enter password" />
+      <input v-model="createdUser.password" type="password" placeholder="Enter password" />
     </div>
+
     <div class="modalField" v-if="!isLogin">
       <h4>Пароль ещё раз</h4>
-      <input v-model="confirmPassword" type="password" placeholder="Confirm password" />
+      <input v-model="createdUser.confirmPassword" type="password" placeholder="Confirm password" />
     </div>
+
     <div class="modalField" v-if="!isLogin">
       ФОТО
     </div>
 
     <div v-if="isLogin" class="authButtons">
       <button class="submitBtn" @click="onLoginHandler">Войти</button>
-      <button @click="toggleAuthType">Регистрация</button>
+      <button class="toggleBtn" @click="toggleAuthType">Регистрация</button>
     </div>
+
     <div v-else class="authButtons">
       <button class="submitBtn" @click="onRegisterHandler">Зарегистрироваться</button>
-      <button @click="toggleAuthType">Авторизация</button>
+      <button class="toggleBtn" @click="toggleAuthType">Авторизация</button>
     </div>
+
+    <span v-if="errorMsg" class="errorText">{{ errorMsg }}</span>
   </BaseModal>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { User } from '@/types/User';
+import { defineComponent, reactive, ref } from 'vue';
+import { CreatedUser } from '@/types/CreatedUser';
 import BaseModal from '@/components/modals/BaseModal.vue';
+import { useStore } from 'vuex';
+import { AuthService } from '@/api/authService';
 
 export default defineComponent({
   name: 'ModalAccount',
   components: { BaseModal },
   setup(props: any, context: any) {
-    const login = ref('');
-    const password = ref('');
-    const confirmPassword = ref('');
+    const store = useStore();
     const isLogin = ref(true);
-
-    function onLoginHandler() {
-      const user: User = {
-        login: login.value,
-        password: password.value
-      };
-
-      context.emit('login', user);
-    }
-
-    function onRegisterHandler() {
-      if (password.value === confirmPassword.value) {
-        const user: User = {
-          login: login.value,
-          password: password.value
-        };
-
-        context.emit('register', user);
-      }
-    }
+    const errorMsg = ref('');
+    const createdUser = reactive<CreatedUser>({
+      login: '',
+      password: '',
+      confirmPassword: '',
+      email: ''
+    });
 
     function toggleAuthType() {
       isLogin.value = !isLogin.value;
     }
 
+    async function onLoginHandler() {
+      if (createdUser.login && createdUser.password) {
+        errorMsg.value = 'Введены не все поля!';
+      }
+
+      try {
+        await store.dispatch('setToken', await AuthService.login(createdUser));
+        context.emit('close');
+      } catch (e) {
+        errorMsg.value = (e as Error).message;
+      }
+    }
+
+    async function onRegisterHandler() {
+      if (!createdUser.login && !createdUser.password && !createdUser.confirmPassword) {
+        errorMsg.value = 'Введены не все поля!';
+        return;
+      }
+
+      if (createdUser.password !== createdUser.confirmPassword) {
+        errorMsg.value = 'Пароли не совпадают!';
+        return;
+      }
+
+      try {
+        await store.dispatch('setToken', await AuthService.register(createdUser));
+        context.emit('close');
+      } catch (e) {
+        errorMsg.value = (e as Error).message;
+      }
+    }
+
     return {
-      login,
-      password,
-      confirmPassword,
+      createdUser,
       isLogin,
+      errorMsg,
+      store,
 
       toggleAuthType,
       onLoginHandler,
@@ -92,6 +122,17 @@ export default defineComponent({
 
 .modalField {
   @extend %field;
-  width: 240px;
+  width: 340px;
+}
+
+.toggleBtn {
+  @extend %button;
+  margin: 15px 0 10px 0;
+  color: #127b9b;
+}
+
+.loginAvailabilityText {
+  color: green;
+  font-size: 12px;
 }
 </style>

@@ -1,4 +1,4 @@
-import { Controller, Request, Post, UseGuards, Req, Get, Body } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Req, Get, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -18,6 +18,14 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() userDto: UserDto) {
+    if (await this.authService.getUserByLogin(userDto.login)) {
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    }
+
+    if (await this.authService.getUserByEmail(userDto.login)) {
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    }
+
     return this.authService.login(await this.authService.register(userDto));
   }
 
@@ -30,6 +38,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('refresh')
   async refresh(@Request() req) {
-    return this.authService.login(await this.authService.getUser(req.user.id));
+    return this.authService.login(await this.authService.getUserById(req.user.id));
   }
 }

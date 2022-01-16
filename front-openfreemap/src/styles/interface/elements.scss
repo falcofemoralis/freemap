@@ -1,13 +1,14 @@
 @import "~@/styles/base.scss";
 
-.submitBtn {
+.submitBtn, %submitBtn {
   @extend %button;
   @extend %shadow;
   height: 40px;
-  width: 120px;
+  width: auto;
   background: #26bae8;
   color: #fff;
   border-radius: 12px;
+  padding: 10px;
 }
 
 .closeBtn, %closeBtn {
@@ -45,4 +46,9 @@
     padding: 12px;
     border-radius: 12px;
   }
+}
+
+.errorText, %errorText {
+  color: red;
+  font-weight: bold;
 }
