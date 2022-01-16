@@ -19,6 +19,7 @@ import { SelectEvent } from 'ol/interaction/Select';
 import TabSelect from '@/components/tabs/TabSelect.vue';
 import { axiosInstance } from '@/api';
 import { MapFeatureDto } from '../../../../shared/dto/map/mapdata.dto';
+import { MapService } from '@/api/mapService';
 
 export default defineComponent({
   name: 'LayerData',
@@ -70,7 +71,7 @@ export default defineComponent({
         /*       loader: (extent, resolution, projection) => {
 
                }*/
-        url: axiosInstance.defaults.baseURL + '/map'
+        url: MapService.getMapUri()
       }),
       style: function(feature) {
         style.getText().setText(feature.get('name'));

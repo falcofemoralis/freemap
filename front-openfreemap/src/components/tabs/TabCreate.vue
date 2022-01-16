@@ -41,10 +41,10 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
 import CreatedObject from '@/types/CreatedObject';
-import { axiosInstance } from '@/api';
+import BaseTab from '@/components/tabs/BaseTab.vue';
 import { ObjectSubTypeDto } from '@/../../shared/dto/map/objectsubtype.dto';
 import { ObjectTypeDto } from '@/../../shared/dto/map/objecttype.dto';
-import BaseTab from '@/components/tabs/BaseTab.vue';
+import { MapService } from '@/api/mapService';
 
 export default defineComponent({
   name: 'TabCreate',
@@ -56,8 +56,8 @@ export default defineComponent({
   },
   async setup(props: any, context: any) {
     /* init data */
-    const types = ref<Array<ObjectTypeDto>>((await axiosInstance.get<Array<ObjectTypeDto>>('/map/getObjectTypes')).data);
-    const subTypes = ref<Array<ObjectSubTypeDto>>((await axiosInstance.get<Array<ObjectSubTypeDto>>('/map/getObjectSubTypes')).data);
+    const types = ref<Array<ObjectTypeDto>>(await MapService.getTypes());
+    const subTypes = ref<Array<ObjectSubTypeDto>>(await MapService.getSubTypes());
 
     /* init object data */
     const createdObject = reactive<CreatedObject>(new CreatedObject());

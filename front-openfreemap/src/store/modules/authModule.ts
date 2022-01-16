@@ -1,5 +1,4 @@
 import { Actions, Getters, Module, Mutations } from 'vuex-smart-module';
-import store from '@/store';
 
 const TOKEN_ITEM = 'token';
 
@@ -31,7 +30,7 @@ class AuthActions extends Actions<AuthState,
   AuthActions> {
 
   setToken(token: string) {
-    store.commit('SET_TOKEN', token);
+    this.commit('SET_TOKEN', token);
   }
 }
 

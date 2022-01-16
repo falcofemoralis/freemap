@@ -63,6 +63,7 @@ import { DrawEvent } from 'ol/interaction/Draw';
 import TabCreate from '@/components/tabs/TabCreate.vue';
 import { Geometry, Polygon } from 'ol/geom';
 import EditType from '@/constants/EditType';
+import { MapService } from '@/api/mapService';
 
 export default defineComponent({
   name: 'WidgetEditorBox',
@@ -165,9 +166,7 @@ export default defineComponent({
      */
     function completeDrawing() {
       isTabCreateOpen.value = true;
-
-      console.log('isTabCreateOpen ' + isTabCreateOpen.value);
-
+      
       resetDrawing();
     }
 
@@ -175,14 +174,18 @@ export default defineComponent({
      * Обработчик завершения создания нового объекта геометрии
      * @param {CreatedObject} createdObject - новый объект
      */
-    function onCreatedHandler(createdObject: CreatedObject) {
+    async function onCreatedHandler(createdObject: CreatedObject) {
       const polygon = feature?.getGeometry() as Polygon;
 
       createdObject.coordinates = polygon.getCoordinates();
       feature?.setProperties({ name: createdObject.name });
-      store.dispatch('postCreatedObject', { createdObject, token: store.getters.getToken });
 
-      console.log(createdObject);
+      try {
+        await MapService.postCreatedObject(createdObject, store.getters.getToken);
+      } catch (e) {
+        console.log(e);
+        // TODO Показать ошибку
+      }
 
       // reset values
       feature = null;
