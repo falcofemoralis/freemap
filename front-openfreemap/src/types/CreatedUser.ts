@@ -3,4 +3,5 @@ export interface CreatedUser {
   password: string;
   confirmPassword: string;
   email: string;
+  avatar: Blob | null;
 }

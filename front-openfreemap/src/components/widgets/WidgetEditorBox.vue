@@ -166,7 +166,7 @@ export default defineComponent({
      */
     function completeDrawing() {
       isTabCreateOpen.value = true;
-      
+
       resetDrawing();
     }
 
@@ -181,7 +181,7 @@ export default defineComponent({
       feature?.setProperties({ name: createdObject.name });
 
       try {
-        await MapService.postCreatedObject(createdObject, store.getters.getToken);
+        await MapService.postCreatedObject(createdObject);
       } catch (e) {
         console.log(e);
         // TODO Показать ошибку

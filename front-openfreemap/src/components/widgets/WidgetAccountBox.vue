@@ -3,7 +3,8 @@
     <ModalAccount v-if="isModalOpen" @close="toggleModal" />
     <div class="accountBox">
       <div v-if="isAuthed">
-        MASTER IS HERE
+        <img v-if="avatarUrl" class="avatarImage" :src="avatarUrl">
+        <img v-else class="avatarImage" :src="require('@/assets/no_avatar.png')">
       </div>
       <button v-else class="signInBtn" @click="toggleModal">Войти</button>
     </div>
@@ -13,8 +14,9 @@
 <script lang="ts">
 import ModalAccount from '@/components/modals/ModalAccount.vue';
 import { CreatedUser } from '@/types/CreatedUser';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { AuthService } from '@/api/authService';
 
 export default defineComponent({
   name: 'WidgetAccountBox',
@@ -23,6 +25,12 @@ export default defineComponent({
     const store = useStore();
     const isModalOpen = ref(false);
     const isAuthed = computed(() => store.getters.isTokenValid);
+    const avatarUrl = ref<string | null>(AuthService.getProfileAvatarUrl(store.getters.getProfileAvatar));
+    console.log(avatarUrl.value);
+    watch(computed(() => store.getters.getProfileAvatar), (current) => {
+      avatarUrl.value = AuthService.getProfileAvatarUrl(current);
+    });
+
 
     function toggleModal() {
       isModalOpen.value = !isModalOpen.value;
@@ -31,6 +39,7 @@ export default defineComponent({
     return {
       isModalOpen,
       isAuthed,
+      avatarUrl,
 
       toggleModal
     };
@@ -43,7 +52,8 @@ export default defineComponent({
 @import "~@/styles/interface/elements.scss";
 
 .accountBox {
-  @extend %box;
+  z-index: 1;
+  position: absolute;
   right: 35px;
   top: 20px;
   width: auto;
@@ -57,5 +67,11 @@ export default defineComponent({
   background: #0b77d2;
   border-radius: 7px;
   color: #fff;
+}
+
+.avatarImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
 }
 </style>

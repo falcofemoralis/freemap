@@ -21,7 +21,7 @@
     </div>
 
     <div class="modalField" v-if="!isLogin">
-      ФОТО
+      <input type="file" accept="image/*" @change="photoChangedHandler">
     </div>
 
     <div v-if="isLogin" class="authButtons">
@@ -42,21 +42,20 @@
 import { defineComponent, reactive, ref } from 'vue';
 import { CreatedUser } from '@/types/CreatedUser';
 import BaseModal from '@/components/modals/BaseModal.vue';
-import { useStore } from 'vuex';
 import { AuthService } from '@/api/authService';
 
 export default defineComponent({
   name: 'ModalAccount',
   components: { BaseModal },
   setup(props: any, context: any) {
-    const store = useStore();
     const isLogin = ref(true);
     const errorMsg = ref('');
     const createdUser = reactive<CreatedUser>({
       login: '',
       password: '',
       confirmPassword: '',
-      email: ''
+      email: '',
+      avatar: null
     });
 
     function toggleAuthType() {
@@ -69,7 +68,7 @@ export default defineComponent({
       }
 
       try {
-        await store.dispatch('setToken', await AuthService.login(createdUser));
+        await AuthService.login(createdUser);
         context.emit('close');
       } catch (e) {
         errorMsg.value = (e as Error).message;
@@ -88,10 +87,16 @@ export default defineComponent({
       }
 
       try {
-        await store.dispatch('setToken', await AuthService.register(createdUser));
+        await AuthService.register(createdUser);
         context.emit('close');
       } catch (e) {
         errorMsg.value = (e as Error).message;
+      }
+    }
+
+    function photoChangedHandler(e: any) {
+      if (e.target.files.length > 0) {
+        createdUser.avatar = e.target.files[0] as File;
       }
     }
 
@@ -99,11 +104,11 @@ export default defineComponent({
       createdUser,
       isLogin,
       errorMsg,
-      store,
 
       toggleAuthType,
       onLoginHandler,
-      onRegisterHandler
+      onRegisterHandler,
+      photoChangedHandler
     };
   }
 });
