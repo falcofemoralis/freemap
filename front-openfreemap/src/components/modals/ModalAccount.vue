@@ -34,7 +34,11 @@
       <button class="toggleBtn" @click="toggleAuthType">Авторизация</button>
     </div>
 
-    <span v-if="errorMsg" class="errorText">{{ errorMsg }}</span>
+    <ul>
+      <li v-for="error in errors" :key="error" class="errorText">
+        {{ error }}
+      </li>
+    </ul>
   </BaseModal>
 </template>
 
@@ -49,7 +53,7 @@ export default defineComponent({
   components: { BaseModal },
   setup(props: any, context: any) {
     const isLogin = ref(true);
-    const errorMsg = ref('');
+    const errors = ref<Array<string>>([]);
     const createdUser = reactive<CreatedUser>({
       login: '',
       password: '',
@@ -68,15 +72,21 @@ export default defineComponent({
      * Авторизация юзера
      */
     async function onLoginHandler() {
-      if (createdUser.login && createdUser.password) {
-        errorMsg.value = 'Введены не все поля!';
+      errors.value = [];
+
+      if (!createdUser.login && !createdUser.password) {
+        errors.value.push('Введены не все поля!');
+      }
+
+      if (errors.value.length > 0) {
+        return;
       }
 
       try {
         await AuthService.login(createdUser);
         context.emit('close');
       } catch (e) {
-        errorMsg.value = (e as Error).message;
+        errors.value.push((e as Error).message);
       }
     }
 
@@ -84,13 +94,21 @@ export default defineComponent({
      * Регистрация юзера
      */
     async function onRegisterHandler() {
+      errors.value = [];
+
       if (!createdUser.login && !createdUser.password && !createdUser.confirmPassword) {
-        errorMsg.value = 'Введены не все поля!';
-        return;
+        errors.value.push('Введены не все поля!');
       }
 
       if (createdUser.password !== createdUser.confirmPassword) {
-        errorMsg.value = 'Пароли не совпадают!';
+        errors.value.push('Пароли не совпадают!');
+      }
+
+      if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(createdUser.email))) {
+        errors.value.push('Некорректный email');
+      }
+
+      if (errors.value.length > 0) {
         return;
       }
 
@@ -98,7 +116,7 @@ export default defineComponent({
         await AuthService.register(createdUser);
         context.emit('close');
       } catch (e) {
-        errorMsg.value = (e as Error).message;
+        errors.value.push((e as Error).message);
       }
     }
 
@@ -115,7 +133,7 @@ export default defineComponent({
     return {
       createdUser,
       isLogin,
-      errorMsg,
+      errors,
 
       toggleAuthType,
       onLoginHandler,

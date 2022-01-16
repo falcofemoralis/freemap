@@ -9,7 +9,9 @@ import {
   HttpException,
   HttpStatus,
   UseInterceptors,
-  UploadedFile, Param, Res
+  UploadedFile,
+  Param,
+  Res
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -62,10 +64,7 @@ export class AuthController {
     }
 
     if (userDto.password != userDto.confirmPassword) {
-      throw new HttpException(
-        "Password didn't match",
-        HttpStatus.NOT_ACCEPTABLE
-      );
+      throw new HttpException('Passwords not match', HttpStatus.NOT_ACCEPTABLE);
     }
 
     const avatarName: string = avatarFile?.filename;
