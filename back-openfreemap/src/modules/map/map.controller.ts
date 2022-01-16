@@ -95,7 +95,6 @@ export class MapController {
     return await this.mapService.getAllObjectSubTypes();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(FilesInterceptor('files'))
   uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {

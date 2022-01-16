@@ -17,6 +17,9 @@ export class User {
   @Column({ type: 'longtext', nullable: false })
   email: string;
 
+  @Column({ type: 'longtext', nullable: true })
+  profileAvatar?: string;
+
   @Column({ type: 'longtext', nullable: false })
   passwordHash?: string;
 

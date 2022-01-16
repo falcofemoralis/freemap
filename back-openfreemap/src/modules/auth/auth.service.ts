@@ -27,19 +27,18 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
+  async login(user: User): Promise<string> {
     const payload: UserDataDto = { id: user.id, login: user.login };
 
-    return {
-      accessToken: this.jwtService.sign(payload)
-    };
+    return this.jwtService.sign(payload);
   }
 
-  async register(userDto: UserDto): Promise<User> {
+  async register(userDto: UserDto, avatarPath: string | null): Promise<User> {
     return await this.userRepository.save({
       login: userDto.login,
       passwordHash: await hash(userDto.password, 10), //salt or round
-      email: userDto.email
+      email: userDto.email,
+      profileAvatar: avatarPath
     });
   }
 
