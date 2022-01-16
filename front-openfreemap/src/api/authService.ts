@@ -32,7 +32,9 @@ export class AuthService {
     const formData = new FormData();
     formData.append('login', createdUser.login);
     formData.append('password', createdUser.password);
+    formData.append('confirmPassword', createdUser.confirmPassword);
     formData.append('email', createdUser.email);
+
     if (createdUser.avatar) {
       formData.append('avatar', createdUser.avatar);
     }
@@ -47,6 +49,8 @@ export class AuthService {
       if (axios.isAxiosError(e)) {
         if (e.response?.status == 409) {
           throw new Error('Пользователь уже существует');
+        } else if(e.response?.status == 406){
+          throw new Error('Пароли не совпадают')
         }
       }
 
@@ -54,15 +58,11 @@ export class AuthService {
     }
   }
 
-  static getProfileAvatarUrl(name?: string | null): string | null {
+  static getProfileAvatarUrl(name: string | null): string | null {
     console.log(name);
-    if (name && name != undefined) {
-      console.log('123');
-
+    if (name) {
       return `${axiosInstance.defaults.baseURL}/auth/profile-avatar/${name}`;
     } else {
-      console.log('11');
-
       return null;
     }
   }

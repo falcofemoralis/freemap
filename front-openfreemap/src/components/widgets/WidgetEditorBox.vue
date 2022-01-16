@@ -58,7 +58,7 @@ import { Vector as VectorLayer } from 'ol/layer';
 import { OSM, Vector as VectorSource } from 'ol/source';
 import GeometryType from '@/constants/GeometryType';
 import { Feature, View } from 'ol';
-import CreatedObject from '@/types/CreatedObject';
+import { CreatedObject } from '@/types/CreatedObject';
 import { DrawEvent } from 'ol/interaction/Draw';
 import TabCreate from '@/components/tabs/TabCreate.vue';
 import { Geometry, Polygon } from 'ol/geom';

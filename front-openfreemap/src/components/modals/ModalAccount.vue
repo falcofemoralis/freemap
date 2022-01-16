@@ -54,14 +54,19 @@ export default defineComponent({
       login: '',
       password: '',
       confirmPassword: '',
-      email: '',
-      avatar: null
+      email: ''
     });
 
+    /**
+     * Переключение режима входа
+     */
     function toggleAuthType() {
       isLogin.value = !isLogin.value;
     }
 
+    /**
+     * Авторизация юзера
+     */
     async function onLoginHandler() {
       if (createdUser.login && createdUser.password) {
         errorMsg.value = 'Введены не все поля!';
@@ -75,6 +80,9 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Регистрация юзера
+     */
     async function onRegisterHandler() {
       if (!createdUser.login && !createdUser.password && !createdUser.confirmPassword) {
         errorMsg.value = 'Введены не все поля!';
@@ -94,6 +102,10 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Отслеживание измненения смены загруженного файла
+     * @param {Event} e
+     */
     function photoChangedHandler(e: any) {
       if (e.target.files.length > 0) {
         createdUser.avatar = e.target.files[0] as File;

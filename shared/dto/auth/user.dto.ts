@@ -1,5 +1,6 @@
 export interface UserDto {
   login: string,
   password: string,
-  email?: string | null
+  confirmPassword?: string,
+  email?: string
 }

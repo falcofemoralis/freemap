@@ -43,9 +43,11 @@ export class AuthController {
       storage: diskStorage({
         destination: AVATAR_PATH,
         filename: (req, file, cb) => {
-          const filename: string = (req.body as UserDto).login + Path.extname(file.originalname);
+          if (file) {
+            const filename: string = (req.body as UserDto).login + Path.extname(file.originalname);
 
-          cb(null, filename);
+            cb(null, filename);
+          }
         }
       })
     })
@@ -57,6 +59,13 @@ export class AuthController {
 
     if (await this.authService.getUserByEmail(userDto.login)) {
       throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    }
+
+    if (userDto.password != userDto.confirmPassword) {
+      throw new HttpException(
+        "Password didn't match",
+        HttpStatus.NOT_ACCEPTABLE
+      );
     }
 
     const avatarName: string = avatarFile?.filename;

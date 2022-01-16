@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
-import CreatedObject from '@/types/CreatedObject';
+import { CreatedObject } from '@/types/CreatedObject';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { ObjectSubTypeDto } from '@/../../shared/dto/map/objectsubtype.dto';
 import { ObjectTypeDto } from '@/../../shared/dto/map/objecttype.dto';
@@ -60,7 +60,12 @@ export default defineComponent({
     const subTypes = ref<Array<ObjectSubTypeDto>>(await MapService.getSubTypes());
 
     /* init object data */
-    const createdObject = reactive<CreatedObject>(new CreatedObject());
+    const createdObject = reactive<CreatedObject>({
+      name: '',
+      desc: '',
+      coordinates: [],
+      typeId: -1
+    });
     const selectedType = types.value.find((val) => val.key == props.editType);
     if (selectedType) {
       createdObject.typeId = selectedType.id;

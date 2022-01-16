@@ -1,4 +1,4 @@
-import CreatedObject from '@/types/CreatedObject';
+import { CreatedObject } from '@/types/CreatedObject';
 import { axiosInstance, getConfig } from '@/api/index';
 import { MapObjectDto } from '../../../shared/dto/map/mapobject.dto';
 import { ObjectSubTypeDto } from '@/../../shared/dto/map/objectsubtype.dto';

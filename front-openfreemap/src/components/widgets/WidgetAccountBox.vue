@@ -26,11 +26,10 @@ export default defineComponent({
     const isModalOpen = ref(false);
     const isAuthed = computed(() => store.getters.isTokenValid);
     const avatarUrl = ref<string | null>(AuthService.getProfileAvatarUrl(store.getters.getProfileAvatar));
-    console.log(avatarUrl.value);
+
     watch(computed(() => store.getters.getProfileAvatar), (current) => {
       avatarUrl.value = AuthService.getProfileAvatarUrl(current);
     });
-
 
     function toggleModal() {
       isModalOpen.value = !isModalOpen.value;
