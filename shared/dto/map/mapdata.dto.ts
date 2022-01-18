@@ -1,7 +1,9 @@
 import { MapObjectDto } from './mapobject.dto';
 
 export interface FeatureProperties extends Omit<MapObjectDto, 'coordinates'> {
+  id: number;
   userId: number;
+  mediaNames?: Array<string>;
 }
 
 export interface MapFeatureDto {

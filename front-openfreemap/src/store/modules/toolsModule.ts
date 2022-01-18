@@ -31,5 +31,5 @@ export const toolsModule = new Module({
   state: ToolsState,
   getters: ToolsGetters,
   mutations: ToolsMutations,
-  actions: ToolsActions
+  actions: ToolsActions,
 });

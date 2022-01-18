@@ -10,9 +10,10 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([MapObject, ObjectType, ObjectSubtype]),
-    AuthModule
+    AuthModule,
   ],
   controllers: [MapController],
-  providers: [MapService]
+  providers: [MapService],
 })
-export class MapModule {}
+export class MapModule {
+}

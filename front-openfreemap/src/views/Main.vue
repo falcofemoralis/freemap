@@ -1,6 +1,6 @@
 <template>
-  <div class="main">
-    <div class="map" ref="mapRef" />
+  <div class='main'>
+    <div class='map' ref='mapRef' />
     <LayerData />
     <WidgetAccountBox />
     <WidgetEditorBox />
@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import WidgetEditorBox from '@/components/widgets/WidgetEditorBox.vue';
 import WidgetPreviewBox from '@/components/widgets/WidgetPreviewBox.vue';
 import Map from 'ol/Map';
@@ -33,7 +33,7 @@ export default defineComponent({
     WidgetSearchBox,
     LayerData,
     WidgetPreviewBox,
-    WidgetEditorBox
+    WidgetEditorBox,
   },
   setup() {
     const store = useStore();
@@ -48,11 +48,11 @@ export default defineComponent({
     const mapView = new View({
       center: [0, 0],
       zoom: 2,
-      projection: 'EPSG:3857'
+      projection: 'EPSG:3857',
     });
     const map = new Map({
       layers: [baseLayer],
-      view: mapView
+      view: mapView,
     });
 
     onMounted(() => {
@@ -116,20 +116,20 @@ export default defineComponent({
      */
     function setMapLayer(type: MapType) {
       baseLayer.setSource(new XYZ({
-        url: type as string
+        url: type as string,
       }));
     }
 
     provide('map', map);
 
     return {
-      mapRef
+      mapRef,
     };
-  }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/widget";
 
 .main {

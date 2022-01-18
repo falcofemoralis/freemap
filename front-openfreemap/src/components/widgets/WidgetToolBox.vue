@@ -1,21 +1,21 @@
 <template>
-  <div class="toolBox">
-    <div class="toolBox__compass"></div>
-    <div class="toolBox__z"></div>
-    <div class="toolBox__ruler"></div>
-    <div class="toolBox__geolocation"></div>
+  <div class='toolBox'>
+    <div class='toolBox__compass'></div>
+    <div class='toolBox__z'></div>
+    <div class='toolBox__ruler'></div>
+    <div class='toolBox__geolocation'></div>
   </div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'WidgetToolBox'
+  name: 'WidgetToolBox',
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/widget";
 
 %circleBox {

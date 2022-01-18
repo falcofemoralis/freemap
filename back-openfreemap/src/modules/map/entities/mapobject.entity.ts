@@ -1,11 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ObjectSubtype } from './objectsubtype.entity';
 import { ObjectType } from './objectype.entity';
@@ -42,4 +42,10 @@ export class MapObject {
 
   @Column({ type: 'longtext', nullable: true })
   links: string | null;
+
+  @CreateDateColumn()
+  createdAt?: Date;
+
+  @UpdateDateColumn()
+  updatedAt?: Date;
 }

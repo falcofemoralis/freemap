@@ -31,5 +31,5 @@ export const editorModule = new Module({
   state: EditorState,
   getters: EditorGetters,
   mutations: EditorMutations,
-  actions: EditorActions
+  actions: EditorActions,
 });

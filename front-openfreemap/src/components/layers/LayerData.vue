@@ -1,11 +1,18 @@
 <template>
   <div>
-    <TabSelect v-if="isTabSelectOpen" @close="closeTab" :feature="selectedFeature" />
+    <Suspense v-if='isTabSelectOpen'>
+      <template #default>
+        <TabSelect @close='closeTab' :feature='selectedFeature' />
+      </template>
+      <template #fallback>
+        <TabLoading />
+      </template>
+    </Suspense>
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, inject, reactive, ref, watch } from 'vue';
+<script lang='ts'>
+import { computed, defineComponent, inject, ref, watch } from 'vue';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 import { Vector as VectorSource } from 'ol/source';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -13,18 +20,19 @@ import { Feature, Map } from 'ol';
 import { GeoJSON } from 'ol/format';
 import { Select } from 'ol/interaction';
 import { Geometry } from 'ol/geom';
-import { altKeyOnly, click, pointerMove } from 'ol/events/condition';
+import { pointerMove } from 'ol/events/condition';
 import { useStore } from 'vuex';
 import { SelectEvent } from 'ol/interaction/Select';
 import TabSelect from '@/components/tabs/TabSelect.vue';
-import { axiosInstance } from '@/api';
 import { MapFeatureDto } from '../../../../shared/dto/map/mapdata.dto';
 import { MapService } from '@/api/mapService';
+import TabLoading from '@/components/tabs/TabLoading.vue';
 
 export default defineComponent({
   name: 'LayerData',
   components: {
-    TabSelect
+    TabLoading,
+    TabSelect,
   },
   setup() {
     const store = useStore();
@@ -37,25 +45,25 @@ export default defineComponent({
      */
     const style = new Style({
       fill: new Fill({
-        color: 'rgba(255, 255, 255, 0.2)'
+        color: 'rgba(255, 255, 255, 0.2)',
       }),
       stroke: new Stroke({
         color: '#ffcc33',
-        width: 2
+        width: 2,
       }),
       image: new Circle({
         radius: 7,
         fill: new Fill({
-          color: '#ffcc33'
-        })
+          color: '#ffcc33',
+        }),
       }),
       text: new Text({
         font: '12px Calibri,sans-serif',
         fill: new Fill({ color: '#000' }),
         stroke: new Stroke({
-          color: '#fff', width: 2
-        })
-      })
+          color: '#fff', width: 2,
+        }),
+      }),
     });
 
     // const url = ref('https://ahocevar.com/geoserver/wfs?service=wfs&request=getfeature&typename=topp:states&cql_filter=STATE_NAME=\'Idaho\'&outputformat=application/json');
@@ -71,13 +79,13 @@ export default defineComponent({
         /*       loader: (extent, resolution, projection) => {
 
                }*/
-        url: MapService.getMapUri()
+        url: MapService.getMapData(),
       }),
       style: function(feature) {
         style.getText().setText(feature.get('name'));
         return [style];
       },
-      renderBuffer: 5000
+      renderBuffer: 5000,
     });
     map?.addLayer(baseLayer);
 
@@ -104,12 +112,12 @@ export default defineComponent({
      */
     const selected = new Style({
       fill: new Fill({
-        color: '#eeeeee'
+        color: '#eeeeee',
       }),
       stroke: new Stroke({
         color: 'rgba(255, 255, 255, 0.7)',
-        width: 2
-      })
+        width: 2,
+      }),
     });
 
     function selectStyle(feature: Feature<Geometry>) {
@@ -138,12 +146,12 @@ export default defineComponent({
      */
     const hovered = new Style({
       fill: new Fill({
-        color: '#eeeeee'
+        color: '#eeeeee',
       }),
       stroke: new Stroke({
         color: 'rgba(0, 0, 0, 0.7)',
-        width: 5
-      })
+        width: 5,
+      }),
     });
 
     function hoverStyle(feature: Feature<Geometry>) {
@@ -183,12 +191,12 @@ export default defineComponent({
       isTabSelectOpen,
       selectedFeature,
 
-      closeTab
+      closeTab,
     };
-  }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 
 </style>

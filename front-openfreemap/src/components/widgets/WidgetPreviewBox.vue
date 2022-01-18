@@ -1,15 +1,15 @@
 <template>
-  <div class="layersBox" @click="changeMapType">
-    <div class="layersBox__label">
-      <span v-if="selectedMapType === MapType.GOOGLE">Земля</span>
+  <div class='layersBox' @click='changeMapType'>
+    <div class='layersBox__label'>
+      <span v-if='selectedMapType === MapType.GOOGLE'>Земля</span>
       <span v-else>Карта</span>
     </div>
   </div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import { useStore } from 'vuex';
-import { computed, defineComponent, inject, onMounted, ref, watch } from 'vue';
+import { defineComponent, inject, onMounted, ref } from 'vue';
 import MapType from '@/constants/MapType';
 import { OverviewMap } from 'ol/control';
 import Map from 'ol/Map';
@@ -29,7 +29,7 @@ export default defineComponent({
       className: 'layers-map',
       collapsed: false,
       collapsible: false,
-      rotateWithView: false
+      rotateWithView: false,
     });
     mapPreview.getOverviewMap().addLayer(baseLayer);
 
@@ -46,7 +46,7 @@ export default defineComponent({
      */
     function setPreviewMapLayer(type: MapType) {
       baseLayer.setSource(new XYZ({
-        url: type as string
+        url: type as string,
       }));
     }
 
@@ -69,13 +69,13 @@ export default defineComponent({
 
       selectedMapType,
 
-      changeMapType
+      changeMapType,
     };
-  }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/widget";
 
 .layersBox {
@@ -100,7 +100,7 @@ export default defineComponent({
 }
 </style>
 
-<style lang="scss">
+<style lang='scss'>
 @import "~@/styles/interface/widget";
 
 %olmap {

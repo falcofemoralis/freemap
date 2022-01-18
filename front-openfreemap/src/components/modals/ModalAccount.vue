@@ -1,48 +1,49 @@
 <template>
   <BaseModal>
-    <div class="modalField">
+    <div class='modalField'>
       <h4>Логин</h4>
-      <input v-model="createdUser.login" placeholder="Enter login" />
+      <input v-model='createdUser.login' placeholder='Enter login' />
     </div>
 
-    <div class="modalField" v-if="!isLogin">
+    <div class='modalField' v-if='!isLogin'>
       <h4>Email</h4>
-      <input v-model="createdUser.email" type="email" placeholder="Enter email" />
+      <input v-model='createdUser.email' type='email' placeholder='Enter email' />
     </div>
 
-    <div class="modalField">
+    <div class='modalField'>
       <h4>Пароль</h4>
-      <input v-model="createdUser.password" type="password" placeholder="Enter password" />
+      <input v-model='createdUser.password' type='password' placeholder='Enter password' />
     </div>
 
-    <div class="modalField" v-if="!isLogin">
+    <div class='modalField' v-if='!isLogin'>
       <h4>Пароль ещё раз</h4>
-      <input v-model="createdUser.confirmPassword" type="password" placeholder="Confirm password" />
+      <input v-model='createdUser.confirmPassword' type='password' placeholder='Confirm password' />
     </div>
 
-    <div class="modalField" v-if="!isLogin">
-      <input type="file" accept="image/*" @change="photoChangedHandler">
+    <div class='modalField' v-if='!isLogin'>
+      <h4>Аватар</h4>
+      <input type='file' accept='image/*' @change='photoChangedHandler'>
     </div>
 
-    <div v-if="isLogin" class="authButtons">
-      <button class="submitBtn" @click="onLoginHandler">Войти</button>
-      <button class="toggleBtn" @click="toggleAuthType">Регистрация</button>
+    <div v-if='isLogin' class='authButtons'>
+      <button class='submitBtn' @click='onLoginHandler'>Войти</button>
+      <button class='toggleBtn' @click='toggleAuthType'>Регистрация</button>
     </div>
 
-    <div v-else class="authButtons">
-      <button class="submitBtn" @click="onRegisterHandler">Зарегистрироваться</button>
-      <button class="toggleBtn" @click="toggleAuthType">Авторизация</button>
+    <div v-else class='authButtons'>
+      <button class='submitBtn' @click='onRegisterHandler'>Зарегистрироваться</button>
+      <button class='toggleBtn' @click='toggleAuthType'>Авторизация</button>
     </div>
 
     <ul>
-      <li v-for="error in errors" :key="error" class="errorText">
+      <li v-for='error in errors' :key='error' class='errorText'>
         {{ error }}
       </li>
     </ul>
   </BaseModal>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import { defineComponent, reactive, ref } from 'vue';
 import { CreatedUser } from '@/types/CreatedUser';
 import BaseModal from '@/components/modals/BaseModal.vue';
@@ -58,7 +59,7 @@ export default defineComponent({
       login: '',
       password: '',
       confirmPassword: '',
-      email: ''
+      email: '',
     });
 
     /**
@@ -138,13 +139,13 @@ export default defineComponent({
       toggleAuthType,
       onLoginHandler,
       onRegisterHandler,
-      photoChangedHandler
+      photoChangedHandler,
     };
-  }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/elements.scss";
 @import "~@/styles/base.scss";
 

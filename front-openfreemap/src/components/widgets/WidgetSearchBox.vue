@@ -1,15 +1,15 @@
 <template>
-  <div class="searchBox"></div>
+  <div class='searchBox'></div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'WidgetSearchBox'
+  name: 'WidgetSearchBox',
 });
 </script>
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/widget";
 
 .searchBox {

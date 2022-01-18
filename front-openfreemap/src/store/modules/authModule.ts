@@ -33,6 +33,13 @@ class AuthMutations extends Mutations<AuthState> {
     localStorage.setItem(PROFILE_AVATAR, img);
     this.state.profileAvatar = img;
   }
+
+  LOGOUT() {
+    this.state.token = null;
+    this.state.profileAvatar = null;
+    localStorage.removeItem(TOKEN_ITEM);
+    localStorage.removeItem(PROFILE_AVATAR);
+  }
 }
 
 class AuthActions extends Actions<AuthState,
@@ -47,6 +54,10 @@ class AuthActions extends Actions<AuthState,
   setProfileAvatar(token: string) {
     this.commit('SET_PROFILE_AVATAR', token);
   }
+
+  logout() {
+    this.commit('LOGOUT');
+  }
 }
 
 export const authModule = new Module({
@@ -54,5 +65,5 @@ export const authModule = new Module({
   state: AuthState,
   getters: AuthGetters,
   mutations: AuthMutations,
-  actions: AuthActions
+  actions: AuthActions,
 });

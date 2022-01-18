@@ -1,73 +1,79 @@
 <template>
   <div>
-    <Suspense>
-      <TabCreate v-if="isTabCreateOpen" @close="closeTab" :editType="selectedEditType" @created="onCreatedHandler" />
+    <Suspense v-if='isTabCreateOpen'>
+      <template #default>
+        <TabCreate @close='closeTab' :editType='selectedEditType' @created='onCreatedHandler' />
+      </template>
+      <template #fallback>
+        <TabLoading />
+      </template>
     </Suspense>
-    <div class="editorBox rcc" v-if="store.getters.isTokenValid">
+    <div class='editorBox rcc' v-if='store.getters.isTokenValid'>
       <img
-        class="editorBtn editorBtn-left"
+        class='editorBtn editorBtn-left'
         :src="require('@/assets/ic_polygon.png')"
-        @click="createEdit(EditType.BUILDING)"
-        alt="Add building"
+        @click='createEdit(EditType.BUILDING)'
+        alt='Add building'
       />
       <img
-        class="editorBtn"
+        class='editorBtn'
         :src="require('@/assets/ic_path.png')"
-        @click="createEdit(EditType.PATH)"
-        alt="Add path"
+        @click='createEdit(EditType.PATH)'
+        alt='Add path'
       />
       <img
-        class="editorBtn editorBtn-right"
+        class='editorBtn editorBtn-right'
         :src="require('@/assets/ic_area.png')"
-        @click="createEdit(EditType.AREA)"
-        alt="Add area"
+        @click='createEdit(EditType.AREA)'
+        alt='Add area'
       />
     </div>
-    <div class="editorCtrlBox" v-if="selectedEditType">
+    <div class='editorCtrlBox' v-if='selectedEditType'>
       <img
-        class="editorBtn editorBtn-left"
+        class='editorBtn editorBtn-left'
         :src="require('@/assets/ic_undo.png')"
-        @click="undo()"
-        alt="undo"
+        @click='undo()'
+        alt='undo'
       />
       <img
-        class="editorBtn"
+        class='editorBtn'
         :class="{ 'editorBtn-right': selectedEditType !== EditType.PATH }"
         :src="require('@/assets/ic_redo.png')"
-        @click="redo()"
-        alt="redo"
+        @click='redo()'
+        alt='redo'
       />
       <img
-        v-if="selectedEditType === EditType.PATH"
-        class="editorBtn editorBtn-right"
+        v-if='selectedEditType === EditType.PATH'
+        class='editorBtn editorBtn-right'
         :src="require('@/assets/ic_completed.png')"
-        @click="completeDrawing"
-        alt="redo"
+        @click='completeDrawing'
+        alt='redo'
       />
     </div>
   </div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import { useStore } from 'vuex';
-import { computed, defineComponent, inject, ref } from 'vue';
+import { defineComponent, inject, ref } from 'vue';
 import Map from 'ol/Map';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
-import { Draw, Modify, Snap } from 'ol/interaction';
+import { Draw } from 'ol/interaction';
 import { Vector as VectorLayer } from 'ol/layer';
-import { OSM, Vector as VectorSource } from 'ol/source';
+import { Vector as VectorSource } from 'ol/source';
 import GeometryType from '@/constants/GeometryType';
-import { Feature, View } from 'ol';
+import { Feature } from 'ol';
 import { CreatedObject } from '@/types/CreatedObject';
 import { DrawEvent } from 'ol/interaction/Draw';
 import TabCreate from '@/components/tabs/TabCreate.vue';
 import { Geometry, Polygon } from 'ol/geom';
 import EditType from '@/constants/EditType';
 import { MapService } from '@/api/mapService';
+import TabLoading from '@/components/tabs/TabLoading.vue';
 
 export default defineComponent({
   name: 'WidgetEditorBox',
-  components: { TabCreate },
+  components: { TabLoading, TabCreate },
   setup() {
     const store = useStore();
     const map = inject<Map>('map');
@@ -79,25 +85,25 @@ export default defineComponent({
 
     const style = new Style({
       fill: new Fill({
-        color: 'rgba(255, 255, 255, 0.2)'
+        color: 'rgba(255, 255, 255, 0.2)',
       }),
       stroke: new Stroke({
         color: '#ffcc33',
-        width: 2
+        width: 2,
       }),
       image: new Circle({
         radius: 7,
         fill: new Fill({
-          color: '#ffcc33'
-        })
+          color: '#ffcc33',
+        }),
       }),
       text: new Text({
         font: '12px Calibri,sans-serif',
         fill: new Fill({ color: '#000' }),
         stroke: new Stroke({
-          color: '#fff', width: 2
-        })
-      })
+          color: '#fff', width: 2,
+        }),
+      }),
     });
 
     /* Edit object init */
@@ -108,7 +114,7 @@ export default defineComponent({
         style.getText().setText(feature.get('name'));
         return [style];
       },
-      renderBuffer: 5000
+      renderBuffer: 5000,
     });
     map?.addLayer(baseLayer);
 
@@ -145,7 +151,7 @@ export default defineComponent({
 
       draw = new Draw({
         source,
-        type: geomType as string
+        type: geomType as string,
       });
 
       draw.on('drawstart', ((event: DrawEvent) => {
@@ -178,13 +184,14 @@ export default defineComponent({
       const polygon = feature?.getGeometry() as Polygon;
 
       createdObject.coordinates = polygon.getCoordinates();
-      feature?.setProperties({ name: createdObject.name });
 
       try {
-        await MapService.postCreatedObject(createdObject);
+        feature?.setProperties(await MapService.addCreatedObject(createdObject));
       } catch (e) {
         console.log(e);
-        // TODO Показать ошибку
+        if (feature) {
+          baseLayer?.getSource().removeFeature(feature);
+        }
       }
 
       // reset values
@@ -265,13 +272,13 @@ export default defineComponent({
       completeDrawing,
       undo,
       redo,
-      closeTab
+      closeTab,
     };
-  }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/widget";
 
 .editorBox {

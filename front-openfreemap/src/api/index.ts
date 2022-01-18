@@ -6,7 +6,6 @@ export const axiosInstance = axios.create({
 });
 
 export function getAuthConfig(): any {
-  console.log(store.getters.getToke);
   return {
     Authorization: `Bearer ${store.getters.getToken}`,
   };

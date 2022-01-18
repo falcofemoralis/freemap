@@ -1,27 +1,27 @@
 <template>
   <div>
-    <ModalAccount v-if="isModalOpen" @close="toggleModal" />
-    <div v-if="isUserMenuOpen" class="userMenu">
+    <ModalAccount v-if='isModalOpen' @close='toggleModal' />
+    <div v-if='isUserMenuOpen' class='userMenu'>
       <ul>
         <li>
           Аккаунт
         </li>
-        <li @click="logout">
+        <li @click='logout'>
           Выйти
         </li>
       </ul>
     </div>
-    <div class="accountBox">
-      <div v-if="isAuthed" @click="toggleUserMenu">
-        <img v-if="avatarUrl" class="avatarImage" :src="avatarUrl">
-        <img v-else class="avatarImage" :src="require('@/assets/no_avatar.png')">
+    <div class='accountBox'>
+      <div v-if='isAuthed' @click='toggleUserMenu'>
+        <img v-if='avatarUrl' class='avatarImage' :src='avatarUrl'>
+        <img v-else class='avatarImage' :src="require('@/assets/no_avatar.png')">
       </div>
-      <button v-else class="signInBtn" @click="toggleModal">Войти</button>
+      <button v-else class='signInBtn' @click='toggleModal'>Войти</button>
     </div>
   </div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import ModalAccount from '@/components/modals/ModalAccount.vue';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -50,7 +50,7 @@ export default defineComponent({
     }
 
     function logout() {
-      store.dispatch('setToken');
+      store.dispatch('logout');
       toggleUserMenu();
     }
 
@@ -62,13 +62,13 @@ export default defineComponent({
 
       toggleModal,
       toggleUserMenu,
-      logout
+      logout,
     };
-  }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/widget.scss";
 @import "~@/styles/interface/elements.scss";
 @import "~@/styles/base.scss";

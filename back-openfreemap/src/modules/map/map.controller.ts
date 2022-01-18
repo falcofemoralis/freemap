@@ -1,10 +1,22 @@
-import { Body, Controller, Get, Post, Request, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Request,
+  Res,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { MapService } from './map.service';
 import { MapObject } from './entities/mapobject.entity';
 import { MapObjectDto } from 'shared/dto/map/mapobject.dto';
 import { ObjectTypeDto } from 'shared/dto/map/objecttype.dto';
 import { ObjectSubTypeDto } from 'shared/dto/map/objectsubtype.dto';
-import { MapDataDto, MapFeatureDto, FeatureProperties } from 'shared/dto/map/mapdata.dto';
+import { FeatureProperties, MapDataDto, MapFeatureDto } from 'shared/dto/map/mapdata.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserDataDto } from 'shared/dto/auth/userdata.dto';
@@ -28,6 +40,7 @@ export class MapController {
     const features: Array<MapFeatureDto> = new Array<any>();
     for (const obj of mapObjects) {
       const featureProperties: FeatureProperties = {
+        id: obj.id,
         name: obj.name,
         desc: obj.desc,
         typeId: obj.type.id,
@@ -63,7 +76,7 @@ export class MapController {
 
   @UseGuards(JwtAuthGuard)
   @Post('object')
-  async addMapObject(@Body() mapObjectDto: MapObjectDto, @Request() req): Promise<number> {
+  async addMapObject(@Body() mapObjectDto: MapObjectDto, @Request() req): Promise<FeatureProperties> {
     const userDataDto: UserDataDto = req.user;
 
     const mapObject: MapObject = new MapObject();
@@ -76,9 +89,16 @@ export class MapController {
     mapObject.links = mapObjectDto.links;
     mapObject.user = await this.authService.getUserById(userDataDto.id);
 
-    const insertedObject = await this.mapService.addMapObject(mapObject);
+    const insertedMapObject = await this.mapService.addMapObject(mapObject);
 
-    return insertedObject.id;
+    delete mapObjectDto.coordinates;
+    const featureProperties: FeatureProperties = {
+      id: insertedMapObject.id,
+      userId: userDataDto.id,
+      ...mapObjectDto,
+    };
+
+    return featureProperties;
   }
 
   @UseGuards(JwtAuthGuard, ObjectGuard)
@@ -102,7 +122,13 @@ export class MapController {
       }),
     }),
   )
-  async addMapObjectMedia(@UploadedFiles() files: Array<Express.Multer.File>) {
+  async addMapObjectMedia(@UploadedFiles() files: Array<Express.Multer.File>): Promise<Array<string>> {
+    const insertedFileNames = new Array<string>();
+    for (const file of files) {
+      insertedFileNames.push(file.filename);
+    }
+
+    return insertedFileNames;
   }
 
   @Get('object/types')
@@ -113,5 +139,19 @@ export class MapController {
   @Get('object/subtypes')
   async getObjectSubTypes(): Promise<Array<ObjectSubTypeDto>> {
     return await this.mapService.getAllObjectSubTypes();
+  }
+
+  @Get('object/media/:id/:name')
+  getMediaFile(@Param('id') id, @Param('name') name, @Res() res) {
+    res.sendFile(Path.join(process.cwd(), `${MEDIA_PATH}/${id}/${name}`));
+  }
+
+  @Get('object/media/:id')
+  getObjectMedia(@Param('id') id): Array<string> {
+    try {
+      return fs.readdirSync(Path.join(process.cwd(), `${MEDIA_PATH}/${id}`));
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 }

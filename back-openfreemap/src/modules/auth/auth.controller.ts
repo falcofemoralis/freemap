@@ -1,17 +1,17 @@
 import {
-  Controller,
-  Request,
-  Post,
-  UseGuards,
-  Get,
+  BadRequestException,
   Body,
+  Controller,
+  Get,
   HttpException,
   HttpStatus,
-  UseInterceptors,
-  UploadedFile,
   Param,
+  Post,
+  Request,
   Res,
-  BadRequestException,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';

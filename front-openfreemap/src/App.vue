@@ -2,18 +2,18 @@
   <Main />
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import { defineComponent } from 'vue';
 import Main from '@/views/Main.vue';
 
 export default defineComponent({
   components: {
-    Main
-  }
+    Main,
+  },
 });
 </script>
 
-<style lang="scss">
+<style lang='scss'>
 *,
 *::after,
 *::before {

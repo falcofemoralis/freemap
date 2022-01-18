@@ -1,24 +1,24 @@
 <template>
-  <div class="modal">
-    <div class="innerModal">
-      <button class="close" @click="$emit('close')"></button>
+  <div class='modal'>
+    <div class='innerModal'>
+      <button class='close' @click="$emit('close')"></button>
       <slot></slot>
     </div>
   </div>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'BaseModal',
   setup() {
     return {};
-  }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang='scss' scoped>
 @import "~@/styles/interface/modal.scss";
 @import "~@/styles/interface/elements.scss";
 @import "~@/styles/base.scss";

@@ -6,4 +6,5 @@ export interface CreatedObject {
   subtypeId?: number;
   address?: string;
   links?: string;
+  mediaFiles?: Blob[];
 }

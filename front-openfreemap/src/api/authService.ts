@@ -41,7 +41,7 @@ export class AuthService {
       const res = await axiosInstance.post('/auth/register', userDto);
       await store.dispatch('setToken', res.data.accessToken);
 
-      if (createdUser.avatar) {
+      if (createdUser.avatar && res.status == 201) {
         const avatarPath = await this.addProfileAvatar(createdUser.avatar);
         await store.dispatch('setProfileAvatar', avatarPath);
       }
@@ -62,16 +62,16 @@ export class AuthService {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await axiosInstance.post('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data', ...getAuthConfig() } });
+    const res = await axiosInstance.post('/auth/profile/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data', ...getAuthConfig() } });
     return res.data.avatarPath;
   }
 
   static getProfileAvatarUrl(name: string | null): string | null {
     if (name) {
-      return `${axiosInstance.defaults.baseURL}/auth/avatar/${name}`;
-    } else {
-      return null;
+      return `${axiosInstance.defaults.baseURL}/auth/profile/avatar/${name}`;
     }
+
+    return null;
   }
 
   static async getProfileById(id: number): Promise<UserDataDto> {
