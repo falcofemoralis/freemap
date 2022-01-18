@@ -1,32 +1,25 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post, Request,
-  UploadedFiles, UseGuards,
-  UseInterceptors
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MapService } from './map.service';
 import { MapObject } from './entities/mapobject.entity';
 import { MapObjectDto } from 'shared/dto/map/mapobject.dto';
 import { ObjectTypeDto } from 'shared/dto/map/objecttype.dto';
 import { ObjectSubTypeDto } from 'shared/dto/map/objectsubtype.dto';
-import {
-  MapDataDto,
-  MapFeatureDto,
-  FeatureProperties
-} from 'shared/dto/map/mapdata.dto';
-import { map } from 'rxjs';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from '@nestjs/passport';
+import { MapDataDto, MapFeatureDto, FeatureProperties } from 'shared/dto/map/mapdata.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserDataDto } from 'shared/dto/auth/userdata.dto';
 import { AuthService } from '../auth/auth.service';
+import { diskStorage } from 'multer';
+import * as Path from 'path';
+import { v4 } from 'uuid';
+import * as fs from 'fs';
+import { ObjectGuard } from './guards/object.guard';
+
+const MEDIA_PATH = './uploads/media';
 
 @Controller('map')
 export class MapController {
-  constructor(private readonly mapService: MapService, private readonly authService: AuthService) {
-  }
+  constructor(private readonly mapService: MapService, private readonly authService: AuthService) {}
 
   @Get()
   async getMapData(): Promise<any> {
@@ -40,7 +33,8 @@ export class MapController {
         typeId: obj.type.id,
         subtypeId: obj.subtype?.id ?? null,
         address: obj.address ?? null,
-        links: obj.links ?? null
+        links: obj.links ?? null,
+        userId: obj.user.id,
       };
 
       features.push({
@@ -48,8 +42,8 @@ export class MapController {
         properties: featureProperties,
         geometry: {
           type: obj.type.geometry,
-          coordinates: JSON.parse(obj.coordinates) as number[][][]
-        }
+          coordinates: JSON.parse(obj.coordinates) as number[][][],
+        },
       });
     }
 
@@ -58,18 +52,18 @@ export class MapController {
       crs: {
         type: 'name',
         properties: {
-          name: 'EPSG:3857'
-        }
+          name: 'EPSG:3857',
+        },
       },
-      features: features
+      features: features,
     };
 
     return mapData;
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post()
-  async addMapObject(@Body() mapObjectDto: MapObjectDto, @Request() req) {
+  @Post('object')
+  async addMapObject(@Body() mapObjectDto: MapObjectDto, @Request() req): Promise<number> {
     const userDataDto: UserDataDto = req.user;
 
     const mapObject: MapObject = new MapObject();
@@ -82,22 +76,42 @@ export class MapController {
     mapObject.links = mapObjectDto.links;
     mapObject.user = await this.authService.getUserById(userDataDto.id);
 
-    await this.mapService.create(mapObject);
+    const insertedObject = await this.mapService.addMapObject(mapObject);
+
+    return insertedObject.id;
   }
 
-  @Get('getObjectTypes')
+  @UseGuards(JwtAuthGuard, ObjectGuard)
+  @Post('object/:id/media/')
+  @UseInterceptors(
+    FilesInterceptor('files', 20, {
+      storage: diskStorage({
+        destination: async (req, file, cb) => {
+          const path = Path.join(MEDIA_PATH, req.params.id);
+          if (!fs.existsSync(path)) {
+            fs.mkdirSync(path, { recursive: true });
+          }
+
+          cb(null, path);
+        },
+        filename: (req, file, cb) => {
+          const fileName: string = v4() + Path.extname(file.originalname);
+
+          cb(null, fileName);
+        },
+      }),
+    }),
+  )
+  async addMapObjectMedia(@UploadedFiles() files: Array<Express.Multer.File>) {
+  }
+
+  @Get('object/types')
   async getObjectTypes(): Promise<Array<ObjectTypeDto>> {
     return await this.mapService.getAllObjectTypes();
   }
 
-  @Get('getObjectSubTypes')
+  @Get('object/subtypes')
   async getObjectSubTypes(): Promise<Array<ObjectSubTypeDto>> {
     return await this.mapService.getAllObjectSubTypes();
-  }
-
-  @Post('upload')
-  @UseInterceptors(FilesInterceptor('files'))
-  uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {
-    console.log(files);
   }
 }

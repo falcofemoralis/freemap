@@ -1,6 +1,8 @@
 import { MapObjectDto } from './mapobject.dto';
 
-export type FeatureProperties = Omit<MapObjectDto, 'coordinates'>
+export interface FeatureProperties extends Omit<MapObjectDto, 'coordinates'> {
+  userId: number;
+}
 
 export interface MapFeatureDto {
   type: string,

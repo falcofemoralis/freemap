@@ -14,16 +14,20 @@ export class MapService {
     @InjectRepository(ObjectType)
     private objectTypeRepository: Repository<ObjectType>,
     @InjectRepository(ObjectSubtype)
-    private objectSubtypeRepository: Repository<ObjectSubtype>
+    private objectSubtypeRepository: Repository<ObjectSubtype>,
   ) {
   }
 
   findAll(): Promise<MapObject[]> {
-    return this.mapObjectRepository.find({ relations: ['type'] });
+    return this.mapObjectRepository.find({ relations: ['type', 'user'] });
   }
 
-  create(mapObject: MapObject): Promise<MapObject> {
+  addMapObject(mapObject: MapObject): Promise<MapObject> {
     return this.mapObjectRepository.save(mapObject);
+  }
+
+  findObjectById(id: number): Promise<MapObject> {
+    return this.mapObjectRepository.findOne(id);
   }
 
   getObjectTypeById(id: number): Promise<ObjectType> {

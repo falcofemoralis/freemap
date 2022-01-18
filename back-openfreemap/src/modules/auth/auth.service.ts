@@ -12,9 +12,8 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     @InjectRepository(User)
-    private userRepository: Repository<User>
-  ) {
-  }
+    private userRepository: Repository<User>,
+  ) {}
 
   async validateUser(login: string, pass: string): Promise<User | null> {
     const user: User = await this.userRepository.findOne({ login });
@@ -28,18 +27,23 @@ export class AuthService {
   }
 
   async login(user: User): Promise<string> {
-    const payload: UserDataDto = { id: user.id, login: user.login };
+    const payload: UserDataDto = { id: user.id, login: user.login, avatarUrl: user.profileAvatar };
 
     return this.jwtService.sign(payload);
   }
 
-  async register(userDto: UserDto, avatarPath: string | null): Promise<User> {
+  async register(userDto: UserDto): Promise<User> {
     return await this.userRepository.save({
       login: userDto.login,
       passwordHash: await hash(userDto.password, 10), //salt or round
       email: userDto.email,
-      profileAvatar: avatarPath
     });
+  }
+
+  async addAvatar(userId: number, avatarFileName: string) {
+    const user = await this.getUserById(userId);
+    user.profileAvatar = avatarFileName;
+    await this.userRepository.update(userId, user);
   }
 
   async getUserByLogin(login: string): Promise<User | null> {

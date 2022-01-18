@@ -3,7 +3,7 @@
     <Suspense>
       <TabCreate v-if="isTabCreateOpen" @close="closeTab" :editType="selectedEditType" @created="onCreatedHandler" />
     </Suspense>
-    <div class="editorBox rcc">
+    <div class="editorBox rcc" v-if="store.getters.isTokenValid">
       <img
         class="editorBtn editorBtn-left"
         :src="require('@/assets/ic_polygon.png')"
@@ -256,6 +256,7 @@ export default defineComponent({
     return {
       EditType,
 
+      store,
       selectedEditType,
       isTabCreateOpen,
 

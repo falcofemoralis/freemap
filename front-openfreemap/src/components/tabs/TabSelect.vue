@@ -4,6 +4,7 @@
     <span class="field"> {{ featureProperties.desc }}</span>
     <span class="field">Адресс: {{ featureProperties.address }}</span>
     <span class="field">Ссылки: {{ featureProperties.links }}</span>
+    <span class="field">{{ featureProperties.userId }}</span>
   </BaseTab>
 </template>
 

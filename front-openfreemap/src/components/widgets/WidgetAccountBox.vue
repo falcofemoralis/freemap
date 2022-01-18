@@ -1,8 +1,18 @@
 <template>
   <div>
     <ModalAccount v-if="isModalOpen" @close="toggleModal" />
+    <div v-if="isUserMenuOpen" class="userMenu">
+      <ul>
+        <li>
+          Аккаунт
+        </li>
+        <li @click="logout">
+          Выйти
+        </li>
+      </ul>
+    </div>
     <div class="accountBox">
-      <div v-if="isAuthed">
+      <div v-if="isAuthed" @click="toggleUserMenu">
         <img v-if="avatarUrl" class="avatarImage" :src="avatarUrl">
         <img v-else class="avatarImage" :src="require('@/assets/no_avatar.png')">
       </div>
@@ -13,7 +23,6 @@
 
 <script lang="ts">
 import ModalAccount from '@/components/modals/ModalAccount.vue';
-import { CreatedUser } from '@/types/CreatedUser';
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { AuthService } from '@/api/authService';
@@ -24,6 +33,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const isModalOpen = ref(false);
+    const isUserMenuOpen = ref(false);
     const isAuthed = computed(() => store.getters.isTokenValid);
     const avatarUrl = ref<string | null>(AuthService.getProfileAvatarUrl(store.getters.getProfileAvatar));
 
@@ -35,12 +45,24 @@ export default defineComponent({
       isModalOpen.value = !isModalOpen.value;
     }
 
+    function toggleUserMenu() {
+      isUserMenuOpen.value = !isUserMenuOpen.value;
+    }
+
+    function logout() {
+      store.dispatch('setToken');
+      toggleUserMenu();
+    }
+
     return {
       isModalOpen,
+      isUserMenuOpen,
       isAuthed,
       avatarUrl,
 
-      toggleModal
+      toggleModal,
+      toggleUserMenu,
+      logout
     };
   }
 });
@@ -49,6 +71,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "~@/styles/interface/widget.scss";
 @import "~@/styles/interface/elements.scss";
+@import "~@/styles/base.scss";
 
 .accountBox {
   z-index: 1;
@@ -72,5 +95,16 @@ export default defineComponent({
   width: 50px;
   height: 50px;
   border-radius: 50px;
+  cursor: pointer;
+}
+
+.userMenu {
+  @extend %shadow;
+  position: absolute;
+  top: 75px;
+  right: 35px;
+  z-index: 10;
+  background: #fff;
+  padding: 15px;
 }
 </style>
