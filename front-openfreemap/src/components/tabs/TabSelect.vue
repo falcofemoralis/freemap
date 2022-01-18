@@ -4,7 +4,7 @@
     <span class='field'> {{ featureProperties.desc }}</span>
     <span class='field'>Адресс: {{ featureProperties.address }}</span>
     <span class='field'>Ссылки: {{ featureProperties.links }}</span>
-    <span class='field'>{{ featureProperties.userId }}</span>
+    <span class='field'>Автор: {{ user.login }}</span>
     <div class='imageSlider'>
       <img v-for='media in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'>
     </div>
@@ -18,6 +18,8 @@ import { Geometry } from 'ol/geom';
 import { FeatureProperties } from '../../../../shared/dto/map/mapdata.dto';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
+import { AuthService } from '@/api/authService';
+import { UserDataDto } from '@/../../shared/dto/auth/userdata.dto';
 
 export default defineComponent({
   name: 'TabSelect',
@@ -28,17 +30,24 @@ export default defineComponent({
     },
   },
   async setup(props: any, context: any) {
-    const featureProperties = ref<FeatureProperties>(getProperties(props.feature));
-    watch(() => props.feature, (sel: Feature<Geometry>) => {
-      featureProperties.value = getProperties(sel);
+    /**
+     * Отслеживание перевыбора объекта на карте
+     */
+    watch(() => props.feature, async (sel: Feature<Geometry>) => {
+      featureProperties.value = await getProperties(sel);
+      user.value = await AuthService.getProfileById(featureProperties.value.userId);
     });
+    const featureProperties = ref<FeatureProperties>(await getProperties(props.feature));
+    const user = ref<UserDataDto>(await AuthService.getProfileById(featureProperties.value.userId));
 
-    if (!featureProperties.value.mediaNames) {
-      featureProperties.value.mediaNames = await MapService.getObjectMedia(featureProperties.value.id);
-    }
+    async function getProperties(feature: Feature<Geometry>): Promise<FeatureProperties> {
+      const fp = feature.getProperties() as FeatureProperties;
 
-    function getProperties(feature: Feature<Geometry>): FeatureProperties {
-      return feature.getProperties() as FeatureProperties;
+      if (!fp.mediaNames) {
+        fp.mediaNames = await MapService.getObjectMedia(fp.id);
+      }
+
+      return fp;
     }
 
     function getMediaUrl(name: string): string {
@@ -47,6 +56,7 @@ export default defineComponent({
 
     return {
       featureProperties,
+      user,
 
       getMediaUrl,
     };
