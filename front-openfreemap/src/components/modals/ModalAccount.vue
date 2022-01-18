@@ -63,7 +63,7 @@ export default defineComponent({
     });
 
     /**
-     * Переключение режима входа
+     * Переключение режима аунтефикации
      */
     function toggleAuthType() {
       isLogin.value = !isLogin.value;
@@ -123,7 +123,7 @@ export default defineComponent({
 
     /**
      * Отслеживание измненения смены загруженного файла
-     * @param {Event} e
+     * @param {Event} e - событие с загруженным файлом
      */
     function photoChangedHandler(e: any) {
       if (e.target.files.length > 0) {

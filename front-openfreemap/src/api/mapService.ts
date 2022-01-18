@@ -6,10 +6,17 @@ import { ObjectTypeDto } from '@/../../shared/dto/map/objecttype.dto';
 import { FeatureProperties } from '@/../../shared/dto/map/mapdata.dto';
 
 export class MapService {
+  /**
+   * Получение ссылки к данным на карте
+   */
   static getMapData(): string {
     return axiosInstance.defaults.baseURL + '/map';
   }
 
+  /**
+   * Добавление нового объекта
+   * @param createdObject
+   */
   static async addCreatedObject(createdObject: CreatedObject): Promise<FeatureProperties> {
     if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId) {
       const mapObjectDto: MapObjectDto = {
@@ -35,6 +42,11 @@ export class MapService {
     }
   }
 
+  /**
+   * Добавление новых изображений к объекту
+   * @param id
+   * @param files
+   */
   static async addObjectMedia(id: number, files: Blob[]): Promise<Array<string>> {
     const formData = new FormData();
 
@@ -47,18 +59,33 @@ export class MapService {
     return res.data;
   }
 
+  /**
+   * Получение базовых типов объекта
+   */
   static async getTypes(): Promise<Array<ObjectTypeDto>> {
     return (await axiosInstance.get<Array<ObjectTypeDto>>('/map/object/types')).data;
   }
 
+  /**
+   * Получение дополнительных типов объекта
+   */
   static async getSubTypes(): Promise<Array<ObjectSubTypeDto>> {
     return (await axiosInstance.get<Array<ObjectSubTypeDto>>('/map/object/subtypes')).data;
   }
 
+  /**
+   * Получение ссылки на медиа файл объекта
+   * @param objId
+   * @param mediaName
+   */
   static getMediaLink(objId: number, mediaName: string): string {
     return `${axiosInstance.defaults.baseURL}/map/object/media/${objId}/${mediaName}`;
   }
 
+  /**
+   * Получение списка медиа файлов объекта
+   * @param objId
+   */
   static async getObjectMedia(objId: number): Promise<Array<string>> {
     try {
       return (await axiosInstance.get<Array<string>>(`/map/object/media/${objId}`)).data;

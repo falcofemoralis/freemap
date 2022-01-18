@@ -6,6 +6,10 @@ import axios from 'axios';
 import store from '@/store/index';
 
 export class AuthService {
+  /**
+   * Авторизация пользователя
+   * @param {CreatedUser} createdUser - веденные данные пользователя
+   */
   static async login(createdUser: CreatedUser) {
     const userDto: UserDto = {
       login: createdUser.login,
@@ -29,6 +33,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Регистрация нового пользователя
+   * @param {CreatedUser} createdUser - веденные данные пользователя
+   */
   static async register(createdUser: CreatedUser) {
     const userDto: UserDto = {
       login: createdUser.login,
@@ -58,6 +66,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Добавление аватара пользователю
+   * @param {Blob} file - загруженный файл пользователя. (из input)
+   */
   static async addProfileAvatar(file: Blob): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
@@ -66,6 +78,11 @@ export class AuthService {
     return res.data.avatarPath;
   }
 
+  /**
+   * Получение url к файлу аватара пользователя
+   * @param {String} name
+   * @returns {string} - сгенерированная ссылка к изображению аватара пользователя
+   */
   static getProfileAvatarUrl(name: string | null): string | null {
     if (name) {
       return `${axiosInstance.defaults.baseURL}/auth/profile/avatar/${name}`;
@@ -74,6 +91,11 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Получение данных пользователя. (напр. id, логин, аватар)
+   * @param id - id пользователя
+   * @returns {UserDataDto} - данные про пользователя
+   */
   static async getProfileById(id: number): Promise<UserDataDto> {
     const res = await axiosInstance.get<UserDataDto>(`/auth/profile/${id}`);
     return res.data;

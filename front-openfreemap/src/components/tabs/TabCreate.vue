@@ -71,10 +71,17 @@ export default defineComponent({
       createdObject.typeId = selectedType.id;
     }
 
+    /**
+     * Завершение создания нового объекта
+     */
     function complete() {
       context.emit('created', createdObject);
     }
 
+    /**
+     * Отслеживание измнений дабавленных медиа файлов у объекта
+     * @param e
+     */
     function mediaChangedHandler(e: any) {
       if (e.target.files.length > 0) {
         createdObject.mediaFiles = e.target.files;

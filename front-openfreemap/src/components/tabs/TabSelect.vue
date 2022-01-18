@@ -31,7 +31,7 @@ export default defineComponent({
   },
   async setup(props: any, context: any) {
     /**
-     * Отслеживание перевыбора объекта на карте
+     * Отслеживание перевыбора объекта на карте. Получение парамтеров объекта карты. Получение данных про пользователя создавшего объект
      */
     watch(() => props.feature, async (sel: Feature<Geometry>) => {
       featureProperties.value = await getProperties(sel);
@@ -40,6 +40,10 @@ export default defineComponent({
     const featureProperties = ref<FeatureProperties>(await getProperties(props.feature));
     const user = ref<UserDataDto>(await AuthService.getProfileById(featureProperties.value.userId));
 
+    /**
+     * Получение параметров из feature объекта карты. Также идет получения возможных медиа файлов объекта.
+     * @param feature
+     */
     async function getProperties(feature: Feature<Geometry>): Promise<FeatureProperties> {
       const fp = feature.getProperties() as FeatureProperties;
 
@@ -50,6 +54,10 @@ export default defineComponent({
       return fp;
     }
 
+    /**
+     * Получение url медиа файла
+     * @param name
+     */
     function getMediaUrl(name: string): string {
       return MapService.getMediaLink(featureProperties.value.id, name);
     }

@@ -181,6 +181,9 @@ export default defineComponent({
       }
     });
 
+    /**
+     * Закрытие вкладки
+     */
     function closeTab() {
       selectEvent.changed();
       isTabSelectOpen.value = false;

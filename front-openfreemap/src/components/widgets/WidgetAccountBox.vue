@@ -37,18 +37,30 @@ export default defineComponent({
     const isAuthed = computed(() => store.getters.isTokenValid);
     const avatarUrl = ref<string | null>(AuthService.getProfileAvatarUrl(store.getters.getProfileAvatar));
 
+    /**
+     * Отслеживание измнения аватара пользователя
+     */
     watch(computed(() => store.getters.getProfileAvatar), (current) => {
       avatarUrl.value = AuthService.getProfileAvatarUrl(current);
     });
 
+    /**
+     * Переключение модального окна аунтефикации
+     */
     function toggleModal() {
       isModalOpen.value = !isModalOpen.value;
     }
 
+    /**
+     * Переключение меню авторизированого пользователя
+     */
     function toggleUserMenu() {
       isUserMenuOpen.value = !isUserMenuOpen.value;
     }
 
+    /**
+     * Разлогин пользователя
+     */
     function logout() {
       store.dispatch('logout');
       toggleUserMenu();
