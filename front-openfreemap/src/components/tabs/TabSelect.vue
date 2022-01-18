@@ -4,7 +4,10 @@
     <span class='field'> {{ featureProperties.desc }}</span>
     <span class='field'>Адресс: {{ featureProperties.address }}</span>
     <span class='field'>Ссылки: {{ featureProperties.links }}</span>
-    <span class='field'>Автор: {{ user.login }}</span>
+    <span class='field'>
+      Автор: {{ user.login }}
+      <img class='avatarImage' :src='getUserAvatarLink(user.avatarUrl)' />
+    </span>
     <div class='imageSlider'>
       <img v-for='media in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'>
     </div>
@@ -62,11 +65,24 @@ export default defineComponent({
       return MapService.getMediaLink(featureProperties.value.id, name);
     }
 
+    /**
+     * Получение url аватара пользователя
+     * @param avatar
+     */
+    function getUserAvatarLink(avatar: string | null): string {
+      if (avatar) {
+        return AuthService.getProfileAvatarUrl(avatar);
+      } else {
+        return require('@/assets/no_avatar.png');
+      }
+    }
+
     return {
       featureProperties,
       user,
 
       getMediaUrl,
+      getUserAvatarLink,
     };
   },
 });
@@ -85,4 +101,12 @@ export default defineComponent({
     width: auto;
   }
 }
+
+.avatarImage {
+  width: 24px;
+  height: 24px;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
 </style>

@@ -83,12 +83,8 @@ export class AuthService {
    * @param {String} name
    * @returns {string} - сгенерированная ссылка к изображению аватара пользователя
    */
-  static getProfileAvatarUrl(name: string | null): string | null {
-    if (name) {
-      return `${axiosInstance.defaults.baseURL}/auth/profile/avatar/${name}`;
-    }
-
-    return null;
+  static getProfileAvatarUrl(name: string): string {
+    return `${axiosInstance.defaults.baseURL}/auth/profile/avatar/${name}`;
   }
 
   /**

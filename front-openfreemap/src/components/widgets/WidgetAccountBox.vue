@@ -13,8 +13,7 @@
     </div>
     <div class='accountBox'>
       <div v-if='isAuthed' @click='toggleUserMenu'>
-        <img v-if='avatarUrl' class='avatarImage' :src='avatarUrl'>
-        <img v-else class='avatarImage' :src="require('@/assets/no_avatar.png')">
+        <img class='avatarImage' :src='avatarUrl'>
       </div>
       <button v-else class='signInBtn' @click='toggleModal'>Войти</button>
     </div>
@@ -35,14 +34,26 @@ export default defineComponent({
     const isModalOpen = ref(false);
     const isUserMenuOpen = ref(false);
     const isAuthed = computed(() => store.getters.isTokenValid);
-    const avatarUrl = ref<string | null>(AuthService.getProfileAvatarUrl(store.getters.getProfileAvatar));
+    const avatarUrl = ref<string>(getUserAvatarLink(store.getters.getProfileAvatar));
 
     /**
      * Отслеживание измнения аватара пользователя
      */
     watch(computed(() => store.getters.getProfileAvatar), (current) => {
-      avatarUrl.value = AuthService.getProfileAvatarUrl(current);
+      avatarUrl.value = getUserAvatarLink(current);
     });
+
+    /**
+     * Получение url аватара пользователя
+     * @param avatar
+     */
+    function getUserAvatarLink(avatar: string | null): string {
+      if (avatar) {
+        return AuthService.getProfileAvatarUrl(avatar);
+      } else {
+        return require('@/assets/no_avatar.png');
+      }
+    }
 
     /**
      * Переключение модального окна аунтефикации
