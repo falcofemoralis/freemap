@@ -1,6 +1,8 @@
 <template>
   <div class='baseTab'>
-    <button class='closeBtn' @click="$emit('close')"></button>
+    <div class='closeCont'>
+      <button class='close' @click="$emit('close')"></button>
+    </div>
     <slot></slot>
   </div>
 </template>
@@ -23,4 +25,20 @@ export default defineComponent({
 .baseTab {
   @extend %tab;
 }
+
+.close{
+  @extend %closeBtn;
+}
+
+.closeCont {
+  top: 0;
+  right: 0;
+  position: absolute;
+  height: 50px;
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
+
 </style>

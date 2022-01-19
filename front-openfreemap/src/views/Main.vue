@@ -7,6 +7,7 @@
     <WidgetPreviewBox />
     <WidgetSearchBox />
     <WidgetToolBox />
+    <WidgetMenuBox />
   </div>
 </template>
 
@@ -25,9 +26,11 @@ import LayerData from '@/components/layers/LayerData.vue';
 import WidgetSearchBox from '@/components/widgets/WidgetSearchBox.vue';
 import WidgetToolBox from '@/components/widgets/WidgetToolBox.vue';
 import WidgetAccountBox from '@/components/widgets/WidgetAccountBox.vue';
+import WidgetMenuBox from '@/components/widgets/WidgetMenuBox.vue';
 
 export default defineComponent({
   components: {
+    WidgetMenuBox,
     WidgetAccountBox,
     WidgetToolBox,
     WidgetSearchBox,
