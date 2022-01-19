@@ -8,7 +8,7 @@
       Автор: {{ user.login }}
       <img class='avatarImage' :src='getUserAvatarLink(user.avatarUrl)' />
     </span>
-    <div class='imageSlider'>
+    <div class='imageSlider' v-if='featureProperties.mediaNames.length > 0'>
       <img v-for='media in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'>
     </div>
   </BaseTab>
@@ -93,11 +93,14 @@ export default defineComponent({
 @import "~@/styles/interface/elements.scss";
 
 .imageSlider {
+  display: flex;
   height: 100px;
   width: 100%;
   overflow-x: scroll;
+  overflow-y: hidden;
 
   img {
+    padding: 10px;
     height: 100%;
     width: auto;
   }

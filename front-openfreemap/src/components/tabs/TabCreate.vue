@@ -103,4 +103,39 @@ export default defineComponent({
 <style lang='scss' scoped>
 @import "~@/styles/interface/tab.scss";
 @import "~@/styles/interface/elements.scss";
+
+.type {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+  border: #b6b6b6 solid 1px;
+  border-radius: 12px;
+
+  &__frame {
+    border-radius: 10px;
+    width: auto;
+    padding: 8px 10px 8px 10px;
+    margin: 8px 10px 8px 10px;
+    color: gray;
+  }
+
+  &__selected {
+    @extend %lightShadow;
+    background: #fff;
+    color: black;
+  }
+
+  &__list {
+    @extend %list;
+    @extend %lightShadow;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 7px 0 7px 0;
+    padding: 12px;
+    border-radius: 12px;
+  }
+}
 </style>

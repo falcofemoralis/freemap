@@ -90,7 +90,7 @@ export default {
     transition: all .3s;
 
     &:hover {
-      background: #fff;
+      background: #d2d2d2;
     }
 
     img {

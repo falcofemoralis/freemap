@@ -49,10 +49,10 @@ export default defineComponent({
      */
     const style = new Style({
       fill: new Fill({
-        color: 'rgba(255, 255, 255, 0.2)',
+        color: 'rgba(255,255,255,0)',
       }),
       stroke: new Stroke({
-        color: '#ffcc33',
+        color: '#969696',
         width: 2,
       }),
       image: new Circle({
@@ -62,7 +62,7 @@ export default defineComponent({
         }),
       }),
       text: new Text({
-        font: '12px Calibri,sans-serif',
+        font: '14px Calibri,sans-serif',
         fill: new Fill({ color: '#000' }),
         stroke: new Stroke({
           color: '#fff', width: 2,
@@ -116,18 +116,26 @@ export default defineComponent({
      */
     const selected = new Style({
       fill: new Fill({
-        color: '#eeeeee',
+        color: 'rgba(255,0,0,0.17)',
       }),
       stroke: new Stroke({
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: 'rgba(255,26,26,0.7)',
         width: 2,
+      }),
+      text: new Text({
+        font: '14px Calibri,sans-serif',
+        fill: new Fill({ color: '#000' }),
+        stroke: new Stroke({
+          color: '#fff', width: 2,
+        }),
       }),
     });
 
     function selectStyle(feature: Feature<Geometry>) {
-      const color = feature.get('COLOR') || '#eeeeee';
-      selected.getFill().setColor(color);
-      return selected;
+      // const color = feature.get('COLOR') || '#eeeeee';
+      // selected.getFill().setColor(color);
+      selected.getText().setText(feature.get('name'));
+      return [selected];
     }
 
     /**
@@ -150,18 +158,26 @@ export default defineComponent({
      */
     const hovered = new Style({
       fill: new Fill({
-        color: '#eeeeee',
+        color: 'rgba(229,229,229,0.35)',
       }),
       stroke: new Stroke({
-        color: 'rgba(0, 0, 0, 0.7)',
+        color: '#26bae8',
         width: 5,
+      }),
+      text: new Text({
+        font: '14px Calibri,sans-serif',
+        fill: new Fill({ color: '#000' }),
+        stroke: new Stroke({
+          color: '#fff', width: 2,
+        }),
       }),
     });
 
     function hoverStyle(feature: Feature<Geometry>) {
-      const color = feature.get('COLOR') || '#eeeeee';
-      hovered.getFill().setColor(color);
-      return hovered;
+      // const color = feature.get('COLOR') || '#eeeeee';
+      // hovered.getFill().setColor(color);
+      hovered.getText().setText(feature.get('name'));
+      return [hovered];
     }
 
     /**
@@ -175,7 +191,6 @@ export default defineComponent({
      */
     const isDrawingEnabled = computed(() => store.getters.getIsDrawing);
     watch(isDrawingEnabled, (current) => {
-      console.log('isDrawEnabled ' + current);
       if (current) {
         map?.removeInteraction(selectEvent);
         map?.removeInteraction(hoverEvent);

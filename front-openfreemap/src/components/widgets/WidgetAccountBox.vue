@@ -95,6 +95,7 @@ export default defineComponent({
 @import "~@/styles/interface/widget.scss";
 @import "~@/styles/interface/elements.scss";
 @import "~@/styles/base.scss";
+@import "~@/styles/colors.scss";
 
 .accountBox {
   z-index: 1;
@@ -137,7 +138,7 @@ export default defineComponent({
     transition: all .3s;
 
     &:hover {
-      color: #26bae8;
+      color: $primary-color;
     }
 
   }
