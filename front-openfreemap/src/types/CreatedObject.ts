@@ -3,7 +3,6 @@ export interface CreatedObject {
   desc: string;
   coordinates: number[][][];
   typeId: number;
-  subtypeId?: number;
   address?: string;
   links?: string;
   mediaFiles?: Blob[];

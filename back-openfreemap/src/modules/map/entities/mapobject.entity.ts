@@ -7,8 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ObjectSubtype } from './objectsubtype.entity';
-import { ObjectType } from './objectype.entity';
+import { ObjectType } from './objecttype.entity';
 import { User } from '../../auth/entities/user.entity';
 
 @Entity()
@@ -32,10 +31,6 @@ export class MapObject {
   @ManyToOne(() => ObjectType)
   @JoinColumn()
   type: ObjectType;
-
-  @ManyToOne(() => ObjectSubtype)
-  @JoinColumn()
-  subtype: ObjectSubtype;
 
   @Column({ type: 'longtext', nullable: true })
   address: string | null;

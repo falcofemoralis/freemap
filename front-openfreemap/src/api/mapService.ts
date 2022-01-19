@@ -1,8 +1,8 @@
 import { CreatedObject } from '@/types/CreatedObject';
 import { axiosInstance, getAuthConfig } from '@/api/index';
 import { MapObjectDto } from '../../../shared/dto/map/mapobject.dto';
-import { ObjectSubTypeDto } from '@/../../shared/dto/map/objectsubtype.dto';
-import { ObjectTypeDto } from '@/../../shared/dto/map/objecttype.dto';
+import { ObjectTypeDto } from '@/../../../shared/dto/map/ObjectTypeDto';
+import { GeometryTypeDto } from '@/../../../shared/dto/map/geometryType';
 import { FeatureProperties } from '@/../../shared/dto/map/mapdata.dto';
 
 export class MapService {
@@ -24,7 +24,6 @@ export class MapService {
         desc: createdObject.desc,
         coordinates: JSON.stringify(createdObject.coordinates),
         typeId: createdObject.typeId,
-        subtypeId: createdObject.subtypeId,
         address: createdObject.address,
         links: createdObject.links,
       };
@@ -60,17 +59,17 @@ export class MapService {
   }
 
   /**
-   * Получение базовых типов объекта
+   * Получение типов геометрии объекта
    */
-  static async getTypes(): Promise<Array<ObjectTypeDto>> {
-    return (await axiosInstance.get<Array<ObjectTypeDto>>('/map/object/types')).data;
+  static async getGeometryTypes(): Promise<Array<GeometryTypeDto>> {
+    return (await axiosInstance.get<Array<GeometryTypeDto>>('/map/object/geometries')).data;
   }
 
   /**
-   * Получение дополнительных типов объекта
+   * Получение типов обхекта по его геометрии
    */
-  static async getSubTypes(): Promise<Array<ObjectSubTypeDto>> {
-    return (await axiosInstance.get<Array<ObjectSubTypeDto>>('/map/object/subtypes')).data;
+  static async getTypesByGeometry(geometryId: number): Promise<Array<ObjectTypeDto>> {
+    return (await axiosInstance.get<Array<GeometryTypeDto>>(`/map/object/types/${geometryId}`)).data;
   }
 
   /**

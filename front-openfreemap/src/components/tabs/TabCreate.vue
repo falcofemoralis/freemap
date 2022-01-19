@@ -1,16 +1,16 @@
 <template>
   <BaseTab>
     <div class='type'>
-      <div v-for='type in types' :key='type.id' class='type__frame'
-           :class="{'type__selected': type.id === createdObject.typeId}">
-        {{ type.name }}
+      <div v-for='geometryType in geometryTypes' :key='geometryType.id' class='type__frame'
+           :class="{'type__selected': geometryType.key === selectedGeometry?.key}">
+        {{ geometryType.name }}
       </div>
     </div>
     <div class='field'>
       <h4>Подтип</h4>
-      <select class='type__list' v-model='createdObject.subtypeId'>
-        <option v-for='subType in subTypes' :key="subType.id + 'd'" :value='subType.id'>
-          {{ subType.name }}
+      <select class='type__list' v-model='createdObject.typeId'>
+        <option v-for='type in types' :key='type.id' :value='type.id'>
+          {{ type.name }}
         </option>
       </select>
     </div>
@@ -42,9 +42,9 @@
 import { defineComponent, reactive, ref } from 'vue';
 import { CreatedObject } from '@/types/CreatedObject';
 import BaseTab from '@/components/tabs/BaseTab.vue';
-import { ObjectSubTypeDto } from '@/../../shared/dto/map/objectsubtype.dto';
-import { ObjectTypeDto } from '@/../../shared/dto/map/objecttype.dto';
 import { MapService } from '@/api/mapService';
+import { ObjectTypeDto } from '@/../../shared/dto/map/ObjectTypeDto';
+import { GeometryTypeDto } from '@/../../shared/dto/map/geometryType';
 
 export default defineComponent({
   name: 'TabCreate',
@@ -56,9 +56,12 @@ export default defineComponent({
   },
   async setup(props: any, context: any) {
     /* init data */
-    const types = ref<Array<ObjectTypeDto>>(await MapService.getTypes());
-    const subTypes = ref<Array<ObjectSubTypeDto>>(await MapService.getSubTypes());
-
+    const geometryTypes = ref<Array<GeometryTypeDto>>(await MapService.getGeometryTypes());
+    const selectedGeometry = ref<GeometryTypeDto | undefined>(geometryTypes.value.find((val: GeometryTypeDto) => val.key == props.editType));
+    const types = ref<Array<ObjectTypeDto>>();
+    if (selectedGeometry.value) {
+      types.value = await MapService.getTypesByGeometry(selectedGeometry.value.id);
+    }
     /* init object data */
     const createdObject = reactive<CreatedObject>({
       name: '',
@@ -66,10 +69,7 @@ export default defineComponent({
       coordinates: [],
       typeId: -1,
     });
-    const selectedType = types.value.find((val) => val.key == props.editType);
-    if (selectedType) {
-      createdObject.typeId = selectedType.id;
-    }
+
 
     /**
      * Завершение создания нового объекта
@@ -91,7 +91,8 @@ export default defineComponent({
     return {
       createdObject,
       types,
-      subTypes,
+      geometryTypes,
+      selectedGeometry,
 
       complete,
       mediaChangedHandler,

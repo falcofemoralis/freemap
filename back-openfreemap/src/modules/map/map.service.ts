@@ -2,23 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MapObject } from './entities/mapobject.entity';
 import { Repository } from 'typeorm';
-import { ObjectType } from './entities/objectype.entity';
-import { ObjectSubtype } from './entities/objectsubtype.entity';
+import { GeometryType } from './entities/geometrytype.entity';
+import { ObjectType } from './entities/objecttype.entity';
 
 @Injectable()
 export class MapService {
   constructor(
     @InjectRepository(MapObject)
     private mapObjectRepository: Repository<MapObject>,
+    @InjectRepository(GeometryType)
+    private geometryTypeRepository: Repository<GeometryType>,
     @InjectRepository(ObjectType)
     private objectTypeRepository: Repository<ObjectType>,
-    @InjectRepository(ObjectSubtype)
-    private objectSubtypeRepository: Repository<ObjectSubtype>,
   ) {
   }
 
   findAll(): Promise<MapObject[]> {
-    return this.mapObjectRepository.find({ relations: ['type', 'user'] });
+    return this.mapObjectRepository.find({ relations: ['type', 'user', 'type.geometryType'] });
   }
 
   addMapObject(mapObject: MapObject): Promise<MapObject> {
@@ -29,19 +29,23 @@ export class MapService {
     return this.mapObjectRepository.findOne(id);
   }
 
+  getObjectTypes(): Promise<Array<ObjectType>> {
+    return this.objectTypeRepository.find();
+  }
+
   getObjectTypeById(id: number): Promise<ObjectType> {
     return this.objectTypeRepository.findOne(id);
   }
 
-  getObjectSubtypeById(id: number): Promise<ObjectSubtype> {
-    return this.objectSubtypeRepository.findOne(id);
+  getGeometryTypes(): Promise<Array<GeometryType>> {
+    return this.geometryTypeRepository.find();
   }
 
-  getAllObjectTypes(): Promise<Array<ObjectType>> {
-    return this.objectTypeRepository.find();
+  getGeometryTypeById(id: number): Promise<GeometryType> {
+    return this.geometryTypeRepository.findOne(id);
   }
 
-  getAllObjectSubTypes(): Promise<Array<ObjectSubtype>> {
-    return this.objectSubtypeRepository.find();
+  getTypesByGeometry(id: number): Promise<Array<ObjectType>> {
+    return this.objectTypeRepository.find({ where: { geometryType: { id } } });
   }
 }

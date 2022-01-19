@@ -14,8 +14,8 @@ import {
 import { MapService } from './map.service';
 import { MapObject } from './entities/mapobject.entity';
 import { MapObjectDto } from 'shared/dto/map/mapobject.dto';
-import { ObjectTypeDto } from 'shared/dto/map/objecttype.dto';
-import { ObjectSubTypeDto } from 'shared/dto/map/objectsubtype.dto';
+import { ObjectTypeDto } from 'shared/dto/map/objectTypeDto';
+import { GeometryTypeDto } from 'shared/dto/map/geometryType';
 import { FeatureProperties, MapDataDto, MapFeatureDto } from 'shared/dto/map/mapdata.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -44,7 +44,6 @@ export class MapController {
         name: obj.name,
         desc: obj.desc,
         typeId: obj.type.id,
-        subtypeId: obj.subtype?.id ?? null,
         address: obj.address ?? null,
         links: obj.links ?? null,
         userId: obj.user.id,
@@ -54,7 +53,7 @@ export class MapController {
         type: 'Feature',
         properties: featureProperties,
         geometry: {
-          type: obj.type.geometry,
+          type: obj.type.geometryType.geometry,
           coordinates: JSON.parse(obj.coordinates) as number[][][],
         },
       });
@@ -84,7 +83,6 @@ export class MapController {
     mapObject.desc = mapObjectDto.desc;
     mapObject.coordinates = mapObjectDto.coordinates;
     mapObject.type = await this.mapService.getObjectTypeById(mapObjectDto.typeId);
-    mapObject.subtype = await this.mapService.getObjectSubtypeById(mapObjectDto.subtypeId);
     mapObject.address = mapObjectDto.address;
     mapObject.links = mapObjectDto.links;
     mapObject.user = await this.authService.getUserById(userDataDto.id);
@@ -133,12 +131,27 @@ export class MapController {
 
   @Get('object/types')
   async getObjectTypes(): Promise<Array<ObjectTypeDto>> {
-    return await this.mapService.getAllObjectTypes();
+    return await this.mapService.getObjectTypes();
   }
 
-  @Get('object/subtypes')
-  async getObjectSubTypes(): Promise<Array<ObjectSubTypeDto>> {
-    return await this.mapService.getAllObjectSubTypes();
+  @Get('object/type/:id')
+  async getObjectTypeById(@Param('id') id: number): Promise<ObjectTypeDto> {
+    return await this.mapService.getObjectTypeById(id);
+  }
+
+  @Get('object/geometries')
+  async getGeometryTypes(): Promise<Array<GeometryTypeDto>> {
+    return await this.mapService.getGeometryTypes();
+  }
+
+  @Get('object/geometry/:id')
+  async getGeometryTypeById(@Param('id') id: number): Promise<GeometryTypeDto> {
+    return await this.mapService.getGeometryTypeById(id);
+  }
+
+  @Get('object/types/:id')
+  async getTypesByGeometry(@Param('id') id: number): Promise<Array<ObjectTypeDto>> {
+    return await this.mapService.getTypesByGeometry(id);
   }
 
   @Get('object/media/:id/:name')

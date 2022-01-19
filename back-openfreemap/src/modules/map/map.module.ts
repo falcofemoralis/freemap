@@ -3,13 +3,13 @@ import { MapController } from './map.controller';
 import { MapService } from './map.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MapObject } from './entities/mapobject.entity';
-import { ObjectType } from './entities/objectype.entity';
-import { ObjectSubtype } from './entities/objectsubtype.entity';
+import { GeometryType } from './entities/geometrytype.entity';
+import { ObjectType } from './entities/objecttype.entity';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([MapObject, ObjectType, ObjectSubtype]),
+    TypeOrmModule.forFeature([MapObject, GeometryType, ObjectType]),
     AuthModule,
   ],
   controllers: [MapController],
