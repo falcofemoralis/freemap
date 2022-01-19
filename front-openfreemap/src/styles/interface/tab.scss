@@ -1,12 +1,14 @@
 @import "~@/styles/base.scss";
 
+$tab-width: 320px;
+
 %tab {
   @extend %shadow;
   z-index: 5;
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 400px;
+  width: $tab-width;
   height: 97%;
   background: #eeeeee;
   transition: all .3s;
@@ -17,6 +19,8 @@
 }
 
 .type {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -27,8 +31,8 @@
   &__frame {
     border-radius: 10px;
     width: auto;
-    padding: 8px 20px 8px 20px;
-    margin: 8px 20px 8px 20px;
+    padding: 8px 10px 8px 10px;
+    margin: 8px 10px 8px 10px;
     color: gray;
   }
 

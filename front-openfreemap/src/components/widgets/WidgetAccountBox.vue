@@ -3,10 +3,10 @@
     <ModalAccount v-if='isModalOpen' @close='toggleModal' />
     <div v-if='isUserMenuOpen' class='userMenu'>
       <ul>
-        <li>
+        <li class='userMenu__field'>
           Аккаунт
         </li>
-        <li @click='logout'>
+        <li class='userMenu__field' @click='logout'>
           Выйти
         </li>
       </ul>
@@ -129,5 +129,17 @@ export default defineComponent({
   z-index: 10;
   background: #fff;
   padding: 15px;
+
+  &__field {
+    cursor: pointer;
+    padding: 10px;
+    color: #000;
+    transition: all .3s;
+
+    &:hover {
+      color: #26bae8;
+    }
+
+  }
 }
 </style>

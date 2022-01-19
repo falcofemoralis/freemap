@@ -1,6 +1,8 @@
 <template>
   <div>
-    <TabMenu v-if='isMenuOpen' @close='toggleMenu' />
+    <Animation>
+      <TabMenu v-if='isMenuOpen' @close='toggleMenu' />
+    </Animation>
     <div class='menuBox'>
       <img class='menuBtn' :src="require('@/assets/menu.png')" alt='menu' @click='toggleMenu'>
     </div>
@@ -10,10 +12,11 @@
 <script lang='ts'>
 import TabMenu from '@/components/tabs/TabMenu.vue';
 import { ref } from 'vue';
+import Animation from '@/components/elements/Animation.vue';
 
 export default {
   name: 'WidgetMenuBox',
-  components: { TabMenu },
+  components: { Animation, TabMenu },
   setup() {
     const isMenuOpen = ref(false);
 
@@ -24,7 +27,7 @@ export default {
     return {
       isMenuOpen,
 
-      toggleMenu
+      toggleMenu,
     };
   },
 

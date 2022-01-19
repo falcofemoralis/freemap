@@ -1,13 +1,15 @@
 <template>
   <div>
-    <Suspense v-if='isTabCreateOpen'>
-      <template #default>
-        <TabCreate @close='closeTab' :editType='selectedEditType' @created='onCreatedHandler' />
-      </template>
-      <template #fallback>
-        <TabLoading />
-      </template>
-    </Suspense>
+    <Animation>
+      <Suspense v-if='isTabCreateOpen'>
+        <template #default>
+          <TabCreate @close='closeTab' :editType='selectedEditType' @created='onCreatedHandler' />
+        </template>
+        <template #fallback>
+          <TabLoading />
+        </template>
+      </Suspense>
+    </Animation>
     <div class='editorBox rcc' v-if='store.getters.isTokenValid'>
       <img
         class='editorBtn editorBtn-left'
@@ -70,10 +72,11 @@ import { Geometry, Polygon } from 'ol/geom';
 import EditType from '@/constants/EditType';
 import { MapService } from '@/api/mapService';
 import TabLoading from '@/components/tabs/TabLoading.vue';
+import Animation from '@/components/elements/Animation.vue';
 
 export default defineComponent({
   name: 'WidgetEditorBox',
-  components: { TabLoading, TabCreate },
+  components: { Animation, TabLoading, TabCreate },
   setup() {
     const store = useStore();
     const map = inject<Map>('map');

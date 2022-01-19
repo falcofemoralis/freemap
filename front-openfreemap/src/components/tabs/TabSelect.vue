@@ -95,6 +95,7 @@ export default defineComponent({
 .imageSlider {
   height: 100px;
   width: 100%;
+  overflow-x: scroll;
 
   img {
     height: 100%;

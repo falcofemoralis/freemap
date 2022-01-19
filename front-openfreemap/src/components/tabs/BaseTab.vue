@@ -8,14 +8,9 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent } from 'vue';
-
-export default defineComponent({
+export default {
   name: 'BaseTab',
-  setup(props: any, context: any) {
-    return {};
-  },
-});
+};
 </script>
 
 <style lang='scss' scoped>
@@ -26,7 +21,7 @@ export default defineComponent({
   @extend %tab;
 }
 
-.close{
+.close {
   @extend %closeBtn;
 }
 
@@ -40,5 +35,4 @@ export default defineComponent({
   display: flex;
   align-items: center;
 }
-
 </style>

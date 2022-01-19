@@ -1,13 +1,15 @@
 <template>
   <div>
-    <Suspense v-if='isTabSelectOpen'>
-      <template #default>
-        <TabSelect @close='closeTab' :feature='selectedFeature' />
-      </template>
-      <template #fallback>
-        <TabLoading />
-      </template>
-    </Suspense>
+    <Animation>
+      <Suspense v-if='isTabSelectOpen'>
+        <template #default>
+          <TabSelect @close='closeTab' :feature='selectedFeature' />
+        </template>
+        <template #fallback>
+          <TabLoading />
+        </template>
+      </Suspense>
+    </Animation>
   </div>
 </template>
 
@@ -26,12 +28,14 @@ import { SelectEvent } from 'ol/interaction/Select';
 import TabSelect from '@/components/tabs/TabSelect.vue';
 import { MapFeatureDto } from '../../../../shared/dto/map/mapdata.dto';
 import { MapService } from '@/api/mapService';
+import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 
 export default defineComponent({
   name: 'LayerData',
   components: {
     TabLoading,
+    Animation,
     TabSelect,
   },
   setup() {
@@ -201,5 +205,5 @@ export default defineComponent({
 </script>
 
 <style lang='scss' scoped>
-
+@import "~@/styles/interface/tab.scss";
 </style>
