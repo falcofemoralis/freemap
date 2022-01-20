@@ -70,12 +70,15 @@ export default defineComponent({
       typeId: -1,
     });
 
-
     /**
      * Завершение создания нового объекта
      */
     function complete() {
-      context.emit('created', createdObject);
+      if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId != -1) {
+        context.emit('created', createdObject);
+      } else {
+        // TODO highlight incorrent fields
+      }
     }
 
     /**

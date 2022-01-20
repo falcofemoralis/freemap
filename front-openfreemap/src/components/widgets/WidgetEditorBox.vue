@@ -175,8 +175,8 @@ export default defineComponent({
      */
     function completeDrawing() {
       isTabCreateOpen.value = true;
-
-      resetDrawing();
+      draw.finishDrawing()
+      map?.removeInteraction(draw);
     }
 
     /**
