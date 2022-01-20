@@ -48,4 +48,14 @@ export class MapService {
   getTypesByGeometry(id: number): Promise<Array<ObjectType>> {
     return this.objectTypeRepository.find({ where: { geometryType: { id } } });
   }
+
+  getNewestObjects(amount: number): Promise<Array<MapObject>> {
+    return this.mapObjectRepository.find({
+      relations: ['type', 'user', 'type.geometryType'],
+      order: {
+        updatedAt: 'DESC',
+      },
+      take: amount,
+    });
+  }
 }

@@ -175,7 +175,7 @@ export default defineComponent({
      */
     function completeDrawing() {
       isTabCreateOpen.value = true;
-      draw.finishDrawing()
+      draw.finishDrawing();
       map?.removeInteraction(draw);
     }
 
@@ -187,6 +187,11 @@ export default defineComponent({
       const polygon = feature?.getGeometry() as Polygon;
 
       createdObject.coordinates = polygon.getCoordinates();
+      const zoom = map?.getView()?.getZoom();
+      console.log(zoom);
+      if (zoom) {
+        createdObject.zoom = zoom;
+      }
 
       try {
         feature?.setProperties(await MapService.addCreatedObject(createdObject));
@@ -288,7 +293,7 @@ export default defineComponent({
   @extend %box;
   display: flex;
   bottom: 25px;
-  left: 125px;
+  left: 180px;
   width: auto;
   height: auto;
 }
@@ -298,7 +303,7 @@ export default defineComponent({
   width: auto;
   height: 55px;
   bottom: 25px;
-  left: 315px;
+  left: 370px;
 }
 
 .editorBtn {

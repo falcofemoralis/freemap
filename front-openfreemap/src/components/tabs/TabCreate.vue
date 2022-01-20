@@ -68,6 +68,7 @@ export default defineComponent({
       desc: '',
       coordinates: [],
       typeId: -1,
+      zoom: -1
     });
 
     /**

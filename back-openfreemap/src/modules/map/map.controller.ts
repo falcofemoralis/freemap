@@ -26,6 +26,7 @@ import * as Path from 'path';
 import { v4 } from 'uuid';
 import * as fs from 'fs';
 import { ObjectGuard } from './guards/object.guard';
+import { NewestObjectDto } from 'shared/dto/map/newestobject.dto';
 
 const MEDIA_PATH = './uploads/media';
 
@@ -45,6 +46,7 @@ export class MapController {
         desc: obj.desc,
         typeId: obj.type.id,
         address: obj.address ?? null,
+        zoom: obj.zoom,
         links: obj.links ?? null,
         userId: obj.user.id,
       };
@@ -82,6 +84,7 @@ export class MapController {
     mapObject.name = mapObjectDto.name;
     mapObject.desc = mapObjectDto.desc;
     mapObject.coordinates = mapObjectDto.coordinates;
+    mapObject.zoom = mapObjectDto.zoom;
     mapObject.type = await this.mapService.getObjectTypeById(mapObjectDto.typeId);
     mapObject.address = mapObjectDto.address;
     mapObject.links = mapObjectDto.links;
@@ -150,7 +153,7 @@ export class MapController {
   }
 
   @Get('object/types/:id')
-  async getTypesByGeometry(@Param('id') id: number): Promise<Array<ObjectTypeDto>> {
+  async getObjectTypesByGeometry(@Param('id') id: number): Promise<Array<ObjectTypeDto>> {
     return await this.mapService.getTypesByGeometry(id);
   }
 
@@ -160,11 +163,34 @@ export class MapController {
   }
 
   @Get('object/media/:id')
-  getObjectMedia(@Param('id') id): Array<string> {
+  getObjectMediaFiles(@Param('id') id): Array<string> {
     try {
       return fs.readdirSync(Path.join(process.cwd(), `${MEDIA_PATH}/${id}`));
     } catch (e) {
       throw new NotFoundException();
     }
+  }
+
+  @Get('object/newest/:amount')
+  async getNewestObjects(@Param('amount') amount: number): Promise<Array<NewestObjectDto>> {
+    const features = new Array<NewestObjectDto>();
+    const objects = await this.mapService.getNewestObjects(amount);
+
+    for (const obj of objects) {
+      features.push({
+        id: obj.id,
+        name: obj.name,
+        desc: obj.desc,
+        coordinates: obj.coordinates,
+        zoom: obj.zoom,
+        typeId: obj.type.id,
+        address: obj.address ?? null,
+        links: obj.links ?? null,
+        userName: obj.user.login,
+        date: obj.updatedAt.toString(),
+      });
+    }
+
+    return features;
   }
 }

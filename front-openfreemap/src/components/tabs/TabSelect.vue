@@ -9,7 +9,8 @@
       <img class='avatarImage' :src='getUserAvatarLink(user.avatarUrl)' />
     </span>
     <div class='imageSlider' v-if='featureProperties.mediaNames.length > 0'>
-      <img v-for='media in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'>
+      <img v-for='(media, i) in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'
+           @click='openImage(featureProperties.mediaNames, i)'>
     </div>
   </BaseTab>
 </template>
@@ -23,6 +24,8 @@ import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { AuthService } from '@/api/authService';
 import { UserDataDto } from '@/../../shared/dto/auth/userdata.dto';
+import 'viewerjs/dist/viewer.css';
+import { api as viewerApi } from 'v-viewer';
 
 export default defineComponent({
   name: 'TabSelect',
@@ -77,12 +80,30 @@ export default defineComponent({
       }
     }
 
+    /**
+     * Открытие слайдера просмотра изображения в полном экране
+     * @param mediaNames - массив изображений
+     * @param index - индекс открытого изображения
+     */
+    function openImage(mediaNames: Array<string>, index: number) {
+      const viewer = viewerApi({
+        images: mediaNames.map((name) => {
+          return getMediaUrl(name);
+        }),
+        options: {
+          initialViewIndex: index,
+          title: false,
+        },
+      });
+    }
+
     return {
       featureProperties,
       user,
 
       getMediaUrl,
       getUserAvatarLink,
+      openImage,
     };
   },
 });
@@ -103,6 +124,7 @@ export default defineComponent({
     padding: 10px;
     height: 100%;
     width: auto;
+    cursor: pointer;
   }
 }
 

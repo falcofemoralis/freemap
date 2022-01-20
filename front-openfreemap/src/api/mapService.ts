@@ -4,6 +4,7 @@ import { MapObjectDto } from '../../../shared/dto/map/mapobject.dto';
 import { ObjectTypeDto } from '@/../../../shared/dto/map/ObjectTypeDto';
 import { GeometryTypeDto } from '@/../../../shared/dto/map/geometryType';
 import { FeatureProperties } from '@/../../shared/dto/map/mapdata.dto';
+import { NewestObjectDto } from '@/../../shared/dto/map/newestobject.dto';
 
 export class MapService {
   /**
@@ -23,6 +24,7 @@ export class MapService {
         name: createdObject.name,
         desc: createdObject.desc,
         coordinates: JSON.stringify(createdObject.coordinates),
+        zoom: createdObject.zoom,
         typeId: createdObject.typeId,
         address: createdObject.address,
         links: createdObject.links,
@@ -91,5 +93,13 @@ export class MapService {
     } catch (e) {
       return [];
     }
+  }
+
+  /**
+   * Получение последних добавленных объектов
+   * @param amount - количество подгружаеемых объектов
+   */
+  static async getNewestObjects(amount: number): Promise<Array<NewestObjectDto>> {
+    return (await axiosInstance.get<Array<NewestObjectDto>>(`/map/object/newest/${amount}`)).data;
   }
 }

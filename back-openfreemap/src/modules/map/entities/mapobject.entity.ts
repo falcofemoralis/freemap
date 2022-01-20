@@ -28,6 +28,9 @@ export class MapObject {
   @Column({ type: 'longtext' })
   coordinates: string;
 
+  @Column()
+  zoom: number;
+
   @ManyToOne(() => ObjectType)
   @JoinColumn()
   type: ObjectType;

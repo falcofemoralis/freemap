@@ -149,3 +149,13 @@ export default defineComponent({
 }
 
 </style>
+
+<style lang='scss'>
+.ol-zoom {
+  display: none;
+}
+
+.ol-rotate-reset{
+  display: none;
+}
+</style>
