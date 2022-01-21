@@ -4,6 +4,7 @@ import { EnteredMapFeatureDataDto } from '../../../shared/dto/map/enteredMapFeat
 import { ObjectTypeDto } from '../../../shared/dto/map/objectType.dto';
 import { GeometryTypeDto } from '../../../shared/dto/map/geometryType.dto';
 import { MapFeatureDto } from '../../../shared/dto/map/mapData.dto';
+import axios from 'axios';
 
 export class MapService {
   /**
@@ -20,7 +21,7 @@ export class MapService {
    * @returns {MapFeatureDto} - добавленный объект в базу
    */
   static async addMapObject(createdObject: CreatedObject): Promise<MapFeatureDto> {
-    if (!createdObject.name || !createdObject.desc || !createdObject.coordinates || createdObject.typeId == -1 || createdObject.zoom == -1) {
+    if (!createdObject.name || !createdObject.desc || createdObject.coordinates.length == 0 || createdObject.typeId == -1 || createdObject.zoom == -1) {
       throw new Error('Существуют не все поля!');
     }
 
@@ -37,11 +38,21 @@ export class MapService {
     const res = await axiosInstance.post('/map/object', enteredMapFeatureDataDto, { headers: { ...getAuthConfig() } });
     const mapFeatureDto: MapFeatureDto = res.data;
 
-    if (createdObject.mediaFiles && res.status == 201) {
-      mapFeatureDto.properties.mediaNames = await this.addMapObjectMedia(mapFeatureDto.properties.id, createdObject.mediaFiles);
-    }
+    try {
+      if (createdObject.mediaFiles && res.status == 201) {
+        mapFeatureDto.properties.mediaNames = await this.addMapObjectMedia(mapFeatureDto.properties.id, createdObject.mediaFiles);
+      }
 
-    return mapFeatureDto;
+      return mapFeatureDto;
+    } catch (e) {
+    /*  if (axios.isAxiosError(e)) {
+        if (e.response?.status) {
+          throw new Error('');
+        }
+      }*/
+
+      throw e;
+    }
   }
 
   /**

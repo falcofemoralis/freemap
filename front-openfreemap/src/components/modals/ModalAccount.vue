@@ -109,6 +109,18 @@ export default defineComponent({
         errors.value.push('Некорректный email');
       }
 
+      if(createdUser.login.length > 30){
+        errors.value.push('Логин слишком длинный');
+      }
+
+      if(createdUser.password.length < 6){
+        errors.value.push('Пароль слишком короткий');
+      }
+
+      if(createdUser.password.length > 50){
+        errors.value.push('Пароль слишком длинный');
+      }
+
       if (errors.value.length > 0) {
         return;
       }

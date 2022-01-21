@@ -3,7 +3,9 @@
     <Animation>
       <Suspense v-if='isTabCreateOpen'>
         <template #default>
-          <TabCreate @close='closeTab' :editType='selectedEditType' @created='onCreatedHandler' />
+          <TabCreate @close='closeTab' :editType='selectedEditType' :coordinates='featureCoordinates'
+                     :zoom='featureZoom'
+                     @created='onCreatedHandler' />
         </template>
         <template #fallback>
           <TabLoading />
@@ -65,14 +67,13 @@ import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import GeometryType from '@/constants/GeometryType';
 import { Feature } from 'ol';
-import { CreatedObject } from '@/types/CreatedObject';
 import { DrawEvent } from 'ol/interaction/Draw';
 import TabCreate from '@/components/tabs/TabCreate.vue';
 import { Geometry, Polygon } from 'ol/geom';
 import EditType from '@/constants/EditType';
-import { MapService } from '@/api/mapService';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import Animation from '@/components/elements/Animation.vue';
+import { MapFeatureDto } from '@/../../shared/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'WidgetEditorBox',
@@ -81,6 +82,8 @@ export default defineComponent({
     const store = useStore();
     const map = inject<Map>('map');
     const selectedEditType = ref<EditType | null>(null); // выбранный тип создания объекта
+    const featureCoordinates = ref<number[][][] | null>(null);
+    const featureZoom = ref<number | null>(null);
     const isTabCreateOpen = ref<boolean>(false); // переключать бокового меню создания объекта
     const lastCoordinates = new Array<Array<number>>(); // координаты точек полигонов объекта геометрии
     let feature: Feature<Geometry> | null = null; // обьект геометрии на карте, который создается
@@ -174,6 +177,8 @@ export default defineComponent({
      * Завершение создания полигонов
      */
     function completeDrawing() {
+      featureCoordinates.value = (feature?.getGeometry() as Polygon).getCoordinates();
+      featureZoom.value = map?.getView()?.getZoom() ?? -1;
       isTabCreateOpen.value = true;
       draw.finishDrawing();
       map?.removeInteraction(draw);
@@ -181,31 +186,16 @@ export default defineComponent({
 
     /**
      * Обработчик завершения создания нового объекта геометрии
-     * @param {CreatedObject} createdObject - новый объект
+     * @param {MapFeatureDto} mapFeatureDto - созданный объект
      */
-    async function onCreatedHandler(createdObject: CreatedObject) {
-      const polygon = feature?.getGeometry() as Polygon;
-
-      createdObject.coordinates = polygon.getCoordinates();
-      const zoom = map?.getView()?.getZoom();
-      if (zoom) {
-        createdObject.zoom = zoom;
-      }
-
-      try {
-        feature?.setProperties((await MapService.addMapObject(createdObject)).properties);
-      } catch (e) {
-        console.log(e);
-        if (feature) {
-          baseLayer?.getSource().removeFeature(feature);
-        }
-      }
+    async function onCreatedHandler(mapFeatureDto: MapFeatureDto) {
+      feature?.setProperties(mapFeatureDto.properties);
 
       // reset values
       feature = null;
       selectedEditType.value = null;
       isTabCreateOpen.value = false;
-      store.dispatch('toggleIsDrawing');
+      await store.dispatch('toggleIsDrawing');
     }
 
     /**
@@ -214,7 +204,6 @@ export default defineComponent({
     function undo() {
       const geometryCoordinates = (feature?.getGeometry() as Polygon)?.getCoordinates()[0];
 
-      console.log(geometryCoordinates);
       if (geometryCoordinates && geometryCoordinates.length > 1) {
         lastCoordinates.push(geometryCoordinates[geometryCoordinates.length - 2]);
         draw.removeLastPoint();
@@ -246,9 +235,11 @@ export default defineComponent({
      */
     window.addEventListener('keyup', function(event) {
       if (event.key === 'Escape') {
-        selectedEditType.value = null;
-        resetDrawing();
-        store.dispatch('toggleIsDrawing');
+        if (selectedEditType.value) {
+          selectedEditType.value = null;
+          resetDrawing();
+          store.dispatch('toggleIsDrawing');
+        }
       }
     });
 
@@ -273,6 +264,8 @@ export default defineComponent({
       store,
       selectedEditType,
       isTabCreateOpen,
+      featureCoordinates,
+      featureZoom,
 
       createEdit,
       onCreatedHandler,

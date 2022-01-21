@@ -31,8 +31,14 @@
 .field, %field {
   width: 100%;
   margin: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* number of lines to show */
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 
-  h4 {
+  h1, h2, h3, h4, h5, h6 {
     color: #1c1a1a;
     width: 100%;
   }

@@ -35,6 +35,11 @@
       <input type='file' multiple accept='image/*, video/*' @change='mediaChangedHandler'>
     </div>
     <button class='submitBtn' @click='complete'>Создать</button>
+    <ul>
+      <li v-for='error in errors' :key='error' class='errorText'>
+        {{ error }}
+      </li>
+    </ul>
   </BaseTab>
 </template>
 
@@ -45,6 +50,7 @@ import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { ObjectTypeDto } from '@/../../shared/dto/map/objectType.dto';
 import { GeometryTypeDto } from '@/../../shared/dto/map/geometryType.dto';
+import { MapFeatureDto } from '@/../../shared/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'TabCreate',
@@ -53,9 +59,12 @@ export default defineComponent({
     editType: {
       type: String,
     },
+    coordinates: {},
+    zoom: {},
   },
   async setup(props: any, context: any) {
     /* init data */
+    const errors = ref<Array<string>>([]);
     const geometryTypes = ref<Array<GeometryTypeDto>>(await MapService.getGeometryTypes());
     const selectedGeometry = ref<GeometryTypeDto | undefined>(geometryTypes.value.find((val: GeometryTypeDto) => val.key == props.editType));
     const types = ref<Array<ObjectTypeDto>>();
@@ -66,19 +75,54 @@ export default defineComponent({
     const createdObject = reactive<CreatedObject>({
       name: '',
       desc: '',
-      coordinates: [],
       typeId: -1,
-      zoom: -1
+      coordinates: props.coordinates,
+      zoom: props.zoom,
     });
 
     /**
      * Завершение создания нового объекта
      */
-    function complete() {
-      if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId != -1) {
-        context.emit('created', createdObject);
-      } else {
-        // TODO highlight incorrent fields
+    async function complete() {
+      errors.value = [];
+
+      if (!createdObject.name) {
+        errors.value.push('Введите имя');
+      } else if (createdObject.name.length > 30) {
+        errors.value.push('Имя слишком длинное');
+      }
+
+      if (!createdObject.desc) {
+        errors.value.push('Введите описание');
+      } else if (createdObject.desc.length > 200) {
+        errors.value.push('Описание слишком длинное');
+      }
+
+      if (createdObject.typeId == -1) {
+        errors.value.push('Не выбран тип объекта');
+      }
+
+      if (createdObject.links && createdObject.links?.length > 100) {
+        errors.value.push('Слишком много ссылок');
+      }
+
+      if (createdObject.address && createdObject.address?.length > 50) {
+        errors.value.push('Слишком длинный адресс');
+      }
+
+      if (createdObject.mediaFiles && createdObject.mediaFiles.length > 20) {
+        errors.value.push('Слишком много медиафайлов');
+      }
+
+      if (errors.value.length > 0) {
+        return;
+      }
+
+      try {
+        const createdFeature: MapFeatureDto = await MapService.addMapObject(createdObject);
+        context.emit('created', createdFeature);
+      } catch (e) {
+        errors.value.push((e as Error).message);
       }
     }
 
@@ -97,6 +141,7 @@ export default defineComponent({
       types,
       geometryTypes,
       selectedGeometry,
+      errors,
 
       complete,
       mediaChangedHandler,

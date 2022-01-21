@@ -4,8 +4,8 @@
       <div v-for='feature in newestFeatures' :key='feature.properties.id'
            @click='onItemSelected(feature.geometry.coordinates, feature.properties.zoom)'
            class='item'>
-        <span>{{ feature.properties.name }}</span>
-        <span>Автор: {{ feature.properties.userId }}</span>
+        <span class='item__name'>{{ feature.properties.name }}</span>
+        <span class='item__author'>Автор: {{ feature.properties.userId }}</span>
       </div>
     </div>
   </BaseTab>
@@ -98,7 +98,6 @@ export default {
 
 .item {
   box-sizing: border-box;
-  height: 60px;
   width: 100%;
   cursor: pointer;
   transition: all .3s;
@@ -106,6 +105,18 @@ export default {
   padding: 16px;
   flex-direction: column;
   justify-content: center;
+
+  &__name{
+    font-size: 16px;
+    max-height: 18px;
+    overflow: hidden;
+  }
+
+  &__author {
+    font-size: 16px;
+    max-height: 18px;
+    overflow: hidden;
+  }
 
   &:hover {
     background: #d2d2d2;
