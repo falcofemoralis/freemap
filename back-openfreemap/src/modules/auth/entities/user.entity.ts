@@ -12,7 +12,7 @@ export class User {
   email: string;
 
   @Column({ type: 'longtext', nullable: true })
-  profileAvatar?: string;
+  avatar?: string;
 
   @Column({ type: 'longtext', nullable: false })
   passwordHash?: string;

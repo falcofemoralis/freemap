@@ -19,11 +19,11 @@
 import { defineComponent, ref, watch } from 'vue';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
-import { FeatureProperties } from '../../../../shared/dto/map/mapdata.dto';
+import { MapFeaturePropertiesDto } from '../../../../shared/dto/map/mapData.dto';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { AuthService } from '@/api/authService';
-import { UserDataDto } from '@/../../shared/dto/auth/userdata.dto';
+import { UserDataDto } from '../../shared/dto/auth/user.dto';
 import 'viewerjs/dist/viewer.css';
 import { api as viewerApi } from 'v-viewer';
 
@@ -43,15 +43,15 @@ export default defineComponent({
       featureProperties.value = await getProperties(sel);
       user.value = await AuthService.getProfileById(featureProperties.value.userId);
     });
-    const featureProperties = ref<FeatureProperties>(await getProperties(props.feature));
+    const featureProperties = ref<MapFeaturePropertiesDto>(await getProperties(props.feature));
     const user = ref<UserDataDto>(await AuthService.getProfileById(featureProperties.value.userId));
 
     /**
      * Получение параметров из feature объекта карты. Также идет получения возможных медиа файлов объекта.
      * @param feature
      */
-    async function getProperties(feature: Feature<Geometry>): Promise<FeatureProperties> {
-      const fp = feature.getProperties() as FeatureProperties;
+    async function getProperties(feature: Feature<Geometry>): Promise<MapFeaturePropertiesDto> {
+      const fp = feature.getProperties() as MapFeaturePropertiesDto;
 
       if (!fp.mediaNames) {
         fp.mediaNames = await MapService.getObjectMedia(fp.id);

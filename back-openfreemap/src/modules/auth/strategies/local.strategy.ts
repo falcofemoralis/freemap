@@ -12,7 +12,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(login: string, password: string): Promise<Omit<User, 'passwordHash'>> {
+  /**
+   * Валидация существования пользователя по его логину и паролю
+   * @param login - логин пользователя
+   * @param password - пароль пользователя
+   * @returns {string} - объект пользователя базы данных без хеша пароля
+   */
+  async validate(login: string, password: string): Promise<User> {
     const user = await this.authService.validateUser(login, password);
 
     if (!user) {

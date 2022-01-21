@@ -5,6 +5,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Request,
@@ -16,13 +17,14 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { UserDto } from 'shared/dto/auth/user.dto';
-import { UserDataDto } from 'shared/dto/auth/userdata.dto';
+import { EnteredUserDataDto } from 'shared/dto/auth/enteredUserData.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as Path from 'path';
-import { User } from './entities/user.entity';
 import { v4 } from 'uuid';
+import { CredentialsDto } from 'shared/dto/auth/credentials.dto';
+import { UserDto } from 'shared/dto/auth/user.dto';
+import * as fs from 'fs';
 
 const AVATAR_PATH = './uploads/avatars';
 
@@ -30,34 +32,54 @@ const AVATAR_PATH = './uploads/avatars';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  /**
+   * Авторизация пользователя
+   * @param req - запрос с объектом пользователя req.user
+   * @returns {CredentialsDto} данные аунтефикации
+   */
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
+  async login(@Request() req): Promise<CredentialsDto> {
+    const token = await this.authService.createToken(req.user);
+    const avatar = (req.user as UserDto).avatar;
+
     return {
-      accessToken: await this.authService.login(req.user),
-      avatarPath: (req.user as User).profileAvatar,
+      accessToken: token,
+      profileAvatar: avatar,
     };
   }
 
+  /**
+   * Регистрация пользователя
+   * @param {EnteredUserDataDto} enteredUserDataDto - веденные данные пользователя
+   * @returns {CredentialsDto} данные аунтефикации без аватара пользователя
+   */
   @Post('register')
-  async register(@Body() userDto: UserDto) {
-    if (await this.authService.getUserByLogin(userDto.login)) {
+  async register(@Body() enteredUserDataDto: EnteredUserDataDto): Promise<CredentialsDto> {
+    if (await this.authService.getUserByLogin(enteredUserDataDto.login)) {
       throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
 
-    if (await this.authService.getUserByEmail(userDto.login)) {
+    if (await this.authService.getUserByEmail(enteredUserDataDto.email)) {
       throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
 
-    if (userDto.password != userDto.confirmPassword) {
+    if (enteredUserDataDto.password != enteredUserDataDto.confirmPassword) {
       throw new HttpException('Passwords not match', HttpStatus.NOT_ACCEPTABLE);
     }
 
+    const token = await this.authService.createToken(await this.authService.register(enteredUserDataDto));
+
     return {
-      accessToken: await this.authService.login(await this.authService.register(userDto)),
+      accessToken: token,
     };
   }
 
+  /**
+   * Загрузка аватара пользователя. Будет созданно имя файла по паттерну uuidv4.extname
+   * @param req - запрос с объектом пользователя req.user
+   * @param file - загруженный файл
+   */
   @Post('profile/avatar')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
@@ -70,42 +92,55 @@ export class AuthController {
           }
         },
       }),
-      fileFilter: (request, file, callback) => {
+      fileFilter: (request, file, cb) => {
         if (!file.mimetype.includes('image')) {
-          return callback(new BadRequestException('Provide a valid image'), false);
+          return cb(new BadRequestException('Provide a valid image'), false);
         }
-        callback(null, true);
+        cb(null, true);
       },
     }),
   )
   async addAvatar(@Request() req, @UploadedFile() file: Express.Multer.File) {
-    await this.authService.addAvatar(req.user.id, file.filename);
-    return { avatarPath: file.filename };
+    await this.authService.updateUserAvatar((req.user as UserDto).id, file.filename);
+
+    return {
+      avatarPath: file.filename,
+    };
   }
 
+  /**
+   * Получение пользователя по его id
+   * @param id - id пользователя
+   * @returns {UserDto} - пользователь
+   */
   @Get('profile/:id')
-  async getProfileById(@Param('id') id): Promise<UserDataDto> {
+  async getProfileById(@Param('id') id): Promise<UserDto> {
     const user = await this.authService.getUserById(id);
 
-    const userDataDto: UserDataDto = {
+    return {
       id,
       login: user.login,
-      avatarUrl: user.profileAvatar,
+      avatar: user.avatar,
+      email: user.email,
     };
-
-    return userDataDto;
   }
 
+  /**
+   * Получение файла аватара пользователя с сервера
+   * @param img - название файла
+   * @param res - response
+   * @returns файл аватара
+   */
   @Get('profile/avatar/:img')
   getProfileAvatar(@Param('img') img, @Res() res) {
-    res.sendFile(Path.join(process.cwd(), `${AVATAR_PATH}/${img}`));
-  }
+    const path = Path.join(process.cwd(), `${AVATAR_PATH}/${img}`);
 
-  @UseGuards(JwtAuthGuard)
-  @Post('profile/refresh')
-  async refresh(@Request() req) {
-    return {
-      accessToken: await this.authService.login(await this.authService.getUserById(req.user.id)),
-    };
+    try {
+      if (fs.existsSync(path)) {
+        res.sendFile(path);
+      }
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 }

@@ -13,6 +13,7 @@ build
 /back-openfreemap/front
 /back-openfreemap/ecosystem.config.js
 
+/back-openfreemap/ormconfig.json
 
 # local env files
 .env

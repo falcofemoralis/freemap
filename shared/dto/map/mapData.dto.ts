@@ -1,14 +1,15 @@
-import { MapObjectDto } from './mapobject.dto';
+import { EnteredMapFeatureDataDto } from './enteredMapFeatureData.dto';
 
-export interface FeatureProperties extends Omit<MapObjectDto, 'coordinates'> {
+export interface MapFeaturePropertiesDto extends Omit<EnteredMapFeatureDataDto, 'coordinates'> {
   id: number;
   userId: number;
+  date: string;
   mediaNames?: Array<string>;
 }
 
 export interface MapFeatureDto {
   type: string,
-  properties: FeatureProperties,
+  properties: MapFeaturePropertiesDto,
   geometry: {
     type: string,
     coordinates: number[][][]

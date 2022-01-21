@@ -26,7 +26,7 @@ import { pointerMove } from 'ol/events/condition';
 import { useStore } from 'vuex';
 import { SelectEvent } from 'ol/interaction/Select';
 import TabSelect from '@/components/tabs/TabSelect.vue';
-import { MapFeatureDto } from '../../../../shared/dto/map/mapdata.dto';
+import { MapFeatureDto } from '../../../../shared/dto/map/mapData.dto';
 import { MapService } from '@/api/mapService';
 import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';

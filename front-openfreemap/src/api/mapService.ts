@@ -1,10 +1,10 @@
 import { CreatedObject } from '@/types/CreatedObject';
 import { axiosInstance, getAuthConfig } from '@/api/index';
-import { MapObjectDto } from '../../../shared/dto/map/mapobject.dto';
-import { ObjectTypeDto } from '@/../../../shared/dto/map/ObjectTypeDto';
+import { EnteredMapFeatureDataDto } from '../../../shared/dto/map/enteredMapFeatureData.dto';
+import { ObjecttypeDto } from '@/../../../shared/dto/map/ObjecttypeDto';
 import { GeometryTypeDto } from '@/../../../shared/dto/map/geometryType';
-import { FeatureProperties } from '@/../../shared/dto/map/mapdata.dto';
-import { NewestObjectDto } from '@/../../shared/dto/map/newestobject.dto';
+import { MapFeaturePropertiesDto } from '@/../../../shared/dto/map/mapData.dto';
+import { NewestObjectDto } from '@/../../../shared/dto/map/newestObject.dto';
 
 export class MapService {
   /**
@@ -18,9 +18,9 @@ export class MapService {
    * Добавление нового объекта
    * @param createdObject
    */
-  static async addCreatedObject(createdObject: CreatedObject): Promise<FeatureProperties> {
+  static async addCreatedObject(createdObject: CreatedObject): Promise<MapFeaturePropertiesDto> {
     if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId) {
-      const mapObjectDto: MapObjectDto = {
+      const mapObjectDto: EnteredMapFeatureDataDto = {
         name: createdObject.name,
         desc: createdObject.desc,
         coordinates: JSON.stringify(createdObject.coordinates),
@@ -31,7 +31,7 @@ export class MapService {
       };
 
       const res = await axiosInstance.post('/map/object', mapObjectDto, { headers: { ...getAuthConfig() } });
-      const featureProperties: FeatureProperties = res.data;
+      const featureProperties: MapFeaturePropertiesDto = res.data;
 
       if (createdObject.mediaFiles && res.status == 201) {
         featureProperties.mediaNames = await this.addObjectMedia(featureProperties.id, createdObject.mediaFiles);
@@ -70,7 +70,7 @@ export class MapService {
   /**
    * Получение типов обхекта по его геометрии
    */
-  static async getTypesByGeometry(geometryId: number): Promise<Array<ObjectTypeDto>> {
+  static async getTypesByGeometry(geometryId: number): Promise<Array<ObjecttypeDto>> {
     return (await axiosInstance.get<Array<GeometryTypeDto>>(`/map/object/types/${geometryId}`)).data;
   }
 

@@ -17,10 +17,19 @@ export class MapService {
   ) {
   }
 
-  findAll(): Promise<MapObject[]> {
+  /**
+   * Получение всех объетов на карте
+   * @returns {Array<MapObject>} - массив объектов
+   */
+  getAllObjects(): Promise<Array<MapObject>> {
     return this.mapObjectRepository.find({ relations: ['type', 'user', 'type.geometryType'] });
   }
 
+  /**
+   * Добавление объекта в базу данных
+   * @param mapObject - объект на карте
+   * @returns {MapObject} - добавленный объект
+   */
   addMapObject(mapObject: MapObject): Promise<MapObject> {
     return this.mapObjectRepository.save(mapObject);
   }
@@ -33,6 +42,11 @@ export class MapService {
     return this.objectTypeRepository.find();
   }
 
+  /**
+   * Получение типа объекта по id
+   * @param id - id типа объекта
+   * @returns {ObjectType} - тип объекта
+   */
   getObjectTypeById(id: number): Promise<ObjectType> {
     return this.objectTypeRepository.findOne(id);
   }
@@ -45,10 +59,14 @@ export class MapService {
     return this.geometryTypeRepository.findOne(id);
   }
 
-  getTypesByGeometry(id: number): Promise<Array<ObjectType>> {
+  getTypesByGeometryId(id: number): Promise<Array<ObjectType>> {
     return this.objectTypeRepository.find({ where: { geometryType: { id } } });
   }
 
+  /**
+   * Получение последних добавленных объектов
+   * @param amount - количество объектов для выборки
+   */
   getNewestObjects(amount: number): Promise<Array<MapObject>> {
     return this.mapObjectRepository.find({
       relations: ['type', 'user', 'type.geometryType'],

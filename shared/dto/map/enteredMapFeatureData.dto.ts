@@ -1,4 +1,4 @@
-export interface MapObjectDto {
+export interface EnteredMapFeatureDataDto {
   name: string;
   desc: string;
   coordinates: string;

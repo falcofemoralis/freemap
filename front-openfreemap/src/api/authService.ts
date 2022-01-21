@@ -1,7 +1,7 @@
 import { CreatedUser } from '@/types/CreatedUser';
 import { axiosInstance, getAuthConfig } from '@/api/index';
+import { EnteredUserDataDto } from '../../../shared/dto/auth/enteredUserData.dto';
 import { UserDto } from '../../../shared/dto/auth/user.dto';
-import { UserDataDto } from '../../../shared/dto/auth/userdata.dto';
 import axios from 'axios';
 import store from '@/store/index';
 
@@ -11,7 +11,7 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async login(createdUser: CreatedUser) {
-    const userDto: UserDto = {
+    const userDto: EnteredUserDataDto = {
       login: createdUser.login,
       password: createdUser.password,
     };
@@ -38,7 +38,7 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async register(createdUser: CreatedUser) {
-    const userDto: UserDto = {
+    const userDto: EnteredUserDataDto = {
       login: createdUser.login,
       password: createdUser.password,
       confirmPassword: createdUser.confirmPassword,
@@ -90,10 +90,10 @@ export class AuthService {
   /**
    * Получение данных пользователя. (напр. id, логин, аватар)
    * @param id - id пользователя
-   * @returns {UserDataDto} - данные про пользователя
+   * @returns {UserDto} - данные про пользователя
    */
-  static async getProfileById(id: number): Promise<UserDataDto> {
-    const res = await axiosInstance.get<UserDataDto>(`/auth/profile/${id}`);
+  static async getProfileById(id: number): Promise<UserDto> {
+    const res = await axiosInstance.get<UserDto>(`/auth/profile/${id}`);
     return res.data;
   }
 }
