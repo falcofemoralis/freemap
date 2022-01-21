@@ -188,13 +188,12 @@ export default defineComponent({
 
       createdObject.coordinates = polygon.getCoordinates();
       const zoom = map?.getView()?.getZoom();
-      console.log(zoom);
       if (zoom) {
         createdObject.zoom = zoom;
       }
 
       try {
-        feature?.setProperties(await MapService.addCreatedObject(createdObject));
+        feature?.setProperties((await MapService.addMapObject(createdObject)).properties);
       } catch (e) {
         console.log(e);
         if (feature) {

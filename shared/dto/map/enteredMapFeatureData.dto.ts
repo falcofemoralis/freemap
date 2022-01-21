@@ -1,7 +1,7 @@
 export interface EnteredMapFeatureDataDto {
   name: string;
   desc: string;
-  coordinates: string;
+  coordinates: number[][][];
   zoom: number;
   typeId: number;
   address?: string;

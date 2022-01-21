@@ -83,7 +83,7 @@ export default defineComponent({
         /*       loader: (extent, resolution, projection) => {
 
                }*/
-        url: MapService.getMapData(),
+        url: MapService.getMapDataUrl(),
       }),
       style: function(feature) {
         style.getText().setText(feature.get('name'));

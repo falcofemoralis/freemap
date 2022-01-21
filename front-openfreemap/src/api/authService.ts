@@ -1,6 +1,7 @@
 import { CreatedUser } from '@/types/CreatedUser';
 import { axiosInstance, getAuthConfig } from '@/api/index';
 import { EnteredUserDataDto } from '../../../shared/dto/auth/enteredUserData.dto';
+import { CredentialsDto } from '../../../shared/dto/auth/credentials.dto';
 import { UserDto } from '../../../shared/dto/auth/user.dto';
 import axios from 'axios';
 import store from '@/store/index';
@@ -11,16 +12,18 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async login(createdUser: CreatedUser) {
-    const userDto: EnteredUserDataDto = {
+    const enteredUserDataDto: EnteredUserDataDto = {
       login: createdUser.login,
       password: createdUser.password,
     };
 
     try {
-      const res = await axiosInstance.post('/auth/login', userDto);
-      await store.dispatch('setToken', res.data.accessToken);
-      if (res.data.avatarPath) {
-        await store.dispatch('setProfileAvatar', res.data.avatarPath);
+      const credentials: CredentialsDto = (await axiosInstance.post('/auth/login', enteredUserDataDto)).data;
+
+      await store.dispatch('setToken', credentials.accessToken);
+
+      if (credentials.profileAvatar) {
+        await store.dispatch('setProfileAvatar', credentials.profileAvatar);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -38,7 +41,7 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async register(createdUser: CreatedUser) {
-    const userDto: EnteredUserDataDto = {
+    const enteredUserDataDto: EnteredUserDataDto = {
       login: createdUser.login,
       password: createdUser.password,
       confirmPassword: createdUser.confirmPassword,
@@ -46,12 +49,13 @@ export class AuthService {
     };
 
     try {
-      const res = await axiosInstance.post('/auth/register', userDto);
-      await store.dispatch('setToken', res.data.accessToken);
+      const credentials: CredentialsDto = (await axiosInstance.post('/auth/register', enteredUserDataDto)).data;
 
-      if (createdUser.avatar && res.status == 201) {
-        const avatarPath = await this.addProfileAvatar(createdUser.avatar);
-        await store.dispatch('setProfileAvatar', avatarPath);
+      await store.dispatch('setToken', credentials.accessToken);
+
+      if (createdUser.avatar && credentials.accessToken) {
+        credentials.profileAvatar = await this.addProfileAvatar(createdUser.avatar);
+        await store.dispatch('setProfileAvatar', credentials.profileAvatar);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -72,10 +76,11 @@ export class AuthService {
    */
   static async addProfileAvatar(file: Blob): Promise<string> {
     const formData = new FormData();
+
     formData.append('file', file);
 
     const res = await axiosInstance.post('/auth/profile/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data', ...getAuthConfig() } });
-    return res.data.avatarPath;
+    return res.data;
   }
 
   /**

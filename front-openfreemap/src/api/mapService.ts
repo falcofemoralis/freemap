@@ -1,54 +1,56 @@
 import { CreatedObject } from '@/types/CreatedObject';
 import { axiosInstance, getAuthConfig } from '@/api/index';
 import { EnteredMapFeatureDataDto } from '../../../shared/dto/map/enteredMapFeatureData.dto';
-import { ObjecttypeDto } from '@/../../../shared/dto/map/ObjecttypeDto';
-import { GeometryTypeDto } from '@/../../../shared/dto/map/geometryType';
-import { MapFeaturePropertiesDto } from '@/../../../shared/dto/map/mapData.dto';
-import { NewestObjectDto } from '@/../../../shared/dto/map/newestObject.dto';
+import { ObjectTypeDto } from '../../../shared/dto/map/objectType.dto';
+import { GeometryTypeDto } from '../../../shared/dto/map/geometryType.dto';
+import { MapFeatureDto } from '../../../shared/dto/map/mapData.dto';
 
 export class MapService {
   /**
    * Получение ссылки к данным на карте
+   * @returns {string} - url запрос к данным на карте
    */
-  static getMapData(): string {
+  static getMapDataUrl(): string {
     return axiosInstance.defaults.baseURL + '/map';
   }
 
   /**
-   * Добавление нового объекта
-   * @param createdObject
+   * Отправка нового объекта на сервер
+   * @param createdObject - новый созданный объект
+   * @returns {MapFeatureDto} - добавленный объект в базу
    */
-  static async addCreatedObject(createdObject: CreatedObject): Promise<MapFeaturePropertiesDto> {
-    if (createdObject.name && createdObject.desc && createdObject.coordinates && createdObject.typeId) {
-      const mapObjectDto: EnteredMapFeatureDataDto = {
-        name: createdObject.name,
-        desc: createdObject.desc,
-        coordinates: JSON.stringify(createdObject.coordinates),
-        zoom: createdObject.zoom,
-        typeId: createdObject.typeId,
-        address: createdObject.address,
-        links: createdObject.links,
-      };
-
-      const res = await axiosInstance.post('/map/object', mapObjectDto, { headers: { ...getAuthConfig() } });
-      const featureProperties: MapFeaturePropertiesDto = res.data;
-
-      if (createdObject.mediaFiles && res.status == 201) {
-        featureProperties.mediaNames = await this.addObjectMedia(featureProperties.id, createdObject.mediaFiles);
-      }
-
-      return featureProperties;
-    } else {
+  static async addMapObject(createdObject: CreatedObject): Promise<MapFeatureDto> {
+    if (!createdObject.name || !createdObject.desc || !createdObject.coordinates || createdObject.typeId == -1 || createdObject.zoom == -1) {
       throw new Error('Существуют не все поля!');
     }
+
+    const enteredMapFeatureDataDto: EnteredMapFeatureDataDto = {
+      name: createdObject.name,
+      desc: createdObject.desc,
+      coordinates: createdObject.coordinates,
+      zoom: createdObject.zoom,
+      typeId: createdObject.typeId,
+      address: createdObject.address,
+      links: createdObject.links,
+    };
+
+    const res = await axiosInstance.post('/map/object', enteredMapFeatureDataDto, { headers: { ...getAuthConfig() } });
+    const mapFeatureDto: MapFeatureDto = res.data;
+
+    if (createdObject.mediaFiles && res.status == 201) {
+      mapFeatureDto.properties.mediaNames = await this.addMapObjectMedia(mapFeatureDto.properties.id, createdObject.mediaFiles);
+    }
+
+    return mapFeatureDto;
   }
 
   /**
    * Добавление новых изображений к объекту
-   * @param id
-   * @param files
+   * @param id - id объекта
+   * @param files - массив загруженных файлов
+   * @returns {Array<String>} - массив имен добавленных файлов
    */
-  static async addObjectMedia(id: number, files: Blob[]): Promise<Array<string>> {
+  static async addMapObjectMedia(id: number, files: Blob[]): Promise<Array<string>> {
     const formData = new FormData();
 
     for (const file of files) {
@@ -68,16 +70,16 @@ export class MapService {
   }
 
   /**
-   * Получение типов обхекта по его геометрии
+   * Получение типов объекта по его геометрии
    */
-  static async getTypesByGeometry(geometryId: number): Promise<Array<ObjecttypeDto>> {
+  static async getTypesByGeometry(geometryId: number): Promise<Array<ObjectTypeDto>> {
     return (await axiosInstance.get<Array<GeometryTypeDto>>(`/map/object/types/${geometryId}`)).data;
   }
 
   /**
    * Получение ссылки на медиа файл объекта
-   * @param objId
-   * @param mediaName
+   * @param objId - id объекта
+   * @param mediaName - название файла
    */
   static getMediaLink(objId: number, mediaName: string): string {
     return `${axiosInstance.defaults.baseURL}/map/object/media/${objId}/${mediaName}`;
@@ -85,7 +87,7 @@ export class MapService {
 
   /**
    * Получение списка медиа файлов объекта
-   * @param objId
+   * @param objId - id объекта
    */
   static async getObjectMedia(objId: number): Promise<Array<string>> {
     try {
@@ -99,7 +101,7 @@ export class MapService {
    * Получение последних добавленных объектов
    * @param amount - количество подгружаеемых объектов
    */
-  static async getNewestObjects(amount: number): Promise<Array<NewestObjectDto>> {
-    return (await axiosInstance.get<Array<NewestObjectDto>>(`/map/object/newest/${amount}`)).data;
+  static async getNewestObjects(amount: number): Promise<Array<MapFeatureDto>> {
+    return (await axiosInstance.get<Array<MapFeatureDto>>(`/map/object/newest/${amount}`)).data;
   }
 }

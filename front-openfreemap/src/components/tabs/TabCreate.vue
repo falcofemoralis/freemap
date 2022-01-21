@@ -43,8 +43,8 @@ import { defineComponent, reactive, ref } from 'vue';
 import { CreatedObject } from '@/types/CreatedObject';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
-import { ObjecttypeDto } from '../../shared/dto/map/objectTypeDto';
-import { GeometryTypeDto } from '@/../../../../shared/dto/map/geometryType.dto';
+import { ObjectTypeDto } from '@/../../shared/dto/map/objectType.dto';
+import { GeometryTypeDto } from '@/../../shared/dto/map/geometryType.dto';
 
 export default defineComponent({
   name: 'TabCreate',
@@ -58,7 +58,7 @@ export default defineComponent({
     /* init data */
     const geometryTypes = ref<Array<GeometryTypeDto>>(await MapService.getGeometryTypes());
     const selectedGeometry = ref<GeometryTypeDto | undefined>(geometryTypes.value.find((val: GeometryTypeDto) => val.key == props.editType));
-    const types = ref<Array<ObjecttypeDto>>();
+    const types = ref<Array<ObjectTypeDto>>();
     if (selectedGeometry.value) {
       types.value = await MapService.getTypesByGeometry(selectedGeometry.value.id);
     }

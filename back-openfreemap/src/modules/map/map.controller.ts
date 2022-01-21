@@ -72,7 +72,7 @@ export class MapController {
     const mapObject: MapObject = new MapObject();
     mapObject.name = dataDto.name;
     mapObject.desc = dataDto.desc;
-    mapObject.coordinates = dataDto.coordinates;
+    mapObject.coordinates = JSON.stringify(dataDto.coordinates);
     mapObject.zoom = dataDto.zoom;
     mapObject.type = await this.mapService.getObjectTypeById(dataDto.typeId);
     mapObject.address = dataDto.address;
@@ -109,7 +109,7 @@ export class MapController {
         },
       }),
       fileFilter: (request, file, cb) => {
-        if (!file.mimetype.includes('image') || !file.mimetype.includes('video')) {
+        if (!file.mimetype.includes('image') && !file.mimetype.includes('video')) {
           return cb(new BadRequestException('Provide a valid file'), false);
         }
         cb(null, true);
@@ -239,7 +239,7 @@ export class MapController {
           type: 'Feature',
           properties: featureProperties,
           geometry: {
-            type: obj.type.geometryType.geometry,
+            type: obj.type?.geometryType?.geometry,
             coordinates: JSON.parse(obj.coordinates) as number[][][],
           },
         });

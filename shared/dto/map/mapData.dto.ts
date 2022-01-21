@@ -11,7 +11,7 @@ export interface MapFeatureDto {
   type: string,
   properties: MapFeaturePropertiesDto,
   geometry: {
-    type: string,
+    type?: string,
     coordinates: number[][][]
   }
 }

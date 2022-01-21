@@ -6,7 +6,7 @@
     <span class='field'>Ссылки: {{ featureProperties.links }}</span>
     <span class='field'>
       Автор: {{ user.login }}
-      <img class='avatarImage' :src='getUserAvatarLink(user.avatarUrl)' />
+      <img class='avatarImage' :src='getUserAvatarLink(user.avatar)' />
     </span>
     <div class='imageSlider' v-if='featureProperties.mediaNames.length > 0'>
       <img v-for='(media, i) in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'
@@ -23,7 +23,7 @@ import { MapFeaturePropertiesDto } from '../../../../shared/dto/map/mapData.dto'
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { AuthService } from '@/api/authService';
-import { UserDataDto } from '../../shared/dto/auth/user.dto';
+import { UserDto } from '@/../../shared/dto/auth/user.dto';
 import 'viewerjs/dist/viewer.css';
 import { api as viewerApi } from 'v-viewer';
 
@@ -44,7 +44,7 @@ export default defineComponent({
       user.value = await AuthService.getProfileById(featureProperties.value.userId);
     });
     const featureProperties = ref<MapFeaturePropertiesDto>(await getProperties(props.feature));
-    const user = ref<UserDataDto>(await AuthService.getProfileById(featureProperties.value.userId));
+    const user = ref<UserDto>(await AuthService.getProfileById(featureProperties.value.userId));
 
     /**
      * Получение параметров из feature объекта карты. Также идет получения возможных медиа файлов объекта.

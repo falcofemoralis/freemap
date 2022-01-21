@@ -1,17 +1,18 @@
 <template>
   <BaseTab>
     <div class='container'>
-      <div v-for='item in newestFeatures' :key='item.id' @click='onItemSelected(item.coordinates, item.zoom)'
+      <div v-for='feature in newestFeatures' :key='feature.properties.id'
+           @click='onItemSelected(feature.geometry.coordinates, feature.properties.zoom)'
            class='item'>
-        <span>{{ item.name }}</span>
-        <span>Автор: {{ item.userName }}</span>
+        <span>{{ feature.properties.name }}</span>
+        <span>Автор: {{ feature.properties.userId }}</span>
       </div>
     </div>
   </BaseTab>
 </template>
 
 <script lang='ts'>
-import { NewestObjectDto } from '@/../../../shared/dto/map/newestobject.dto';
+import { MapFeatureDto } from '@/../../../shared/dto/map/mapData.dto';
 import { MapService } from '@/api/mapService';
 import { inject, ref } from 'vue';
 import BaseTab from '@/components/tabs/BaseTab.vue';
@@ -22,12 +23,11 @@ export default {
   components: { BaseTab },
   async setup() {
     const map = inject<Map>('map');
-    const newestFeatures = ref<Array<NewestObjectDto>>(await MapService.getNewestObjects(10));
+    const newestFeatures = ref<Array<MapFeatureDto>>(await MapService.getNewestObjects(10));
     const view = map?.getView();
 
-    function onItemSelected(str: string, zoom: number) {
+    function onItemSelected(coordinates: number[][][], zoom: number) {
       //[3896242.816040075,6076995.82677048]
-      const coordinates: number[][][] = JSON.parse(str);
       let sumX = 0;
       let sumY = 0;
       let n = 0;

@@ -68,6 +68,10 @@ export class AuthController {
       throw new HttpException('Passwords not match', HttpStatus.NOT_ACCEPTABLE);
     }
 
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(enteredUserDataDto.email)) {
+      throw new HttpException('Incorrect email', HttpStatus.CONFLICT);
+    }
+
     const token = await this.authService.createToken(await this.authService.register(enteredUserDataDto));
 
     return {
@@ -79,6 +83,7 @@ export class AuthController {
    * Загрузка аватара пользователя. Будет созданно имя файла по паттерну uuidv4.extname
    * @param req - запрос с объектом пользователя req.user
    * @param file - загруженный файл
+   * @returns {string} - имя добавленного файла
    */
   @Post('profile/avatar')
   @UseGuards(JwtAuthGuard)
@@ -100,12 +105,10 @@ export class AuthController {
       },
     }),
   )
-  async addAvatar(@Request() req, @UploadedFile() file: Express.Multer.File) {
+  async addAvatar(@Request() req, @UploadedFile() file: Express.Multer.File): Promise<string> {
     await this.authService.updateUserAvatar((req.user as UserDto).id, file.filename);
 
-    return {
-      avatarPath: file.filename,
-    };
+    return file.filename;
   }
 
   /**
