@@ -72,6 +72,18 @@ export class AuthController {
       throw new HttpException('Incorrect email', HttpStatus.CONFLICT);
     }
 
+    if (enteredUserDataDto.login.length > 30) {
+      throw new HttpException('Login is too long', HttpStatus.CONFLICT);
+    }
+
+    if (enteredUserDataDto.password.length < 6) {
+      throw new HttpException('Password is too short', HttpStatus.CONFLICT);
+    }
+
+    if (enteredUserDataDto.password.length > 50) {
+      throw new HttpException('Password is too long', HttpStatus.CONFLICT);
+    }
+
     const token = await this.authService.createToken(await this.authService.register(enteredUserDataDto));
 
     return {

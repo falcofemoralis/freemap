@@ -65,7 +65,35 @@ export class MapController {
   @UseGuards(JwtAuthGuard)
   @Post('object')
   async addMapObject(@Body() dataDto: EnteredMapFeatureDataDto, @Request() req): Promise<MapFeatureDto> {
-    if (!dataDto.name || !dataDto.desc || !dataDto.typeId || !dataDto.coordinates || !dataDto.zoom) {
+    if (!dataDto.typeId || !dataDto.coordinates || !dataDto.zoom) {
+      throw new BadRequestException();
+    }
+
+    if (!dataDto.name || dataDto.name.length > 30) {
+      throw new BadRequestException();
+    }
+
+    if (!dataDto.desc || dataDto.desc.length > 200) {
+      throw new BadRequestException();
+    }
+
+    if (dataDto.typeId == -1) {
+      throw new BadRequestException();
+    }
+
+    if (dataDto.typeId == -1) {
+      throw new BadRequestException();
+    }
+
+    if (dataDto.coordinates.length == 0) {
+      throw new BadRequestException();
+    }
+
+    if (dataDto.links && dataDto.links?.length > 100) {
+      throw new BadRequestException();
+    }
+
+    if (dataDto.address && dataDto.address?.length > 50) {
       throw new BadRequestException();
     }
 
