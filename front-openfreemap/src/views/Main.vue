@@ -27,6 +27,8 @@ import WidgetSearchBox from '@/components/widgets/WidgetSearchBox.vue';
 import WidgetToolBox from '@/components/widgets/WidgetToolBox.vue';
 import WidgetAccountBox from '@/components/widgets/WidgetAccountBox.vue';
 import WidgetMenuBox from '@/components/widgets/WidgetMenuBox.vue';
+import ProjectionType from '@/constants/ProjectionType';
+import { fromLonLat, toLonLat } from 'ol/proj';
 
 export default defineComponent({
   components: {
@@ -39,19 +41,22 @@ export default defineComponent({
     WidgetEditorBox,
   },
   setup() {
+    const COORDINATES_CHANGE_TIME = 0.25; // Измненение url каждые 250 мс
+
     const store = useStore();
     const route = useRoute();
     const router = useRouter();
     const mapRef = ref(); // Map ref to html element
     let pathChanged = false;
-    const COORDINATES_CHANGE_TIME = 0.25; // Измненение url каждые 250 мс
+    let currentLonLat = new Array<number>();
+    let currentZoom = -1;
 
     /* Map initialization */
     const baseLayer = new TileLayer();
     const mapView = new View({
       center: [0, 0],
       zoom: 2,
-      projection: 'EPSG:3857',
+      projection: ProjectionType.EPSG3857,
     });
     const map = new Map({
       layers: [baseLayer],
@@ -84,14 +89,60 @@ export default defineComponent({
      */
     const query = computed(() => route.query);
     const queryWatch = watch(query, (updatedquery: Record<string, string | LocationQueryValue[] | null>) => {
-      if (updatedquery.pos && updatedquery.z) {
-        const pos = updatedquery.pos.toString().split(',');
-        mapView.setCenter([parseInt(pos[0]), parseInt(pos[1])]);
-        mapView.setZoom(parseInt(updatedquery.z.toString()));
-        //   usePosition.value = true;
+      if (updatedquery.lon && updatedquery.lat && updatedquery.z) {
+        mapView.setCenter(fromLonLat([parseFloat(updatedquery.lon.toString()), parseFloat(updatedquery.lat.toString())], ProjectionType.EPSG3857));
+        mapView.setZoom(parseFloat(updatedquery.z.toString()));
+
+        if (updatedquery.map) {
+          store.dispatch('setMapType', MapType.getMapType(updatedquery.map as string));
+        }
         queryWatch();
       }
     });
+
+    /**
+     * Отслеживание измнения типа карты
+     */
+    watch(computed(() => store.getters.getMapType), () => {
+      updateQuery();
+    });
+
+
+    /**
+     * Обновление url с необходимыми параметрами
+     */
+    function updateQuery() {
+      console.log('updateQuery');
+      const query = new Array<string>();
+      const mapType = store.getters.getMapType
+
+      if (currentLonLat[0]) {
+        query.push(`lon=${currentLonLat[0]}`);
+      }
+
+      if (currentLonLat[1]) {
+        query.push(`lat=${currentLonLat[1]}`);
+      }
+
+      if (currentZoom) {
+        query.push(`z=${currentZoom}`);
+      }
+
+      if (mapType) {
+        query.push(`map=${MapType.getMapName(mapType)}`);
+      }
+
+      let queryString = '?';
+      for (const q of query) {
+        if (queryString != '?') {
+          queryString += '&';
+        }
+
+        queryString += `${q}`;
+      }
+
+      router.replace(queryString);
+    }
 
     /**
      * Листенер изменения координат. Меняется текущий url с добавление координат и текущего зума
@@ -102,7 +153,10 @@ export default defineComponent({
 
       if (!pathChanged) {
         if (coordinates && zoom) {
-          router.replace(`?pos=${coordinates}&z=${zoom}`);
+          const [lon, lat] = toLonLat(coordinates, ProjectionType.EPSG3857);
+          currentLonLat = [lon, lat];
+          currentZoom = zoom;
+          updateQuery();
         }
 
         pathChanged = true;
@@ -155,7 +209,7 @@ export default defineComponent({
   display: none;
 }
 
-.ol-rotate-reset{
+.ol-rotate-reset {
   display: none;
 }
 </style>

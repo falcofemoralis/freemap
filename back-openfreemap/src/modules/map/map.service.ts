@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MapObject } from './entities/mapobject.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { GeometryType } from './entities/geometrytype.entity';
 import { ObjectType } from './entities/objecttype.entity';
 
@@ -21,8 +21,11 @@ export class MapService {
    * Получение всех объетов на карте
    * @returns {Array<MapObject>} - массив объектов
    */
-  getAllObjects(): Promise<Array<MapObject>> {
-    return this.mapObjectRepository.find({ relations: ['type', 'user', 'type.geometryType'] });
+  getAllObjects(zoom: number): Promise<Array<MapObject>> {
+    return this.mapObjectRepository.find({
+      relations: ['type', 'user', 'type.geometryType'],
+      where: { zoom: MoreThan(zoom) },
+    });
   }
 
   /**

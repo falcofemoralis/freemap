@@ -51,6 +51,8 @@ import { MapService } from '@/api/mapService';
 import { ObjectTypeDto } from '@/../../shared/dto/map/objectType.dto';
 import { GeometryTypeDto } from '@/../../shared/dto/map/geometryType.dto';
 import { MapFeatureDto } from '@/../../shared/dto/map/mapData.dto';
+import { toLonLat } from 'ol/proj';
+import ProjectionType from '@/constants/ProjectionType';
 
 export default defineComponent({
   name: 'TabCreate',
@@ -71,12 +73,22 @@ export default defineComponent({
     if (selectedGeometry.value) {
       types.value = await MapService.getTypesByGeometry(selectedGeometry.value.id);
     }
+
+    const lotLatCoordinates: number[][][] = [];
+    lotLatCoordinates[0] = [];
+    for (const tuple of props.coordinates as number[][][]) {
+      for (const coordinate of tuple) {
+        const lonLat = toLonLat(coordinate, ProjectionType.EPSG3857);
+        lotLatCoordinates[0].push(lonLat);
+      }
+    }
+
     /* init object data */
     const createdObject = reactive<CreatedObject>({
       name: '',
       desc: '',
       typeId: -1,
-      coordinates: props.coordinates,
+      coordinates: lotLatCoordinates,
       zoom: props.zoom,
     });
 

@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   Request,
   Res,
   UploadedFiles,
@@ -41,8 +42,15 @@ export class MapController {
    * @returns {MapDataDto} - пак данных
    */
   @Get()
-  async getMapData(): Promise<MapDataDto> {
-    const features = await this.getMapFeatures(await this.mapService.getAllObjects());
+  async getMapData(@Query('zoom') zoom: number, @Query('lon') lon: number, @Query('lat') lat: number): Promise<MapDataDto> {
+    if (!zoom || !lon || !lat) {
+      throw new NotFoundException();
+    }
+
+    console.log(lon);
+    console.log(lat);
+
+    const features = await this.getMapFeatures(await this.mapService.getAllObjects(zoom));
 
     return {
       type: 'FeatureCollection',

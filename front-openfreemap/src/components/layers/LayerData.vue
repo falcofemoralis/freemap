@@ -27,9 +27,10 @@ import { useStore } from 'vuex';
 import { SelectEvent } from 'ol/interaction/Select';
 import TabSelect from '@/components/tabs/TabSelect.vue';
 import { MapFeatureDto } from '../../../../shared/dto/map/mapData.dto';
-import { MapService } from '@/api/mapService';
 import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
+import { MapService } from '@/api/mapService';
+import {toLonLat} from 'ol/proj';
 
 export default defineComponent({
   name: 'LayerData',
@@ -80,9 +81,11 @@ export default defineComponent({
     const baseLayer = new VectorLayer({
       source: new VectorSource({
         format: new GeoJSON(),
-        /*       loader: (extent, resolution, projection) => {
-
-               }*/
+        /*    loader: (extent, resolution, projection) => {
+              console.log(extent);
+              console.log(resolution);
+              console.log(projection);
+            },*/
         url: MapService.getMapDataUrl(),
       }),
       style: function(feature) {
@@ -91,6 +94,18 @@ export default defineComponent({
       },
       renderBuffer: 5000,
     });
+
+    let currZoom = map?.getView().getZoom();
+    map?.on('moveend', function(e) {
+      const newZoom = map.getView().getZoom();
+      console.log(toLonLat(map?.getView().calculateExtent(map.getSize())));
+
+      if (currZoom != newZoom) {
+        console.log('zoom end, new zoom: ' + newZoom);
+        currZoom = newZoom;
+      }
+    });
+
     map?.addLayer(baseLayer);
 
     /**
