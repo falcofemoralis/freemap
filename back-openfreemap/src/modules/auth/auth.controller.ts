@@ -25,6 +25,7 @@ import { v4 } from 'uuid';
 import { CredentialsDto } from 'shared/dto/auth/credentials.dto';
 import { UserDto } from 'shared/dto/auth/user.dto';
 import * as fs from 'fs';
+import { UserDocument } from './schemas/user.schema';
 
 const AVATAR_PATH = './uploads/avatars';
 
@@ -40,8 +41,9 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req): Promise<CredentialsDto> {
-    const token = await this.authService.createToken(req.user);
-    const avatar = (req.user as UserDto).avatar;
+    const user = req.user as UserDocument;
+    const token = await this.authService.createToken(user);
+    const avatar = user.avatar;
 
     return {
       accessToken: token,
@@ -128,9 +130,15 @@ export class AuthController {
    * @param id - id пользователя
    * @returns {UserDto} - пользователь
    */
-  @Get('profile/:id')
-  async getProfileById(@Param('id') id): Promise<UserDto> {
+  @Get('profile/user/:id')
+  async getProfileById(@Param('id') id: string): Promise<UserDto> {
+    if (!id) {
+      throw new NotFoundException();
+    }
+
     const user = await this.authService.getUserById(id);
+
+    console.log(user);
 
     return {
       id,
@@ -147,7 +155,11 @@ export class AuthController {
    * @returns файл аватара
    */
   @Get('profile/avatar/:img')
-  getProfileAvatar(@Param('img') img, @Res() res) {
+  getProfileAvatar(@Param('img') img: string, @Res() res) {
+    if (!img) {
+      throw new NotFoundException();
+    }
+
     const path = Path.join(process.cwd(), `${AVATAR_PATH}/${img}`);
 
     try {

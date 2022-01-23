@@ -1,7 +1,7 @@
 <template>
   <BaseTab>
     <h2 class='field'> {{ featureProperties.name }}</h2>
-    <span class='field'> {{ featureProperties.desc }}</span>
+    <span class='field'> {{ featureProperties.description }}</span>
     <span class='field'>Адресс: {{ featureProperties.address }}</span>
     <span class='field'>Ссылки: {{ featureProperties.links }}</span>
     <span class='field'>

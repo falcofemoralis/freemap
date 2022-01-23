@@ -1,9 +1,9 @@
 export interface CreatedObject {
   name: string;
-  desc: string;
-  coordinates: number[][][];
+  description: string;
+  coordinates: number[][];
   zoom: number;
-  typeId: number;
+  typeId: string;
   address?: string;
   links?: string;
   mediaFiles?: Blob[];

@@ -15,8 +15,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { MapService } from './map.service';
-import { MapObject } from './entities/mapobject.entity';
-import { EnteredMapFeatureDataDto } from 'shared/dto/map/enteredMapFeatureData.dto';
 import { ObjectTypeDto } from 'shared/dto/map/objectType.dto';
 import { GeometryTypeDto } from 'shared/dto/map/geometryType.dto';
 import { MapDataDto, MapFeatureDto, MapFeaturePropertiesDto } from 'shared/dto/map/mapdata.dto';
@@ -29,7 +27,8 @@ import { v4 } from 'uuid';
 import * as fs from 'fs';
 import { MapObjectGuard } from './guards/mapObjectGuard';
 import { UserDto } from 'shared/dto/auth/user.dto';
-
+import { MapFeatureDocument } from './schemas/mapFeature.schema';
+import { GetMapDataQuery } from './queries/getMapData.query';
 
 const MEDIA_PATH = './uploads/media';
 
@@ -39,18 +38,15 @@ export class MapController {
 
   /**
    * Получение объектов на карте
+   * @param latT - верхняя точка широты
+   * @param lonR - правая точка долготы
+   * @param latB - нижняя точка широты
+   * @param lonL - левая точка долготы
    * @returns {MapDataDto} - пак данных
    */
   @Get()
-  async getMapData(@Query('zoom') zoom: number, @Query('lon') lon: number, @Query('lat') lat: number): Promise<MapDataDto> {
-    if (!zoom || !lon || !lat) {
-      throw new NotFoundException();
-    }
-
-    console.log(lon);
-    console.log(lat);
-
-    const features = await this.getMapFeatures(await this.mapService.getAllObjects(zoom));
+  async getMapData(@Query() queryParams: GetMapDataQuery): Promise<MapDataDto> {
+    const features = await this.packMapFeatures(await this.mapService.getAllObjects(queryParams.latT, queryParams.lonR, queryParams.latB, queryParams.lonL, queryParams.zoom));
 
     return {
       type: 'FeatureCollection',
@@ -72,7 +68,7 @@ export class MapController {
    */
   @UseGuards(JwtAuthGuard)
   @Post('object')
-  async addMapObject(@Body() dataDto: EnteredMapFeatureDataDto, @Request() req): Promise<MapFeatureDto> {
+  async addMapObject(@Body() dataDto: MapFeaturePropertiesDto, @Request() req): Promise<MapFeatureDto> {
     if (!dataDto.typeId || !dataDto.coordinates || !dataDto.zoom) {
       throw new BadRequestException();
     }
@@ -81,15 +77,11 @@ export class MapController {
       throw new BadRequestException();
     }
 
-    if (!dataDto.desc || dataDto.desc.length > 200) {
+    if (!dataDto.description || dataDto.description.length > 200) {
       throw new BadRequestException();
     }
 
-    if (dataDto.typeId == -1) {
-      throw new BadRequestException();
-    }
-
-    if (dataDto.typeId == -1) {
+    if (!dataDto.typeId) {
       throw new BadRequestException();
     }
 
@@ -105,19 +97,16 @@ export class MapController {
       throw new BadRequestException();
     }
 
-    const mapObject: MapObject = new MapObject();
-    mapObject.name = dataDto.name;
-    mapObject.desc = dataDto.desc;
-    mapObject.coordinates = JSON.stringify(dataDto.coordinates);
-    mapObject.zoom = dataDto.zoom;
-    mapObject.type = await this.mapService.getObjectTypeById(dataDto.typeId);
-    mapObject.address = dataDto.address;
-    mapObject.links = dataDto.links;
-    mapObject.user = await this.authService.getUserById((req.user as UserDto).id);
+    const userId = (req.user as UserDto).id;
+    if (!userId) {
+      throw new BadRequestException();
+    }
 
-    const insertedMapObject = await this.mapService.addMapObject(mapObject);
+    dataDto.userId = userId;
 
-    return (await this.getMapFeatures([insertedMapObject]))[0];
+    const insertedMapObject = await this.mapService.addMapObject(dataDto);
+
+    return (await this.packMapFeatures([insertedMapObject]))[0];
   }
 
   /**
@@ -193,12 +182,25 @@ export class MapController {
     }
   }
 
+  //--------------
+
   /**
    * Получение всех типов объекта
    */
-  @Get('object/types')
+  @Get('object/queries')
   async getObjectTypes(): Promise<Array<ObjectTypeDto>> {
-    return await this.mapService.getObjectTypes();
+    const types = await this.mapService.getObjectTypes();
+
+    const typesDto = new Array<ObjectTypeDto>();
+    for (const type of types) {
+      typesDto.push({
+        id: type.id,
+        geometryId: type.geometryType.id,
+        name: type.name,
+      });
+    }
+
+    return typesDto;
   }
 
   /**
@@ -206,16 +208,71 @@ export class MapController {
    * @param id - id типа
    */
   @Get('object/type/:id')
-  async getObjectTypeById(@Param('id') id: number): Promise<ObjectTypeDto> {
-    return await this.mapService.getObjectTypeById(id);
+  async getObjectTypeById(@Param('id') id: string): Promise<ObjectTypeDto> {
+    const type = await this.mapService.getObjectTypeById(id);
+
+    return {
+      id: type.id,
+      geometryId: type.geometryType.id,
+      name: type.name,
+    };
   }
+
+  /**
+   * Добавление нового типа объекта
+   * @param {ObjectTypeDto} objectTypeDto - тип объекта
+   */
+  @Post('object/type')
+  async createObjectType(@Body() objectTypeDto: ObjectTypeDto): Promise<ObjectTypeDto> {
+    const insertedObjectType = await this.mapService.createObjectType(objectTypeDto);
+
+    return {
+      id: insertedObjectType.id,
+      geometryId: insertedObjectType.geometryType.id,
+      name: insertedObjectType.name,
+    };
+  }
+
+  /**
+   * Получение типов объектов по id геометрии
+   * @param id - id геометрии
+   */
+  @Get('object/queries/:id')
+  async getObjectTypesByGeometryId(@Param('id') id: string): Promise<Array<ObjectTypeDto>> {
+    const types = await this.mapService.getTypesByGeometryId(id);
+
+    const typesDto = new Array<ObjectTypeDto>();
+    for (const type of types) {
+      typesDto.push({
+        id: type.id,
+        geometryId: type.geometryType.id,
+        name: type.name,
+      });
+    }
+
+    return typesDto;
+  }
+
+  //--------------
 
   /**
    * Получение геометрий объекта
    */
   @Get('object/geometries')
   async getGeometryTypes(): Promise<Array<GeometryTypeDto>> {
-    return await this.mapService.getGeometryTypes();
+    const types = await this.mapService.getGeometryTypes();
+
+    const typesDto = new Array<GeometryTypeDto>();
+    for (const type of types) {
+      typesDto.push({
+        id: type.id,
+        name: type.name,
+        geometry: type.geometry,
+        key: type.key,
+      });
+    }
+
+    return typesDto;
   }
 
   /**
@@ -223,18 +280,18 @@ export class MapController {
    * @param id - id геометрии
    */
   @Get('object/geometry/:id')
-  async getGeometryTypeById(@Param('id') id: number): Promise<GeometryTypeDto> {
-    return await this.mapService.getGeometryTypeById(id);
+  async getGeometryTypeById(@Param('id') id: string): Promise<GeometryTypeDto> {
+    const type = await this.mapService.getGeometryTypeById(id);
+
+    return {
+      id: type.id,
+      name: type.name,
+      key: type.key,
+      geometry: type.geometry,
+    };
   }
 
-  /**
-   * Получение типов объектов по id геотмерии
-   * @param id - id геометрии
-   */
-  @Get('object/types/:id')
-  async getObjectTypesByGeometryId(@Param('id') id: number): Promise<Array<ObjectTypeDto>> {
-    return await this.mapService.getTypesByGeometryId(id);
-  }
+  //--------------
 
   /**
    * Получение списка последних добавленных объектов на карту
@@ -246,29 +303,35 @@ export class MapController {
       throw new ForbiddenException();
     }
 
-    return await this.getMapFeatures(await this.mapService.getNewestObjects(amount));
+    return await this.packMapFeatures(await this.mapService.getNewestObjects(amount));
   }
 
   /**
-   * Получение feature объектов карты
+   * Упакова feature в соотвествии с форматов geoJson
    * @param mapObjects - список объектов в базе данных
    * @returns {Array<MapFeatureDto>} - массив features
    */
-  async getMapFeatures(mapObjects: Array<MapObject>): Promise<Array<MapFeatureDto>> {
+  async packMapFeatures(mapObjects: Array<MapFeatureDocument>): Promise<Array<MapFeatureDto>> {
     const features = new Array<MapFeatureDto>();
 
     for (const obj of mapObjects) {
       try {
+        const coordinates: number[][] = [];
+        for (const coordinate of obj.coordinates) {
+          coordinates.push([coordinate.lon, coordinate.lat]);
+        }
+
         const featureProperties: MapFeaturePropertiesDto = {
           id: obj.id,
           userId: obj.user.id,
           typeId: obj.type.id,
           name: obj.name,
-          desc: obj.desc,
+          description: obj.description,
           zoom: obj.zoom,
-          date: obj.createdAt.toString(),
-          address: obj.address ?? null,
-          links: obj.links ?? null,
+          date: obj._id.getTimestamp(),
+          address: obj.address,
+          links: obj.links,
+          coordinates: coordinates,
         };
 
         features.push({
@@ -276,7 +339,7 @@ export class MapController {
           properties: featureProperties,
           geometry: {
             type: obj.type?.geometryType?.geometry,
-            coordinates: JSON.parse(obj.coordinates) as number[][][],
+            coordinates: [coordinates],
           },
         });
       } catch (e) {

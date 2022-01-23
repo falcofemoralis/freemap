@@ -1,10 +1,8 @@
 import { CreatedObject } from '@/types/CreatedObject';
 import { axiosInstance, getAuthConfig } from '@/api/index';
-import { EnteredMapFeatureDataDto } from '../../../shared/dto/map/enteredMapFeatureData.dto';
+import { MapFeatureDto, MapFeaturePropertiesDto } from '../../../shared/dto/map/mapData.dto';
 import { ObjectTypeDto } from '../../../shared/dto/map/objectType.dto';
 import { GeometryTypeDto } from '../../../shared/dto/map/geometryType.dto';
-import { MapFeatureDto } from '../../../shared/dto/map/mapData.dto';
-import axios from 'axios';
 
 export class MapService {
   /**
@@ -21,18 +19,18 @@ export class MapService {
    * @returns {MapFeatureDto} - добавленный объект в базу
    */
   static async addMapObject(createdObject: CreatedObject): Promise<MapFeatureDto> {
-    if (!createdObject.name || !createdObject.desc || createdObject.coordinates.length == 0 || createdObject.typeId == -1 || createdObject.zoom == -1) {
+    if (!createdObject.name || !createdObject.description || createdObject.coordinates.length == 0 || !createdObject.typeId || createdObject.zoom == -1) {
       throw new Error('Существуют не все поля!');
     }
 
-    const enteredMapFeatureDataDto: EnteredMapFeatureDataDto = {
+    const enteredMapFeatureDataDto: Omit<MapFeaturePropertiesDto, 'id' | 'userId'> = {
       name: createdObject.name,
-      desc: createdObject.desc,
+      description: createdObject.description,
       coordinates: createdObject.coordinates,
       zoom: createdObject.zoom,
       typeId: createdObject.typeId,
       address: createdObject.address,
-      links: createdObject.links,
+      links: [createdObject.links ?? ''],
     };
 
     const res = await axiosInstance.post('/map/object', enteredMapFeatureDataDto, { headers: { ...getAuthConfig() } });
@@ -45,11 +43,11 @@ export class MapService {
 
       return mapFeatureDto;
     } catch (e) {
-    /*  if (axios.isAxiosError(e)) {
-        if (e.response?.status) {
-          throw new Error('');
-        }
-      }*/
+      /*  if (axios.isAxiosError(e)) {
+          if (e.response?.status) {
+            throw new Error('');
+          }
+        }*/
 
       throw e;
     }
@@ -61,7 +59,7 @@ export class MapService {
    * @param files - массив загруженных файлов
    * @returns {Array<String>} - массив имен добавленных файлов
    */
-  static async addMapObjectMedia(id: number, files: Blob[]): Promise<Array<string>> {
+  static async addMapObjectMedia(id: string, files: Blob[]): Promise<Array<string>> {
     const formData = new FormData();
 
     for (const file of files) {
@@ -83,8 +81,8 @@ export class MapService {
   /**
    * Получение типов объекта по его геометрии
    */
-  static async getTypesByGeometry(geometryId: number): Promise<Array<ObjectTypeDto>> {
-    return (await axiosInstance.get<Array<GeometryTypeDto>>(`/map/object/types/${geometryId}`)).data;
+  static async getTypesByGeometry(geometryId: string): Promise<Array<ObjectTypeDto>> {
+    return (await axiosInstance.get<Array<ObjectTypeDto>>(`/map/object/types/${geometryId}`)).data;
   }
 
   /**
@@ -92,7 +90,7 @@ export class MapService {
    * @param objId - id объекта
    * @param mediaName - название файла
    */
-  static getMediaLink(objId: number, mediaName: string): string {
+  static getMediaLink(objId: string, mediaName: string): string {
     return `${axiosInstance.defaults.baseURL}/map/object/media/${objId}/${mediaName}`;
   }
 
@@ -100,7 +98,7 @@ export class MapService {
    * Получение списка медиа файлов объекта
    * @param objId - id объекта
    */
-  static async getObjectMedia(objId: number): Promise<Array<string>> {
+  static async getObjectMedia(objId: string): Promise<Array<string>> {
     try {
       return (await axiosInstance.get<Array<string>>(`/map/object/media/${objId}`)).data;
     } catch (e) {

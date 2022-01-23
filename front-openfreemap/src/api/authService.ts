@@ -19,7 +19,6 @@ export class AuthService {
 
     try {
       const credentials: CredentialsDto = (await axiosInstance.post('/auth/login', enteredUserDataDto)).data;
-
       await store.dispatch('setToken', credentials.accessToken);
 
       if (credentials.profileAvatar) {
@@ -50,7 +49,6 @@ export class AuthService {
 
     try {
       const credentials: CredentialsDto = (await axiosInstance.post('/auth/register', enteredUserDataDto)).data;
-
       await store.dispatch('setToken', credentials.accessToken);
 
       if (createdUser.avatar && credentials.accessToken) {
@@ -97,8 +95,8 @@ export class AuthService {
    * @param id - id пользователя
    * @returns {UserDto} - данные про пользователя
    */
-  static async getProfileById(id: number): Promise<UserDto> {
-    const res = await axiosInstance.get<UserDto>(`/auth/profile/${id}`);
+  static async getProfileById(id: string): Promise<UserDto> {
+    const res = await axiosInstance.get<UserDto>(`/auth/profile/user/${id}`);
     return res.data;
   }
 }

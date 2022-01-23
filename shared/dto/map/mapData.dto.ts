@@ -1,9 +1,19 @@
-import { EnteredMapFeatureDataDto } from './enteredMapFeatureData.dto';
+export interface Coordinate {
+  lon: number;
+  lat: number;
+}
 
-export interface MapFeaturePropertiesDto extends Omit<EnteredMapFeatureDataDto, 'coordinates'> {
-  id: number;
-  userId: number;
-  date: string;
+export interface MapFeaturePropertiesDto {
+  name: string;
+  description: string;
+  coordinates: number[][];
+  zoom: number;
+  typeId: string;
+  address?: string;
+  links?: string[];
+  id: string;
+  userId: string;
+  date?: string;
   mediaNames?: Array<string>;
 }
 

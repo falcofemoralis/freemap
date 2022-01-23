@@ -30,7 +30,8 @@ import { MapFeatureDto } from '../../../../shared/dto/map/mapData.dto';
 import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import { MapService } from '@/api/mapService';
-import {toLonLat} from 'ol/proj';
+import { transformExtent } from 'ol/proj';
+import { axiosInstance } from '@/api';
 
 export default defineComponent({
   name: 'LayerData',
@@ -98,8 +99,20 @@ export default defineComponent({
     let currZoom = map?.getView().getZoom();
     map?.on('moveend', function(e) {
       const newZoom = map.getView().getZoom();
-      console.log(toLonLat(map?.getView().calculateExtent(map.getSize())));
+      let extent = map.getView().calculateExtent(map.getSize());
+      extent = transformExtent(extent, 'EPSG:3857', 'EPSG:4326');
 
+      // console.log(toLonLat(map?.getView().calculateExtent(map.getSize())));
+
+
+      async function getData(ext: number[]) {
+        const res = await axiosInstance.get(`/map?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=1`);
+        console.log(res.data);
+      }
+
+      getData(extent);
+
+      console.log(extent);
       if (currZoom != newZoom) {
         console.log('zoom end, new zoom: ' + newZoom);
         currZoom = newZoom;

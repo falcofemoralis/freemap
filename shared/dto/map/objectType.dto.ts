@@ -1,4 +1,5 @@
 export interface ObjectTypeDto {
-  id: number;
+  id: string;
+  geometryId: string;
   name: string;
 }

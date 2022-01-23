@@ -20,7 +20,7 @@
     </div>
     <div class='field'>
       <h4>Описание</h4>
-      <input v-model='createdObject.desc' placeholder='Enter desc' />
+      <input v-model='createdObject.description' placeholder='Enter desc' />
     </div>
     <div class='field'>
       <h4>Адресс</h4>
@@ -74,20 +74,20 @@ export default defineComponent({
       types.value = await MapService.getTypesByGeometry(selectedGeometry.value.id);
     }
 
-    const lotLatCoordinates: number[][][] = [];
-    lotLatCoordinates[0] = [];
+    // Конвертирование коордиант geojson из EPSG:3857 в lon Lat
+    const lotLatCoordinates: number[][] = [];
     for (const tuple of props.coordinates as number[][][]) {
       for (const coordinate of tuple) {
         const lonLat = toLonLat(coordinate, ProjectionType.EPSG3857);
-        lotLatCoordinates[0].push(lonLat);
+        lotLatCoordinates.push(lonLat);
       }
     }
 
     /* init object data */
     const createdObject = reactive<CreatedObject>({
       name: '',
-      desc: '',
-      typeId: -1,
+      description: '',
+      typeId: '',
       coordinates: lotLatCoordinates,
       zoom: props.zoom,
     });
@@ -104,13 +104,13 @@ export default defineComponent({
         errors.value.push('Имя слишком длинное');
       }
 
-      if (!createdObject.desc) {
+      if (!createdObject.description) {
         errors.value.push('Введите описание');
-      } else if (createdObject.desc.length > 200) {
+      } else if (createdObject.description.length > 200) {
         errors.value.push('Описание слишком длинное');
       }
 
-      if (createdObject.typeId == -1) {
+      if (!createdObject.typeId) {
         errors.value.push('Не выбран тип объекта');
       }
 
