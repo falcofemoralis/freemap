@@ -138,20 +138,6 @@ export class MapController {
   }
 
   /**
-   * Получение списка имен медиа файлов у объекта
-   * @param id - id объекта
-   * @returns {Array<String>} - массив имен файлов медиа
-   */
-  @Get('object/media/:id')
-  getObjectMediaFiles(@Param('id') id: string): Array<string> {
-    try {
-      return fs.readdirSync(Path.join(process.cwd(), `${MEDIA_PATH}/${id}`));
-    } catch (e) {
-      throw new NotFoundException();
-    }
-  }
-
-  /**
    * Получение медиа файла с сервера
    * @param id - id объекта
    * @param name - имя файла
@@ -251,6 +237,8 @@ export class MapController {
   async getGeometryTypes(): Promise<Array<GeometryTypeDto>> {
     const types = await this.mapService.getGeometryTypes();
 
+    console.log(types);
+
     const typesDto = new Array<GeometryTypeDto>();
     for (const type of types) {
       typesDto.push({
@@ -303,9 +291,46 @@ export class MapController {
         name: obj.name,
         date: obj._id.getTimestamp(),
         coordinates: obj.coordinates,
+        zoom: obj.zoom,
       });
     }
 
     return newestFeatures;
+  }
+
+  /**
+   * Получение всех данных про объект
+   * @param id - id объект
+   */
+  @Get('object/:id')
+  async getMapObject(@Param('id') id: string): Promise<FullFeaturePropertiesDto> {
+    if (!id) {
+      throw new BadRequestException();
+    }
+
+    const mapObject = await this.mapService.getObjectById(id);
+
+    let mediaNames = new Array<string>();
+    try {
+      mediaNames = fs.readdirSync(Path.join(process.cwd(), `${MEDIA_PATH}/${id}`));
+    } catch (e) {
+      //throw new NotFoundException();
+    }
+
+    return {
+      id,
+      userId: mapObject.user.id,
+      userLogin: mapObject.user.login,
+      userAvatar: mapObject.user.avatar,
+      typeId: mapObject.type.id,
+      name: mapObject.name,
+      description: mapObject.description,
+      coordinates: mapObject.coordinates,
+      zoom: mapObject.zoom,
+      date: mapObject._id.getTimestamp(),
+      address: mapObject.address,
+      links: mapObject.links,
+      mediaNames,
+    };
   }
 }

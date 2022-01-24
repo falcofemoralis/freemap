@@ -48,11 +48,11 @@ import { defineComponent, reactive, ref } from 'vue';
 import { CreatedObject } from '@/types/CreatedObject';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
-import { ObjectTypeDto } from '@/../../shared/dto/map/objectType.dto';
-import { GeometryTypeDto } from '@/../../shared/dto/map/geometryType.dto';
-import { MapFeatureDto } from '@/../../shared/dto/map/mapData.dto';
 import { toLonLat } from 'ol/proj';
 import ProjectionType from '@/constants/ProjectionType';
+import { GeometryTypeDto } from '@/dto/map/geometryType.dto';
+import { ObjectTypeDto } from '@/dto/map/objectType.dto';
+import { Coordinate, MapFeatureDto } from '@/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'TabCreate',
@@ -75,11 +75,11 @@ export default defineComponent({
     }
 
     // Конвертирование коордиант geojson из EPSG:3857 в lon Lat
-    const lotLatCoordinates: number[][] = [];
+    const lotLatCoordinates: Coordinate[] = [];
     for (const tuple of props.coordinates as number[][][]) {
       for (const coordinate of tuple) {
         const lonLat = toLonLat(coordinate, ProjectionType.EPSG3857);
-        lotLatCoordinates.push(lonLat);
+        lotLatCoordinates.push({ lon: lonLat[0], lat: lonLat[1] });
       }
     }
 
@@ -106,7 +106,7 @@ export default defineComponent({
 
       if (!createdObject.description) {
         errors.value.push('Введите описание');
-      } else if (createdObject.description.length > 200) {
+      } else if (createdObject.description.length > 400) {
         errors.value.push('Описание слишком длинное');
       }
 

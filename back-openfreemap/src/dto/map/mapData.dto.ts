@@ -14,8 +14,8 @@ export class ShortFeaturePropertiesDto {
 }
 
 export class FullFeaturePropertiesDto {
-  id: string;
-  userId: string;
+  id?: string;
+  userId?: string;
   userLogin?: string;
   userAvatar?: string;
 
@@ -36,7 +36,7 @@ export class FullFeaturePropertiesDto {
   @IsNotEmpty()
   zoom: number;
 
-  date: string;
+  date?: string;
   address?: string;
   links?: string[];
   mediaNames?: Array<string>;
@@ -69,4 +69,5 @@ export interface NewestMapFeatureDto {
   name: string;
   date: string;
   coordinates: Coordinate[];
+  zoom: number;
 }

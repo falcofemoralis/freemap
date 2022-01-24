@@ -26,12 +26,11 @@ import { pointerMove } from 'ol/events/condition';
 import { useStore } from 'vuex';
 import { SelectEvent } from 'ol/interaction/Select';
 import TabSelect from '@/components/tabs/TabSelect.vue';
-import { MapFeatureDto } from '../../../../shared/dto/map/mapData.dto';
 import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import { MapService } from '@/api/mapService';
 import { transformExtent } from 'ol/proj';
-import ProjectionType from '@/constants/ProjectionType';
+import { MapFeatureDto } from '@/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'LayerData',
@@ -80,10 +79,6 @@ export default defineComponent({
      * Базовый слой с объектами
      */
     const baseLayer = new VectorLayer({
-      /*            source: new VectorSource({
-                    format: new GeoJSON(),
-                    url: 'http://192.168.0.100:3000/api/map?latT=48.15986892503301&lonR=35.8281942180315&latB=47.576318197603655&lonL=34.657504459578135&zoom=0',
-                  }),*/
       style: function(feature) {
         style.getText().setText(feature.get('name'));
         return [style];
@@ -92,39 +87,29 @@ export default defineComponent({
     });
 
 
-    let currZoom = map?.getView().getZoom();
     map?.on('moveend', function(e) {
-      const newZoom = map.getView().getZoom();
-      let extent = map.getView().calculateExtent(map.getSize());
-      extent = transformExtent(extent, 'EPSG:3857', 'EPSG:4326');
+      const zoom = map.getView().getZoom();
+      const extent = transformExtent(map.getView().calculateExtent(map.getSize()), 'EPSG:3857', 'EPSG:4326');
 
       const vectorSource = new Vector({
         format: new GeoJSON(),
         loader: async () => {
-          const res = await MapService.getMapData(extent, 0);
+          if (extent && zoom) {
+            const res = await MapService.getMapData(extent, zoom);
 
-          /* const features = vectorSource.readFeatures(res), {
-             featureProjection: projection
-           });*/
+            const features = vectorSource?.getFormat()?.readFeatures(res, {
+              dataProjection: 'EPSG:4326',
+              featureProjection: 'EPSG:3857',
+            });
 
-          const features = vectorSource?.getFormat()?.readFeatures(res, {
-            dataProjection: 'EPSG:4326',
-            featureProjection: 'EPSG:3857'
-          });
-          console.log(features);
-          if (features) {
-            vectorSource.addFeatures(features as Feature<Geometry>[]);
+            if (features) {
+              vectorSource.addFeatures(features as Feature<Geometry>[]);
+            }
           }
         },
-        // url:  MapService.getMapDataUrl(extent, 0),
       });
 
       baseLayer.setSource(vectorSource);
-
-      if (currZoom != newZoom) {
-        console.log('zoom end, new zoom: ' + newZoom);
-        currZoom = newZoom;
-      }
     });
 
     map?.addLayer(baseLayer);
@@ -137,7 +122,6 @@ export default defineComponent({
       const featureExtent = feature.getGeometry()?.getExtent();
       const mapExtent = map?.getView().calculateExtent(map.getSize());
 
-      // console.log(featureExtent);
       if (featureExtent && mapExtent) {
         return (
           featureExtent[0] - mapExtent[0] > 0 &&

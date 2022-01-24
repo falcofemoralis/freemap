@@ -16,7 +16,8 @@
     "baseUrl": "src",
     "outDir": "./dist",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/dto/*": ["../../back-openfreemap/src/dto/*"]
     },
     "lib": [
       "esnext",
@@ -32,6 +33,7 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "src/**/*",
+    "../back-openfreemap/src/dto/**/*.ts"
   ],
   "exclude": [
     "node_modules"

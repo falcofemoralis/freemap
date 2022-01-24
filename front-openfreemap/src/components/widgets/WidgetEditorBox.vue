@@ -73,7 +73,7 @@ import { Geometry, Polygon } from 'ol/geom';
 import EditType from '@/constants/EditType';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import Animation from '@/components/elements/Animation.vue';
-import { MapFeatureDto } from '@/../../shared/dto/map/mapData.dto';
+import { MapFeatureDto } from '@/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'WidgetEditorBox',

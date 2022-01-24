@@ -1,8 +1,8 @@
 import { CreatedObject } from '@/types/CreatedObject';
 import { axiosInstance, getAuthConfig } from '@/api/index';
-import { MapDataDto, MapFeatureDto, MapFeaturePropertiesDto } from '../../../shared/dto/map/mapData.dto';
-import { ObjectTypeDto } from '../../../shared/dto/map/objectType.dto';
-import { GeometryTypeDto } from '../../../shared/dto/map/geometryType.dto';
+import { FullFeaturePropertiesDto, MapDataDto, MapFeatureDto, NewestMapFeatureDto } from '@/dto/map/mapData.dto';
+import { GeometryTypeDto } from '@/dto/map/geometryType.dto';
+import { ObjectTypeDto } from '@/dto/map/objectType.dto';
 
 export class MapService {
   /**
@@ -10,7 +10,8 @@ export class MapService {
    * @returns {string} - url запрос к данным на карте
    */
   static async getMapData(ext: number[], zoom: number): Promise<MapDataDto> {
-    return (await axiosInstance.get<MapDataDto>(`/map?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=${zoom}`)).data;
+    const mapData = (await axiosInstance.get<MapDataDto>(`/map?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=${zoom}`)).data;
+    return mapData;
   }
 
   /**
@@ -19,11 +20,7 @@ export class MapService {
    * @returns {MapFeatureDto} - добавленный объект в базу
    */
   static async addMapObject(createdObject: CreatedObject): Promise<MapFeatureDto> {
-    if (!createdObject.name || !createdObject.description || createdObject.coordinates.length == 0 || !createdObject.typeId || createdObject.zoom == -1) {
-      throw new Error('Существуют не все поля!');
-    }
-
-    const enteredMapFeatureDataDto: Omit<MapFeaturePropertiesDto, 'id' | 'userId'> = {
+    const featurePropertiesDto: FullFeaturePropertiesDto = {
       name: createdObject.name,
       description: createdObject.description,
       coordinates: createdObject.coordinates,
@@ -33,12 +30,12 @@ export class MapService {
       links: [createdObject.links ?? ''],
     };
 
-    const res = await axiosInstance.post('/map/object', enteredMapFeatureDataDto, { headers: { ...getAuthConfig() } });
+    const res = await axiosInstance.post('/map/object', featurePropertiesDto, { headers: { ...getAuthConfig() } });
     const mapFeatureDto: MapFeatureDto = res.data;
 
     try {
-      if (createdObject.mediaFiles && res.status == 201) {
-        mapFeatureDto.properties.mediaNames = await this.addMapObjectMedia(mapFeatureDto.properties.id, createdObject.mediaFiles);
+      if (createdObject.mediaFiles && res.status == 201 && mapFeatureDto.properties.id) {
+        (mapFeatureDto.properties as FullFeaturePropertiesDto).mediaNames = await this.addMapObjectMedia(mapFeatureDto.properties.id, createdObject.mediaFiles);
       }
 
       return mapFeatureDto;
@@ -51,6 +48,10 @@ export class MapService {
 
       throw e;
     }
+  }
+
+  static async getMapObject(id: string): Promise<FullFeaturePropertiesDto> {
+    return (await axiosInstance.get<FullFeaturePropertiesDto>(`/map/object/${id}`)).data;
   }
 
   /**
@@ -66,7 +67,7 @@ export class MapService {
       formData.append('files', file);
     }
 
-    const res = await axiosInstance.post(`/map/object/${id}/media`, formData, { headers: { 'Content-Type': 'multipart/form-data', ...getAuthConfig() } });
+    const res = await axiosInstance.post(`/map/object/media/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data', ...getAuthConfig() } });
 
     return res.data;
   }
@@ -95,22 +96,10 @@ export class MapService {
   }
 
   /**
-   * Получение списка медиа файлов объекта
-   * @param objId - id объекта
-   */
-  static async getObjectMedia(objId: string): Promise<Array<string>> {
-    try {
-      return (await axiosInstance.get<Array<string>>(`/map/object/media/${objId}`)).data;
-    } catch (e) {
-      return [];
-    }
-  }
-
-  /**
    * Получение последних добавленных объектов
    * @param amount - количество подгружаеемых объектов
    */
-  static async getNewestObjects(amount: number): Promise<Array<MapFeatureDto>> {
-    return (await axiosInstance.get<Array<MapFeatureDto>>(`/map/object/newest/${amount}`)).data;
+  static async getNewestObjects(amount: number): Promise<Array<NewestMapFeatureDto>> {
+    return (await axiosInstance.get<Array<NewestMapFeatureDto>>(`/map/object/newest/${amount}`)).data;
   }
 }

@@ -5,8 +5,8 @@
     <span class='field'>Адресс: {{ featureProperties.address }}</span>
     <span class='field'>Ссылки: {{ featureProperties.links }}</span>
     <span class='field'>
-      Автор: {{ user.login }}
-      <img class='avatarImage' :src='getUserAvatarLink(user.avatar)' />
+      Автор: {{ featureProperties.userLogin }}
+      <img class='avatarImage' :src='getUserAvatarLink(featureProperties.userAvatar)' />
     </span>
     <div class='imageSlider' v-if='featureProperties.mediaNames.length > 0'>
       <img v-for='(media, i) in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'
@@ -19,13 +19,12 @@
 import { defineComponent, ref, watch } from 'vue';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
-import { MapFeaturePropertiesDto } from '../../../../shared/dto/map/mapData.dto';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { AuthService } from '@/api/authService';
-import { UserDto } from '@/../../shared/dto/auth/user.dto';
 import 'viewerjs/dist/viewer.css';
 import { api as viewerApi } from 'v-viewer';
+import { FullFeaturePropertiesDto, ShortFeaturePropertiesDto } from '@/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'TabSelect',
@@ -41,23 +40,17 @@ export default defineComponent({
      */
     watch(() => props.feature, async (sel: Feature<Geometry>) => {
       featureProperties.value = await getProperties(sel);
-      user.value = await AuthService.getProfileById(featureProperties.value.userId);
     });
-    const featureProperties = ref<MapFeaturePropertiesDto>(await getProperties(props.feature));
-    const user = ref<UserDto>(await AuthService.getProfileById(featureProperties.value.userId));
+    const featureProperties = ref<FullFeaturePropertiesDto>(await getProperties(props.feature));
 
     /**
      * Получение параметров из feature объекта карты. Также идет получения возможных медиа файлов объекта.
      * @param feature
      */
-    async function getProperties(feature: Feature<Geometry>): Promise<MapFeaturePropertiesDto> {
-      const fp = feature.getProperties() as MapFeaturePropertiesDto;
+    async function getProperties(feature: Feature<Geometry>): Promise<FullFeaturePropertiesDto> {
+      const mapObjectId = (feature.getProperties() as ShortFeaturePropertiesDto).id;
 
-      if (!fp.mediaNames) {
-        fp.mediaNames = await MapService.getObjectMedia(fp.id);
-      }
-
-      return fp;
+      return await MapService.getMapObject(mapObjectId);
     }
 
     /**
@@ -65,7 +58,8 @@ export default defineComponent({
      * @param name
      */
     function getMediaUrl(name: string): string {
-      return MapService.getMediaLink(featureProperties.value.id, name);
+      return MapService.getMediaLink(featureProperties.value.id ?? '', name);
+
     }
 
     /**
@@ -86,20 +80,21 @@ export default defineComponent({
      * @param index - индекс открытого изображения
      */
     function openImage(mediaNames: Array<string>, index: number) {
-      const viewer = viewerApi({
-        images: mediaNames.map((name) => {
-          return getMediaUrl(name);
-        }),
-        options: {
-          initialViewIndex: index,
-          title: false,
-        },
-      });
+      if (mediaNames.length > 0) {
+        const viewer = viewerApi({
+          images: mediaNames.map((name) => {
+            return getMediaUrl(name);
+          }),
+          options: {
+            initialViewIndex: index,
+            title: false,
+          },
+        });
+      }
     }
 
     return {
       featureProperties,
-      user,
 
       getMediaUrl,
       getUserAvatarLink,

@@ -1,10 +1,11 @@
 import { CreatedUser } from '@/types/CreatedUser';
 import { axiosInstance, getAuthConfig } from '@/api/index';
-import { LoginUserDto } from '../../../back-openfreemap/src/dto/auth/loginUser.dto'
-import { CredentialsDto } from '../../../back-openfreemap/src/dto/auth/credentials.dto'
-import { UserDto } from '../../../back-openfreemap/src/dto/auth/user.dto'
 import axios from 'axios';
 import store from '@/store/index';
+import { LoginUserDto } from '@/dto/auth/loginUser.dto';
+import { CredentialsDto } from '@/dto/auth/credentials.dto';
+import { RegisterUserDto } from '@/dto/auth/registerUser.dto';
+import { UserDto } from '@/dto/auth/user.dto';
 
 export class AuthService {
   /**
@@ -40,15 +41,14 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async register(createdUser: CreatedUser) {
-    const enteredUserDataDto: LoginUserDto = {
+    const registerUserDto: RegisterUserDto = {
       login: createdUser.login,
       password: createdUser.password,
-      confirmPassword: createdUser.confirmPassword,
       email: createdUser.email,
     };
 
     try {
-      const credentials: CredentialsDto = (await axiosInstance.post('/auth/register', enteredUserDataDto)).data;
+      const credentials: CredentialsDto = (await axiosInstance.post('/auth/register', registerUserDto)).data;
       await store.dispatch('setToken', credentials.accessToken);
 
       if (createdUser.avatar && credentials.accessToken) {

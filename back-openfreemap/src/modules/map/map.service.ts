@@ -113,7 +113,7 @@ export class MapService {
    * Получение всех типов геометрии объекта
    */
   async getGeometryTypes(): Promise<Array<GeometryTypeDocument>> {
-    return this.geometryTypeModel.find();
+    return this.geometryTypeModel.find().exec();
   }
 
   /**
