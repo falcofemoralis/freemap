@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema  } from 'mongoose';
 import { User, UserDocument } from '../../auth/schemas/user.schema';
 import { ObjectType, ObjectTypeDocument } from './objectType.schema';
 
@@ -11,7 +10,7 @@ export interface Coordinate {
 
 @Schema()
 export class MapFeature {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: User.name })
   user: UserDocument;
 
   @Prop()
@@ -20,7 +19,7 @@ export class MapFeature {
   @Prop()
   description: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: ObjectType.name })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: ObjectType.name })
   type: ObjectTypeDocument;
 
   @Prop()

@@ -16,7 +16,7 @@
 <script lang='ts'>
 import { computed, defineComponent, inject, ref, watch } from 'vue';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
-import { Vector as VectorSource } from 'ol/source';
+import { Vector } from 'ol/source';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Feature, Map } from 'ol';
 import { GeoJSON } from 'ol/format';
@@ -31,7 +31,7 @@ import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import { MapService } from '@/api/mapService';
 import { transformExtent } from 'ol/proj';
-import { axiosInstance } from '@/api';
+import ProjectionType from '@/constants/ProjectionType';
 
 export default defineComponent({
   name: 'LayerData',
@@ -80,15 +80,10 @@ export default defineComponent({
      * Базовый слой с объектами
      */
     const baseLayer = new VectorLayer({
-      source: new VectorSource({
-        format: new GeoJSON(),
-        /*    loader: (extent, resolution, projection) => {
-              console.log(extent);
-              console.log(resolution);
-              console.log(projection);
-            },*/
-        url: MapService.getMapDataUrl(),
-      }),
+      /*            source: new VectorSource({
+                    format: new GeoJSON(),
+                    url: 'http://192.168.0.100:3000/api/map?latT=48.15986892503301&lonR=35.8281942180315&latB=47.576318197603655&lonL=34.657504459578135&zoom=0',
+                  }),*/
       style: function(feature) {
         style.getText().setText(feature.get('name'));
         return [style];
@@ -96,23 +91,36 @@ export default defineComponent({
       renderBuffer: 5000,
     });
 
+
     let currZoom = map?.getView().getZoom();
     map?.on('moveend', function(e) {
       const newZoom = map.getView().getZoom();
       let extent = map.getView().calculateExtent(map.getSize());
       extent = transformExtent(extent, 'EPSG:3857', 'EPSG:4326');
 
-      // console.log(toLonLat(map?.getView().calculateExtent(map.getSize())));
+      const vectorSource = new Vector({
+        format: new GeoJSON(),
+        loader: async () => {
+          const res = await MapService.getMapData(extent, 0);
 
+          /* const features = vectorSource.readFeatures(res), {
+             featureProjection: projection
+           });*/
 
-      async function getData(ext: number[]) {
-        const res = await axiosInstance.get(`/map?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=1`);
-        console.log(res.data);
-      }
+          const features = vectorSource?.getFormat()?.readFeatures(res, {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          });
+          console.log(features);
+          if (features) {
+            vectorSource.addFeatures(features as Feature<Geometry>[]);
+          }
+        },
+        // url:  MapService.getMapDataUrl(extent, 0),
+      });
 
-      getData(extent);
+      baseLayer.setSource(vectorSource);
 
-      console.log(extent);
       if (currZoom != newZoom) {
         console.log('zoom end, new zoom: ' + newZoom);
         currZoom = newZoom;

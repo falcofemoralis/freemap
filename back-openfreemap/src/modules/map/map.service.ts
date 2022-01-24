@@ -23,9 +23,21 @@ export class MapService {
    * @returns {Array<MapFeatureDocument>} - массив объектов
    */
   async getAllObjects(latT: number, lonR: number, latB: number, lonL: number, zoom: number): Promise<Array<MapFeatureDocument>> {
-    const filter = { 'coordinates.lon': { $gte: lonL as number, $lte: lonR as number }, 'coordinates.lat': { $gte: latB as number, $lte: latT as number } };
+    const filter = {
+      'coordinates.lon': { $gte: lonL as number, $lte: lonR as number },
+      'coordinates.lat': { $gte: latB as number, $lte: latT as number },
+    };
     console.log(filter);
-    return this.mapFeatureModel.find(filter).populate(['user', 'type']);
+    const t = await this.mapFeatureModel
+      .find(filter)
+      .populate(['user'])
+      .populate({
+        path: 'type',
+        populate: {
+          path: 'geometryType',
+        },
+      });
+    return t;
   }
 
   /**
@@ -50,7 +62,7 @@ export class MapService {
       links: featureData.links,
     });
 
-    return (await newMapFeature.save()).populate(['user', 'type']);
+    return (await newMapFeature.save()).populate(['user', 'type', 'type.geometryType']);
   }
 
   /**

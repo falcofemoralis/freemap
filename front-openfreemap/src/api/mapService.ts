@@ -1,6 +1,6 @@
 import { CreatedObject } from '@/types/CreatedObject';
 import { axiosInstance, getAuthConfig } from '@/api/index';
-import { MapFeatureDto, MapFeaturePropertiesDto } from '../../../shared/dto/map/mapData.dto';
+import { MapDataDto, MapFeatureDto, MapFeaturePropertiesDto } from '../../../shared/dto/map/mapData.dto';
 import { ObjectTypeDto } from '../../../shared/dto/map/objectType.dto';
 import { GeometryTypeDto } from '../../../shared/dto/map/geometryType.dto';
 
@@ -9,8 +9,8 @@ export class MapService {
    * Получение ссылки к данным на карте
    * @returns {string} - url запрос к данным на карте
    */
-  static getMapDataUrl(): string {
-    return axiosInstance.defaults.baseURL + '/map';
+  static async getMapData(ext: number[], zoom: number): Promise<MapDataDto> {
+    return (await axiosInstance.get<MapDataDto>(`/map?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=${zoom}`)).data;
   }
 
   /**

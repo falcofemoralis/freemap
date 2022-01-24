@@ -20,7 +20,6 @@ import { GeometryTypeDto } from 'shared/dto/map/geometryType.dto';
 import { MapDataDto, MapFeatureDto, MapFeaturePropertiesDto } from 'shared/dto/map/mapdata.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AuthService } from '../auth/auth.service';
 import { diskStorage } from 'multer';
 import * as Path from 'path';
 import { v4 } from 'uuid';
@@ -34,7 +33,7 @@ const MEDIA_PATH = './uploads/media';
 
 @Controller('map')
 export class MapController {
-  constructor(private readonly mapService: MapService, private readonly authService: AuthService) {}
+  constructor(private readonly mapService: MapService) {}
 
   /**
    * Получение объектов на карте
@@ -47,6 +46,8 @@ export class MapController {
   @Get()
   async getMapData(@Query() queryParams: GetMapDataQuery): Promise<MapDataDto> {
     const features = await this.packMapFeatures(await this.mapService.getAllObjects(queryParams.latT, queryParams.lonR, queryParams.latB, queryParams.lonL, queryParams.zoom));
+
+    console.log(features);
 
     return {
       type: 'FeatureCollection',
@@ -187,7 +188,7 @@ export class MapController {
   /**
    * Получение всех типов объекта
    */
-  @Get('object/queries')
+  @Get('object/types')
   async getObjectTypes(): Promise<Array<ObjectTypeDto>> {
     const types = await this.mapService.getObjectTypes();
 
@@ -237,7 +238,7 @@ export class MapController {
    * Получение типов объектов по id геометрии
    * @param id - id геометрии
    */
-  @Get('object/queries/:id')
+  @Get('object/types/:id')
   async getObjectTypesByGeometryId(@Param('id') id: string): Promise<Array<ObjectTypeDto>> {
     const types = await this.mapService.getTypesByGeometryId(id);
 
@@ -331,9 +332,10 @@ export class MapController {
           date: obj._id.getTimestamp(),
           address: obj.address,
           links: obj.links,
-          coordinates: coordinates,
+          coordinates: [],
         };
 
+        console.log(obj.type?.geometryType?.geometry);
         features.push({
           type: 'Feature',
           properties: featureProperties,
