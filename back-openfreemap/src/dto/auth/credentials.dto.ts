@@ -1,4 +1,4 @@
-export interface CredentialsDto {
+export class CredentialsDto {
   accessToken: string;
   profileAvatar?: string;
 }

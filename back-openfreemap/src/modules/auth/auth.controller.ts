@@ -1,31 +1,16 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Param,
-  Post,
-  Request,
-  Res,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Request, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { EnteredUserDataDto } from 'shared/dto/auth/enteredUserData.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as Path from 'path';
 import { v4 } from 'uuid';
-import { CredentialsDto } from 'shared/dto/auth/credentials.dto';
-import { UserDto } from 'shared/dto/auth/user.dto';
 import * as fs from 'fs';
-import { UserDocument } from './schemas/user.schema';
+import { RegisterUserDto } from '../../dto/auth/registerUser.dto';
+import { CredentialsDto } from '../../dto/auth/credentials.dto';
+import { UserDto } from '../../dto/auth/user.dto';
+import { IsNotEmpty } from 'class-validator';
+import { LoginUserDto } from '../../dto/auth/loginUser.dto';
 
 const AVATAR_PATH = './uploads/avatars';
 
@@ -35,13 +20,17 @@ export class AuthController {
 
   /**
    * Авторизация пользователя
-   * @param req - запрос с объектом пользователя req.user
+   * @param {LoginUserDto} loginUserDto - объект с веденным данным пользователя
    * @returns {CredentialsDto} данные аунтефикации
    */
-  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req): Promise<CredentialsDto> {
-    const user = req.user as UserDocument;
+  async login(@Body() loginUserDto: LoginUserDto): Promise<CredentialsDto> {
+    const user = await this.authService.validateUser(loginUserDto.login, loginUserDto.password);
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
     const token = await this.authService.createToken(user);
     const avatar = user.avatar;
 
@@ -53,40 +42,20 @@ export class AuthController {
 
   /**
    * Регистрация пользователя
-   * @param {EnteredUserDataDto} enteredUserDataDto - веденные данные пользователя
+   * @param {RegisterUserDto} registerUserDto - веденные данные пользователя
    * @returns {CredentialsDto} данные аунтефикации без аватара пользователя
    */
   @Post('register')
-  async register(@Body() enteredUserDataDto: EnteredUserDataDto): Promise<CredentialsDto> {
-    if (await this.authService.getUserByLogin(enteredUserDataDto.login)) {
-      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+  async register(@Body() registerUserDto: RegisterUserDto): Promise<CredentialsDto> {
+    if (await this.authService.getUserByLogin(registerUserDto.login)) {
+      throw new HttpException('User with this login is already exists', HttpStatus.CONFLICT);
     }
 
-    if (await this.authService.getUserByEmail(enteredUserDataDto.email)) {
-      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    if (await this.authService.getUserByEmail(registerUserDto.email)) {
+      throw new HttpException('User with this email is already exists', HttpStatus.CONFLICT);
     }
 
-    if (enteredUserDataDto.password != enteredUserDataDto.confirmPassword) {
-      throw new HttpException('Passwords not match', HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(enteredUserDataDto.email)) {
-      throw new HttpException('Incorrect email', HttpStatus.CONFLICT);
-    }
-
-    if (enteredUserDataDto.login.length > 30) {
-      throw new HttpException('Login is too long', HttpStatus.CONFLICT);
-    }
-
-    if (enteredUserDataDto.password.length < 6) {
-      throw new HttpException('Password is too short', HttpStatus.CONFLICT);
-    }
-
-    if (enteredUserDataDto.password.length > 50) {
-      throw new HttpException('Password is too long', HttpStatus.CONFLICT);
-    }
-
-    const token = await this.authService.createToken(await this.authService.register(enteredUserDataDto));
+    const token = await this.authService.createToken(await this.authService.register(registerUserDto));
 
     return {
       accessToken: token,
@@ -126,29 +95,6 @@ export class AuthController {
   }
 
   /**
-   * Получение пользователя по его id
-   * @param id - id пользователя
-   * @returns {UserDto} - пользователь
-   */
-  @Get('profile/user/:id')
-  async getProfileById(@Param('id') id: string): Promise<UserDto> {
-    if (!id) {
-      throw new NotFoundException();
-    }
-
-    const user = await this.authService.getUserById(id);
-
-    console.log(user);
-
-    return {
-      id,
-      login: user.login,
-      avatar: user.avatar,
-      email: user.email,
-    };
-  }
-
-  /**
    * Получение файла аватара пользователя с сервера
    * @param img - название файла
    * @param res - response
@@ -157,7 +103,7 @@ export class AuthController {
   @Get('profile/avatar/:img')
   getProfileAvatar(@Param('img') img: string, @Res() res) {
     if (!img) {
-      throw new NotFoundException();
+      throw new BadRequestException();
     }
 
     const path = Path.join(process.cwd(), `${AVATAR_PATH}/${img}`);
@@ -169,5 +115,29 @@ export class AuthController {
     } catch (e) {
       throw new NotFoundException();
     }
+  }
+
+  /**
+   * Получение пользователя по его id
+   * @param id - id пользователя
+   * @returns {UserDto} - пользователь
+   */
+  @Get('profile/user/:id')
+  async getProfileById(@Param('id') id: string): Promise<UserDto> {
+    if (!id) {
+      throw new BadRequestException();
+    }
+
+    const user = await this.authService.getUserById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return {
+      id,
+      login: user.login,
+      avatar: user.avatar,
+      email: user.email,
+    };
   }
 }

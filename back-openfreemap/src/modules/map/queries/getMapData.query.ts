@@ -4,21 +4,21 @@ import { IsNumber } from 'class-validator';
 export class GetMapDataQuery {
   @IsNumber()
   @Type(() => Number)
-  latT: number;
+  latT: number; // верхняя точка широты
 
   @IsNumber()
   @Type(() => Number)
-  lonR: number;
+  lonR: number; // правая точка долготы
 
   @IsNumber()
   @Type(() => Number)
-  latB: number;
+  latB: number; // нижняя точка широты
 
   @IsNumber()
   @Type(() => Number)
-  lonL: number;
+  lonL: number; // левая точка долготы
 
   @IsNumber()
   @Type(() => Number)
-  zoom: number;
+  zoom: number; // приближение пользователя
 }

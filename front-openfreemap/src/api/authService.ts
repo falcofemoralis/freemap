@@ -1,8 +1,8 @@
 import { CreatedUser } from '@/types/CreatedUser';
 import { axiosInstance, getAuthConfig } from '@/api/index';
-import { EnteredUserDataDto } from '../../../shared/dto/auth/enteredUserData.dto';
-import { CredentialsDto } from '../../../shared/dto/auth/credentials.dto';
-import { UserDto } from '../../../shared/dto/auth/user.dto';
+import { LoginUserDto } from '../../../back-openfreemap/src/dto/auth/loginUser.dto'
+import { CredentialsDto } from '../../../back-openfreemap/src/dto/auth/credentials.dto'
+import { UserDto } from '../../../back-openfreemap/src/dto/auth/user.dto'
 import axios from 'axios';
 import store from '@/store/index';
 
@@ -12,13 +12,13 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async login(createdUser: CreatedUser) {
-    const enteredUserDataDto: EnteredUserDataDto = {
+    const loginUserDto: LoginUserDto = {
       login: createdUser.login,
       password: createdUser.password,
     };
 
     try {
-      const credentials: CredentialsDto = (await axiosInstance.post('/auth/login', enteredUserDataDto)).data;
+      const credentials: CredentialsDto = (await axiosInstance.post('/auth/login', loginUserDto)).data;
       await store.dispatch('setToken', credentials.accessToken);
 
       if (credentials.profileAvatar) {
@@ -40,7 +40,7 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async register(createdUser: CreatedUser) {
-    const enteredUserDataDto: EnteredUserDataDto = {
+    const enteredUserDataDto: LoginUserDto = {
       login: createdUser.login,
       password: createdUser.password,
       confirmPassword: createdUser.confirmPassword,

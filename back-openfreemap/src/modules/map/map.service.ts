@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Coordinate, MapFeature, MapFeatureDocument } from './schemas/mapFeature.schema';
+import { MapFeature, MapFeatureDocument } from './schemas/mapFeature.schema';
 import { ObjectType, ObjectTypeDocument } from './schemas/objectType.schema';
 import { GeometryType, GeometryTypeDocument } from './schemas/geometryType.schema';
-import { ObjectTypeDto } from 'shared/dto/map/objectType.dto';
-import { MapFeaturePropertiesDto } from 'shared/dto/map/mapdata.dto';
+import { GetMapDataQuery } from './queries/getMapData.query';
+import { FullFeaturePropertiesDto } from '../../dto/map/mapData.dto';
+import { ObjectTypeDto } from '../../dto/map/objectType.dto';
 
 @Injectable()
 export class MapService {
@@ -22,47 +23,41 @@ export class MapService {
    * Получение всех объектов на карте
    * @returns {Array<MapFeatureDocument>} - массив объектов
    */
-  async getAllObjects(latT: number, lonR: number, latB: number, lonL: number, zoom: number): Promise<Array<MapFeatureDocument>> {
+  async getAllObjects(bbox: GetMapDataQuery): Promise<Array<MapFeatureDocument>> {
     const filter = {
-      'coordinates.lon': { $gte: lonL as number, $lte: lonR as number },
-      'coordinates.lat': { $gte: latB as number, $lte: latT as number },
+      'coordinates.lon': { $gte: bbox.lonL, $lte: bbox.lonR },
+      'coordinates.lat': { $gte: bbox.latB, $lte: bbox.latT },
     };
-    console.log(filter);
-    const t = await this.mapFeatureModel
-      .find(filter)
-      .populate(['user'])
-      .populate({
-        path: 'type',
-        populate: {
-          path: 'geometryType',
-        },
-      });
-    return t;
+
+    return this.mapFeatureModel.find(filter).populate({
+      path: 'type',
+      populate: {
+        path: 'geometryType',
+      },
+    });
   }
 
   /**
    * Добавление объекта в базу данных
-   * @param featureData - данные про объект на карте
+   * @param {FullFeaturePropertiesDto} featurePropsDto - данные про объект на карте
+   * @param userId - id пользователя, который добавил объект
    * @returns {MapFeatureDocument} - добавленный объект
    */
-  async addMapObject(featureData: MapFeaturePropertiesDto): Promise<MapFeatureDocument> {
-    const coordinates: Coordinate[] = [];
-    for (const coord of featureData.coordinates) {
-      coordinates.push({ lon: coord[0], lat: coord[1] });
-    }
+  async addMapObject(featurePropsDto: FullFeaturePropertiesDto, userId: string): Promise<MapFeatureDocument> {
+    delete featurePropsDto.mediaNames;
+    delete featurePropsDto.date;
 
-    const newMapFeature = new this.mapFeatureModel({
-      user: featureData.userId,
-      name: featureData.name,
-      description: featureData.description,
-      type: featureData.typeId,
-      zoom: featureData.zoom,
-      coordinates: coordinates,
-      address: featureData.address,
-      links: featureData.links,
-    });
+    const newMapFeature = new this.mapFeatureModel({ user: userId, type: featurePropsDto.typeId, ...featurePropsDto });
 
-    return (await newMapFeature.save()).populate(['user', 'type', 'type.geometryType']);
+    return (await newMapFeature.save()).populate([
+      'type',
+      {
+        path: 'type',
+        populate: {
+          path: 'geometryType',
+        },
+      },
+    ]);
   }
 
   /**
@@ -79,7 +74,7 @@ export class MapService {
    * Получение всех типов объекта
    */
   async getObjectTypes(): Promise<Array<ObjectTypeDocument>> {
-    return this.objectTypeModel.find().populate('geometryType');
+    return this.objectTypeModel.find().populate(['geometryType']);
   }
 
   /**
@@ -88,7 +83,7 @@ export class MapService {
    * @returns {ObjectTypeDocument} - тип объекта
    */
   async getObjectTypeById(id: string): Promise<ObjectTypeDocument> {
-    return this.objectTypeModel.findById(id).populate('geometryType');
+    return this.objectTypeModel.findById(id).populate(['geometryType']);
   }
 
   /**
@@ -101,7 +96,7 @@ export class MapService {
       geometryType: objectTypeDto.geometryId,
     });
 
-    return (await newObjectType.save()).populate('geometryType');
+    return (await newObjectType.save()).populate(['geometryType']);
   }
 
   /**
@@ -109,7 +104,7 @@ export class MapService {
    * @param id - id геометрии
    */
   async getTypesByGeometryId(id: string): Promise<Array<ObjectTypeDocument>> {
-    return this.objectTypeModel.find({ geometryType: id }).populate('geometryType');
+    return this.objectTypeModel.find({ geometryType: id }).populate(['geometryType']);
   }
 
   //--------------
@@ -118,7 +113,7 @@ export class MapService {
    * Получение всех типов геометрии объекта
    */
   async getGeometryTypes(): Promise<Array<GeometryTypeDocument>> {
-    return this.geometryTypeModel.find().exec();
+    return this.geometryTypeModel.find();
   }
 
   /**
@@ -137,6 +132,6 @@ export class MapService {
    * @returns {MapFeatureDocument} - последние amount добавленных объектов
    */
   async getNewestObjects(amount: number): Promise<Array<MapFeatureDocument>> {
-    return this.mapFeatureModel.find().sort({ _id: -1 }).limit(amount).populate(['user', 'type']).exec();
+    return this.mapFeatureModel.find().sort({ _id: -1 }).limit(amount).populate(['user']);
   }
 }

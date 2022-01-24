@@ -1,23 +1,5 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  ForbiddenException,
-  Get,
-  NotFoundException,
-  Param,
-  Post,
-  Query,
-  Request,
-  Res,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Get, NotFoundException, Param, Post, Query, Request, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MapService } from './map.service';
-import { ObjectTypeDto } from 'shared/dto/map/objectType.dto';
-import { GeometryTypeDto } from 'shared/dto/map/geometryType.dto';
-import { MapDataDto, MapFeatureDto, MapFeaturePropertiesDto } from 'shared/dto/map/mapdata.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { diskStorage } from 'multer';
@@ -25,9 +7,11 @@ import * as Path from 'path';
 import { v4 } from 'uuid';
 import * as fs from 'fs';
 import { MapObjectGuard } from './guards/mapObjectGuard';
-import { UserDto } from 'shared/dto/auth/user.dto';
-import { MapFeatureDocument } from './schemas/mapFeature.schema';
 import { GetMapDataQuery } from './queries/getMapData.query';
+import { FullFeaturePropertiesDto, MapDataDto, MapFeatureDto, NewestMapFeatureDto, ShortFeaturePropertiesDto } from '../../dto/map/mapData.dto';
+import { UserDto } from '../../dto/auth/user.dto';
+import { ObjectTypeDto } from '../../dto/map/objectType.dto';
+import { GeometryTypeDto } from '../../dto/map/geometryType.dto';
 
 const MEDIA_PATH = './uploads/media';
 
@@ -37,17 +21,37 @@ export class MapController {
 
   /**
    * Получение объектов на карте
-   * @param latT - верхняя точка широты
-   * @param lonR - правая точка долготы
-   * @param latB - нижняя точка широты
-   * @param lonL - левая точка долготы
-   * @returns {MapDataDto} - пак данных
+   * @param {GetMapDataQuery} bbox - область поиска объектов на карте
+   * @returns {MapDataDto} - пак данных с объектами на карте
    */
   @Get()
-  async getMapData(@Query() queryParams: GetMapDataQuery): Promise<MapDataDto> {
-    const features = await this.packMapFeatures(await this.mapService.getAllObjects(queryParams.latT, queryParams.lonR, queryParams.latB, queryParams.lonL, queryParams.zoom));
+  async getMapData(@Query() bbox: GetMapDataQuery): Promise<MapDataDto> {
+    const mapObjects = await this.mapService.getAllObjects(bbox);
 
-    console.log(features);
+    const features = new Array<MapFeatureDto>();
+
+    for (const obj of mapObjects) {
+      const featureProperties: ShortFeaturePropertiesDto = {
+        id: obj.id,
+        typeId: obj.type.id,
+        name: obj.name,
+        date: obj._id.getTimestamp(),
+      };
+
+      const featureCoordinates: number[][] = [];
+      for (const coordinate of obj.coordinates) {
+        featureCoordinates.push([coordinate.lon, coordinate.lat]);
+      }
+
+      features.push({
+        type: 'Feature',
+        properties: featureProperties,
+        geometry: {
+          type: obj.type?.geometryType?.geometry,
+          coordinates: [featureCoordinates],
+        },
+      });
+    }
 
     return {
       type: 'FeatureCollection',
@@ -63,51 +67,33 @@ export class MapController {
 
   /**
    * Добавление нового объекта в базу данных
-   * @param dataDto - веденные данные пользователем про объект
+   * @param {FullFeaturePropertiesDto} featureDto - веденные данные пользователем про объект
    * @param req - запрос с объектом пользователя
    * @returns {MapFeatureDto} - объект карты
    */
   @UseGuards(JwtAuthGuard)
   @Post('object')
-  async addMapObject(@Body() dataDto: MapFeaturePropertiesDto, @Request() req): Promise<MapFeatureDto> {
-    if (!dataDto.typeId || !dataDto.coordinates || !dataDto.zoom) {
-      throw new BadRequestException();
-    }
-
-    if (!dataDto.name || dataDto.name.length > 30) {
-      throw new BadRequestException();
-    }
-
-    if (!dataDto.description || dataDto.description.length > 200) {
-      throw new BadRequestException();
-    }
-
-    if (!dataDto.typeId) {
-      throw new BadRequestException();
-    }
-
-    if (dataDto.coordinates.length == 0) {
-      throw new BadRequestException();
-    }
-
-    if (dataDto.links && dataDto.links?.length > 100) {
-      throw new BadRequestException();
-    }
-
-    if (dataDto.address && dataDto.address?.length > 50) {
-      throw new BadRequestException();
-    }
-
+  async addMapObject(@Body() featureDto: FullFeaturePropertiesDto, @Request() req): Promise<MapFeatureDto> {
     const userId = (req.user as UserDto).id;
-    if (!userId) {
-      throw new BadRequestException();
+    const insertedMapObject = await this.mapService.addMapObject(featureDto, userId);
+
+    featureDto.id = insertedMapObject.id;
+    featureDto.userId = userId;
+    featureDto.date = insertedMapObject._id.getTimestamp();
+
+    const featureCoordinates: number[][] = [];
+    for (const coordinate of featureDto.coordinates) {
+      featureCoordinates.push([coordinate.lon, coordinate.lat]);
     }
 
-    dataDto.userId = userId;
-
-    const insertedMapObject = await this.mapService.addMapObject(dataDto);
-
-    return (await this.packMapFeatures([insertedMapObject]))[0];
+    return {
+      type: 'Feature',
+      properties: featureDto,
+      geometry: {
+        type: insertedMapObject.type?.geometryType?.geometry,
+        coordinates: [featureCoordinates],
+      },
+    };
   }
 
   /**
@@ -116,7 +102,7 @@ export class MapController {
    * @returns {Array<String>} массив имен добавленых медиа файлов
    */
   @UseGuards(JwtAuthGuard, MapObjectGuard)
-  @Post('object/:id/media/')
+  @Post('object/media/:id')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
       storage: diskStorage({
@@ -154,9 +140,10 @@ export class MapController {
   /**
    * Получение списка имен медиа файлов у объекта
    * @param id - id объекта
+   * @returns {Array<String>} - массив имен файлов медиа
    */
   @Get('object/media/:id')
-  getObjectMediaFiles(@Param('id') id): Array<string> {
+  getObjectMediaFiles(@Param('id') id: string): Array<string> {
     try {
       return fs.readdirSync(Path.join(process.cwd(), `${MEDIA_PATH}/${id}`));
     } catch (e) {
@@ -171,7 +158,7 @@ export class MapController {
    * @param res - ответ сервера
    */
   @Get('object/media/:id/:name')
-  getMediaFile(@Param('id') id, @Param('name') name, @Res() res) {
+  getMediaFile(@Param('id') id: string, @Param('name') name: string, @Res() res) {
     const path = Path.join(process.cwd(), `${MEDIA_PATH}/${id}/${name}`);
 
     try {
@@ -184,6 +171,22 @@ export class MapController {
   }
 
   //--------------
+
+  /**
+   * Добавление нового типа объекта
+   * @param {ObjectTypeDto} objectTypeDto - новый тип объекта
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('object/type')
+  async createObjectType(@Body() objectTypeDto: ObjectTypeDto): Promise<ObjectTypeDto> {
+    const insertedObjectType = await this.mapService.createObjectType(objectTypeDto);
+
+    return {
+      id: insertedObjectType.id,
+      geometryId: insertedObjectType.geometryType.id,
+      name: insertedObjectType.name,
+    };
+  }
 
   /**
    * Получение всех типов объекта
@@ -216,21 +219,6 @@ export class MapController {
       id: type.id,
       geometryId: type.geometryType.id,
       name: type.name,
-    };
-  }
-
-  /**
-   * Добавление нового типа объекта
-   * @param {ObjectTypeDto} objectTypeDto - тип объекта
-   */
-  @Post('object/type')
-  async createObjectType(@Body() objectTypeDto: ObjectTypeDto): Promise<ObjectTypeDto> {
-    const insertedObjectType = await this.mapService.createObjectType(objectTypeDto);
-
-    return {
-      id: insertedObjectType.id,
-      geometryId: insertedObjectType.geometryType.id,
-      name: insertedObjectType.name,
     };
   }
 
@@ -299,56 +287,25 @@ export class MapController {
    * @param amount - количество объектов которые можно получить
    */
   @Get('object/newest/:amount')
-  async getNewestObjects(@Param('amount') amount: number): Promise<Array<MapFeatureDto>> {
+  async getNewestObjects(@Param('amount') amount: number): Promise<Array<NewestMapFeatureDto>> {
     if (amount > 100) {
       throw new ForbiddenException();
     }
 
-    return await this.packMapFeatures(await this.mapService.getNewestObjects(amount));
-  }
+    const mapObjects = await this.mapService.getNewestObjects(amount);
 
-  /**
-   * Упакова feature в соотвествии с форматов geoJson
-   * @param mapObjects - список объектов в базе данных
-   * @returns {Array<MapFeatureDto>} - массив features
-   */
-  async packMapFeatures(mapObjects: Array<MapFeatureDocument>): Promise<Array<MapFeatureDto>> {
-    const features = new Array<MapFeatureDto>();
-
+    const newestFeatures = new Array<NewestMapFeatureDto>();
     for (const obj of mapObjects) {
-      try {
-        const coordinates: number[][] = [];
-        for (const coordinate of obj.coordinates) {
-          coordinates.push([coordinate.lon, coordinate.lat]);
-        }
-
-        const featureProperties: MapFeaturePropertiesDto = {
-          id: obj.id,
-          userId: obj.user.id,
-          typeId: obj.type.id,
-          name: obj.name,
-          description: obj.description,
-          zoom: obj.zoom,
-          date: obj._id.getTimestamp(),
-          address: obj.address,
-          links: obj.links,
-          coordinates: [],
-        };
-
-        console.log(obj.type?.geometryType?.geometry);
-        features.push({
-          type: 'Feature',
-          properties: featureProperties,
-          geometry: {
-            type: obj.type?.geometryType?.geometry,
-            coordinates: [coordinates],
-          },
-        });
-      } catch (e) {
-        console.log(e);
-      }
+      newestFeatures.push({
+        id: obj.id,
+        userLogin: obj.user.login,
+        userAvatar: obj.user.avatar,
+        name: obj.name,
+        date: obj._id.getTimestamp(),
+        coordinates: obj.coordinates,
+      });
     }
 
-    return features;
+    return newestFeatures;
   }
 }

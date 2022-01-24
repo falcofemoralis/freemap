@@ -1,5 +1,4 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
-  "entryFile": "back-openfreemap/src/main"
+  "sourceRoot": "src"
 }

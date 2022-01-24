@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserDto } from 'shared/dto/auth/user.dto';
 import { compare, hash } from 'bcrypt';
-import { EnteredUserDataDto } from 'shared/dto/auth/enteredUserData.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
+import { UserDto } from '../../dto/auth/user.dto';
+import { RegisterUserDto } from '../../dto/auth/registerUser.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +16,7 @@ export class AuthService {
   ) {}
 
   /**
-   * Поиск пользователя в базе данных
+   * Валидация пользователя по его логину и паролю
    * @param login - логин пользователя
    * @param pass - пароль пользователя
    * @returns {User | null} - пользователь без поля хеша пароля.
@@ -25,7 +25,6 @@ export class AuthService {
     const user: UserDocument = await this.userModel.findOne({ login }).exec();
 
     if (user && (await compare(pass, user.passwordHash))) {
-      delete user.passwordHash;
       return user;
     }
 
@@ -33,8 +32,8 @@ export class AuthService {
   }
 
   /**
-   * Создание payload токена.
-   * @param user - найденный пользователь из базы данных (UserEntity)
+   * Создание токена пользователя.
+   * @param {UserDocument} user - найденный пользователь из базы данных
    * @returns {String} - сгенерированный токен
    */
   async createToken(user: UserDocument): Promise<string> {
@@ -44,7 +43,7 @@ export class AuthService {
   }
 
   /**
-   * Получение данных из payload токена
+   * Получение данных из токена
    * @param payload - payload токена
    * @returns {UserDto} - пользователь
    */
@@ -56,16 +55,16 @@ export class AuthService {
 
   /**
    * Регистрация нового пользователя в базе данных
-   * @param enteredUserDataDto - веденные данные пользовател
+   * @param {RegisterUserDto} registerUserDto - веденные данные пользовател
    * @returns {UserDocument} - пользователь
    */
-  async register(enteredUserDataDto: EnteredUserDataDto): Promise<UserDocument> {
-    const passwordHash = await hash(enteredUserDataDto.password, 10); //salt or round
+  async register(registerUserDto: RegisterUserDto): Promise<UserDocument> {
+    const passwordHash = await hash(registerUserDto.password, 10); //salt or round
 
     const newUser = new this.userModel({
-      login: enteredUserDataDto.login,
+      login: registerUserDto.login,
       passwordHash: passwordHash,
-      email: enteredUserDataDto.email,
+      email: registerUserDto.email,
     });
 
     return newUser.save();
@@ -74,10 +73,10 @@ export class AuthService {
   /**
    * Сохранение имени файла аватара пользователя в базе данных
    * @param id - id пользователя
-   * @param avatarFileName - имя файла аватара
+   * @param avatar - имя файла аватара
    */
-  async updateUserAvatar(id: string, avatarFileName: string): Promise<UserDocument> {
-    return this.userModel.findByIdAndUpdate(id, { avatar: avatarFileName });
+  async updateUserAvatar(id: string, avatar: string): Promise<UserDocument> {
+    return this.userModel.findByIdAndUpdate(id, { avatar });
   }
 
   /**
