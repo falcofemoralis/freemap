@@ -24,7 +24,7 @@ import { MapService } from '@/api/mapService';
 import { AuthService } from '@/api/authService';
 import 'viewerjs/dist/viewer.css';
 import { api as viewerApi } from 'v-viewer';
-import { FullFeaturePropertiesDto, ShortFeaturePropertiesDto } from '@/dto/map/mapData.dto';
+import { FullFeaturePropertiesDto, GetFeaturePropertiesDto } from '@/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'TabSelect',
@@ -48,7 +48,7 @@ export default defineComponent({
      * @param feature
      */
     async function getProperties(feature: Feature<Geometry>): Promise<FullFeaturePropertiesDto> {
-      const mapObjectId = (feature.getProperties() as ShortFeaturePropertiesDto).id;
+      const mapObjectId = (feature.getProperties() as GetFeaturePropertiesDto).id;
 
       return await MapService.getMapObject(mapObjectId);
     }

@@ -1,23 +1,19 @@
-import { BadRequestException } from '@nestjs/common';
-import { ArrayMinSize, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
+import { ArrayMinSize, IsNotEmpty, MaxLength } from 'class-validator';
 
 export interface Coordinate {
   lon: number;
   lat: number;
 }
 
-export class ShortFeaturePropertiesDto {
+export class GetFeaturePropertiesDto {
   id: string;
   typeId: string;
   name: string;
   date: string;
 }
 
-export class FullFeaturePropertiesDto {
+export class AddFeaturePropertiesDto {
   id?: string;
-  userId?: string;
-  userLogin?: string;
-  userAvatar?: string;
 
   @IsNotEmpty()
   typeId: string;
@@ -36,22 +32,47 @@ export class FullFeaturePropertiesDto {
   @IsNotEmpty()
   zoom: number;
 
-  date?: string;
+  address?: string;
+
+  links?: string[];
+}
+
+export class NewestFeaturePropertiesDto {
+  id: string;
+  userLogin: string;
+  userAvatar?: string;
+  name: string;
+  date: string;
+  zoom: number;
+  coordinates: Coordinate[];
+}
+
+export class FullFeaturePropertiesDto {
+  id: string;
+  userId: string;
+  userLogin: string;
+  userAvatar: string;
+  typeId: string;
+  name: string;
+  description: string;
+  zoom: number;
+  date: string;
   address?: string;
   links?: string[];
   mediaNames?: Array<string>;
+  coordinates: Coordinate[];
 }
 
-export interface MapFeatureDto {
+export interface MapFeatureDto<T> {
   type: string;
-  properties: ShortFeaturePropertiesDto | FullFeaturePropertiesDto;
-  geometry: {
+  properties: T;
+  geometry?: {
     type?: string;
     coordinates: number[][][];
   };
 }
 
-export interface MapDataDto {
+export interface MapDataDto<T> {
   type: string;
   crs: {
     type: string;
@@ -59,15 +80,5 @@ export interface MapDataDto {
       name: string;
     };
   };
-  features: MapFeatureDto[];
-}
-
-export interface NewestMapFeatureDto {
-  id: string;
-  userLogin: string;
-  userAvatar?: string;
-  name: string;
-  date: string;
-  coordinates: Coordinate[];
-  zoom: number;
+  features: MapFeatureDto<T>[];
 }

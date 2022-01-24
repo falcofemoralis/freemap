@@ -8,7 +8,7 @@ import { v4 } from 'uuid';
 import * as fs from 'fs';
 import { MapObjectGuard } from './guards/mapObjectGuard';
 import { GetMapDataQuery } from './queries/getMapData.query';
-import { FullFeaturePropertiesDto, MapDataDto, MapFeatureDto, NewestMapFeatureDto, ShortFeaturePropertiesDto } from '../../dto/map/mapData.dto';
+import { FullFeaturePropertiesDto, MapDataDto, MapFeatureDto, NewestFeaturePropertiesDto, GetFeaturePropertiesDto, AddFeaturePropertiesDto, Coordinate } from '../../dto/map/mapData.dto';
 import { UserDto } from '../../dto/auth/user.dto';
 import { ObjectTypeDto } from '../../dto/map/objectType.dto';
 import { GeometryTypeDto } from '../../dto/map/geometryType.dto';
@@ -22,33 +22,28 @@ export class MapController {
   /**
    * Получение объектов на карте
    * @param {GetMapDataQuery} bbox - область поиска объектов на карте
-   * @returns {MapDataDto} - пак данных с объектами на карте
+   * @returns {MapDataDto<GetFeaturePropertiesDto>} - пак данных с объектами на карте
    */
   @Get()
-  async getMapData(@Query() bbox: GetMapDataQuery): Promise<MapDataDto> {
+  async getMapData(@Query() bbox: GetMapDataQuery): Promise<MapDataDto<GetFeaturePropertiesDto>> {
     const mapObjects = await this.mapService.getAllObjects(bbox);
 
-    const features = new Array<MapFeatureDto>();
+    const features = new Array<MapFeatureDto<GetFeaturePropertiesDto>>();
 
     for (const obj of mapObjects) {
-      const featureProperties: ShortFeaturePropertiesDto = {
+      const featureProperties: GetFeaturePropertiesDto = {
         id: obj.id,
         typeId: obj.type.id,
         name: obj.name,
         date: obj._id.getTimestamp(),
       };
 
-      const featureCoordinates: number[][] = [];
-      for (const coordinate of obj.coordinates) {
-        featureCoordinates.push([coordinate.lon, coordinate.lat]);
-      }
-
       features.push({
         type: 'Feature',
         properties: featureProperties,
         geometry: {
           type: obj.type?.geometryType?.geometry,
-          coordinates: [featureCoordinates],
+          coordinates: this.parseCoordinates(obj.coordinates),
         },
       });
     }
@@ -67,31 +62,22 @@ export class MapController {
 
   /**
    * Добавление нового объекта в базу данных
-   * @param {FullFeaturePropertiesDto} featureDto - веденные данные пользователем про объект
+   * @param {AddFeaturePropertiesDto} featureDto - веденные данные пользователем про объект
    * @param req - запрос с объектом пользователя
-   * @returns {MapFeatureDto} - объект карты
+   * @returns {MapFeatureDto<AddFeaturePropertiesDto>} - объект карты
    */
   @UseGuards(JwtAuthGuard)
   @Post('object')
-  async addMapObject(@Body() featureDto: FullFeaturePropertiesDto, @Request() req): Promise<MapFeatureDto> {
-    const userId = (req.user as UserDto).id;
-    const insertedMapObject = await this.mapService.addMapObject(featureDto, userId);
-
+  async addMapObject(@Body() featureDto: AddFeaturePropertiesDto, @Request() req): Promise<MapFeatureDto<AddFeaturePropertiesDto>> {
+    const insertedMapObject = await this.mapService.addMapObject(featureDto, (req.user as UserDto).id);
     featureDto.id = insertedMapObject.id;
-    featureDto.userId = userId;
-    featureDto.date = insertedMapObject._id.getTimestamp();
-
-    const featureCoordinates: number[][] = [];
-    for (const coordinate of featureDto.coordinates) {
-      featureCoordinates.push([coordinate.lon, coordinate.lat]);
-    }
 
     return {
       type: 'Feature',
       properties: featureDto,
       geometry: {
         type: insertedMapObject.type?.geometryType?.geometry,
-        coordinates: [featureCoordinates],
+        coordinates: this.parseCoordinates(insertedMapObject.coordinates),
       },
     };
   }
@@ -275,16 +261,16 @@ export class MapController {
    * @param amount - количество объектов которые можно получить
    */
   @Get('object/newest/:amount')
-  async getNewestObjects(@Param('amount') amount: number): Promise<Array<NewestMapFeatureDto>> {
+  async getNewestObjects(@Param('amount') amount: number): Promise<Array<MapFeatureDto<NewestFeaturePropertiesDto>>> {
     if (amount > 100) {
       throw new ForbiddenException();
     }
 
     const mapObjects = await this.mapService.getNewestObjects(amount);
 
-    const newestFeatures = new Array<NewestMapFeatureDto>();
+    const newestFeatures = new Array<MapFeatureDto<NewestFeaturePropertiesDto>>();
     for (const obj of mapObjects) {
-      newestFeatures.push({
+      const featureProperties: NewestFeaturePropertiesDto = {
         id: obj.id,
         userLogin: obj.user.login,
         userAvatar: obj.user.avatar,
@@ -292,6 +278,15 @@ export class MapController {
         date: obj._id.getTimestamp(),
         coordinates: obj.coordinates,
         zoom: obj.zoom,
+      };
+
+      newestFeatures.push({
+        type: 'Feature',
+        properties: featureProperties,
+        geometry: {
+          type: obj.type?.geometryType?.geometry,
+          coordinates: this.parseCoordinates(obj.coordinates),
+        },
       });
     }
 
@@ -303,7 +298,7 @@ export class MapController {
    * @param id - id объект
    */
   @Get('object/:id')
-  async getMapObject(@Param('id') id: string): Promise<FullFeaturePropertiesDto> {
+  async getMapObject(@Param('id') id: string): Promise<MapFeatureDto<FullFeaturePropertiesDto>> {
     if (!id) {
       throw new BadRequestException();
     }
@@ -317,7 +312,7 @@ export class MapController {
       //throw new NotFoundException();
     }
 
-    return {
+    const fullFeaturePropertiesDto: FullFeaturePropertiesDto = {
       id,
       userId: mapObject.user.id,
       userLogin: mapObject.user.login,
@@ -325,12 +320,30 @@ export class MapController {
       typeId: mapObject.type.id,
       name: mapObject.name,
       description: mapObject.description,
-      coordinates: mapObject.coordinates,
       zoom: mapObject.zoom,
       date: mapObject._id.getTimestamp(),
       address: mapObject.address,
       links: mapObject.links,
+      coordinates: mapObject.coordinates,
       mediaNames,
     };
+
+    return {
+      type: 'Feature',
+      properties: fullFeaturePropertiesDto,
+      geometry: {
+        type: mapObject.type?.geometryType?.geometry,
+        coordinates: this.parseCoordinates(mapObject.coordinates),
+      },
+    };
+  }
+
+  parseCoordinates(coordinates: Coordinate[]): number[][][] {
+    const featureCoordinates: number[][] = [];
+    for (const coordinate of coordinates) {
+      featureCoordinates.push([coordinate.lon, coordinate.lat]);
+    }
+
+    return [featureCoordinates];
   }
 }

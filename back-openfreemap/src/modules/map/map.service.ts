@@ -5,7 +5,7 @@ import { MapFeature, MapFeatureDocument } from './schemas/mapFeature.schema';
 import { ObjectType, ObjectTypeDocument } from './schemas/objectType.schema';
 import { GeometryType, GeometryTypeDocument } from './schemas/geometryType.schema';
 import { GetMapDataQuery } from './queries/getMapData.query';
-import { FullFeaturePropertiesDto } from '../../dto/map/mapData.dto';
+import { AddFeaturePropertiesDto, FullFeaturePropertiesDto } from '../../dto/map/mapData.dto';
 import { ObjectTypeDto } from '../../dto/map/objectType.dto';
 
 @Injectable()
@@ -43,10 +43,7 @@ export class MapService {
    * @param userId - id пользователя, который добавил объект
    * @returns {MapFeatureDocument} - добавленный объект
    */
-  async addMapObject(featurePropsDto: FullFeaturePropertiesDto, userId: string): Promise<MapFeatureDocument> {
-    delete featurePropsDto.mediaNames;
-    delete featurePropsDto.date;
-
+  async addMapObject(featurePropsDto: AddFeaturePropertiesDto, userId: string): Promise<MapFeatureDocument> {
     const newMapFeature = new this.mapFeatureModel({ user: userId, type: featurePropsDto.typeId, ...featurePropsDto });
 
     return (await newMapFeature.save()).populate([
@@ -65,7 +62,16 @@ export class MapService {
    * @param id - id объекта
    */
   async getObjectById(id: string): Promise<MapFeatureDocument> {
-    return this.mapFeatureModel.findById(id).populate(['user', 'type']);
+    return this.mapFeatureModel.findById(id).populate([
+      'user',
+      'type',
+      {
+        path: 'type',
+        populate: {
+          path: 'geometryType',
+        },
+      },
+    ]);
   }
 
   //--------------
@@ -132,6 +138,18 @@ export class MapService {
    * @returns {MapFeatureDocument} - последние amount добавленных объектов
    */
   async getNewestObjects(amount: number): Promise<Array<MapFeatureDocument>> {
-    return this.mapFeatureModel.find().sort({ _id: -1 }).limit(amount).populate(['user']);
+    return this.mapFeatureModel
+      .find()
+      .sort({ _id: -1 })
+      .limit(amount)
+      .populate([
+        'user',
+        {
+          path: 'type',
+          populate: {
+            path: 'geometryType',
+          },
+        },
+      ]);
   }
 }

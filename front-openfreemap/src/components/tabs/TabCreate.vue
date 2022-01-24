@@ -131,7 +131,7 @@ export default defineComponent({
       }
 
       try {
-        const createdFeature: MapFeatureDto = await MapService.addMapObject(createdObject);
+        const createdFeature = await MapService.addMapObject(createdObject);
         context.emit('created', createdFeature);
       } catch (e) {
         errors.value.push((e as Error).message);

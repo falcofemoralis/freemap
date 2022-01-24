@@ -30,7 +30,7 @@ import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import { MapService } from '@/api/mapService';
 import { transformExtent } from 'ol/proj';
-import { MapFeatureDto } from '@/dto/map/mapData.dto';
+import { FullFeaturePropertiesDto, MapFeatureDto } from '@/dto/map/mapData.dto';
 
 export default defineComponent({
   name: 'LayerData',
@@ -43,7 +43,7 @@ export default defineComponent({
     const store = useStore();
     const map = inject<Map>('map');
     const isTabSelectOpen = ref(false);
-    const selectedFeature = ref<MapFeatureDto>();
+    const selectedFeature = ref<MapFeatureDto<FullFeaturePropertiesDto>>();
 
     /**
      * Стиль объектов на карте
@@ -97,13 +97,15 @@ export default defineComponent({
           if (extent && zoom) {
             const res = await MapService.getMapData(extent, zoom);
 
-            const features = vectorSource?.getFormat()?.readFeatures(res, {
+            const convertedFeatures = vectorSource?.getFormat()?.readFeatures(res, {
               dataProjection: 'EPSG:4326',
               featureProjection: 'EPSG:3857',
             });
 
-            if (features) {
-              vectorSource.addFeatures(features as Feature<Geometry>[]);
+            console.log(convertedFeatures);
+
+            if (convertedFeatures) {
+              vectorSource.addFeatures(convertedFeatures as Feature<Geometry>[]);
             }
           }
         },
@@ -165,7 +167,7 @@ export default defineComponent({
     selectEvent.on('select', (event: SelectEvent) => {
       isTabSelectOpen.value = true;
 
-      const features: MapFeatureDto[] = event.selected;
+      const features: MapFeatureDto<FullFeaturePropertiesDto>[] = event.selected;
       if (features.length > 0) {
         selectedFeature.value = features[0];
       }
