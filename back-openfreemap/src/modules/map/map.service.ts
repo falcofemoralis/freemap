@@ -27,6 +27,7 @@ export class MapService {
     const filter = {
       'coordinates.lon': { $gte: bbox.lonL, $lte: bbox.lonR },
       'coordinates.lat': { $gte: bbox.latB, $lte: bbox.latT },
+      zoom: { $gte: bbox.zoom - 2, $lte: bbox.zoom + 2 },
     };
 
     return this.mapFeatureModel.find(filter).populate({

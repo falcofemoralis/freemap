@@ -75,10 +75,15 @@ export default defineComponent({
     /* Data object init */
     // https://stackoverflow.com/questions/27093482/is-it-possible-to-add-a-icon-symbol-to-a-polygon/27251137#27251137
 
+    const vectorSource = new Vector({
+      format: new GeoJSON(),
+    });
+
     /**
      * Базовый слой с объектами
      */
     const baseLayer = new VectorLayer({
+      source: vectorSource,
       style: function(feature) {
         style.getText().setText(feature.get('name'));
         return [style];
@@ -87,31 +92,37 @@ export default defineComponent({
     });
 
 
-    map?.on('moveend', function(e) {
+    map?.on('moveend', async function(e) {
       const zoom = map.getView().getZoom();
       const extent = transformExtent(map.getView().calculateExtent(map.getSize()), 'EPSG:3857', 'EPSG:4326');
 
-      const vectorSource = new Vector({
-        format: new GeoJSON(),
-        loader: async () => {
-          if (extent && zoom) {
-            const res = await MapService.getMapData(extent, zoom);
+      if (extent && zoom) {
+        const res = await MapService.getMapData(extent, zoom);
 
-            const convertedFeatures = vectorSource?.getFormat()?.readFeatures(res, {
-              dataProjection: 'EPSG:4326',
-              featureProjection: 'EPSG:3857',
-            });
-
-            console.log(convertedFeatures);
-
-            if (convertedFeatures) {
-              vectorSource.addFeatures(convertedFeatures as Feature<Geometry>[]);
+        vectorSource.forEachFeature((feature: Feature<Geometry>) => {
+          let isFound = false;
+          for (const newFeature of res.features) {
+            if (feature.getProperties().id == newFeature.properties.id) {
+              isFound = true;
+              res.features.splice(res.features.indexOf(newFeature), 1);
+              return;
             }
           }
-        },
-      });
 
-      baseLayer.setSource(vectorSource);
+          if (!isFound) {
+            vectorSource.removeFeature(feature);
+          }
+        });
+
+        const convertedFeatures = vectorSource?.getFormat()?.readFeatures(res, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857',
+        });
+
+        if (convertedFeatures) {
+          vectorSource.addFeatures(convertedFeatures as Feature<Geometry>[]);
+        }
+      }
     });
 
     map?.addLayer(baseLayer);

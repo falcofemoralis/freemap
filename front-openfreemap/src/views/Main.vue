@@ -112,7 +112,6 @@ export default defineComponent({
      * Обновление url с необходимыми параметрами
      */
     function updateQuery() {
-      console.log('updateQuery');
       const query = new Array<string>();
       const mapType = store.getters.getMapType
 
