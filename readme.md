@@ -1,1 +1,1 @@
-в IDE следует выбирать папку front-openfreemap
+
