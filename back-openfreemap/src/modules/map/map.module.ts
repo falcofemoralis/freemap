@@ -3,9 +3,9 @@ import { MapController } from './map.controller';
 import { MapService } from './map.service';
 import { AuthModule } from '../auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MapFeature, MapFeatureSchema } from './schemas/mapFeature.schema';
-import { GeometryType, GeometryTypeSchema } from './schemas/geometryType.schema';
-import { ObjectType, ObjectTypeSchema } from './schemas/objectType.schema';
+import { MapFeature, MapFeatureSchema } from './schemas/map-feature.schema';
+import { GeometryType, GeometryTypeSchema } from './schemas/geometry-type.schema';
+import { ObjectType, ObjectTypeSchema } from './schemas/object-type.schema';
 
 @Module({
   imports: [
@@ -19,5 +19,4 @@ import { ObjectType, ObjectTypeSchema } from './schemas/objectType.schema';
   controllers: [MapController],
   providers: [MapService],
 })
-export class MapModule {
-}
+export class MapModule {}

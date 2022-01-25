@@ -1,29 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { MapFeature, MapFeatureDocument } from './schemas/mapFeature.schema';
-import { ObjectType, ObjectTypeDocument } from './schemas/objectType.schema';
-import { GeometryType, GeometryTypeDocument } from './schemas/geometryType.schema';
-import { GetMapDataQuery } from './queries/getMapData.query';
-import { AddFeaturePropertiesDto, FullFeaturePropertiesDto } from '../../dto/map/mapData.dto';
-import { ObjectTypeDto } from '../../dto/map/objectType.dto';
+import { MapFeature, MapFeatureDocument } from './schemas/map-feature.schema';
+import { ObjectType, ObjectTypeDocument } from './schemas/object-type.schema';
+import { GeometryType, GeometryTypeDocument } from './schemas/geometry-type.schema';
+import { CreateFeatureDataDto, FullFeatureDataDto } from '../../dto/map/map-data.dto';
+import { ObjectTypeDto } from '../../dto/map/object-type.dto';
+import { BboxDto } from '../../dto/map/bbox.dto';
 
 @Injectable()
 export class MapService {
   constructor(
     @InjectModel(MapFeature.name)
-    private mapFeatureModel: Model<MapFeature>,
+    private mapFeatureModel: Model<MapFeatureDocument>,
     @InjectModel(ObjectType.name)
-    private objectTypeModel: Model<ObjectType>,
+    private objectTypeModel: Model<ObjectTypeDocument>,
     @InjectModel(GeometryType.name)
-    private geometryTypeModel: Model<GeometryType>,
+    private geometryTypeModel: Model<GeometryTypeDocument>,
   ) {}
 
   /**
    * Получение всех объектов на карте
    * @returns {Array<MapFeatureDocument>} - массив объектов
    */
-  async getAllObjects(bbox: GetMapDataQuery): Promise<Array<MapFeatureDocument>> {
+  async getAllObjects(bbox: BboxDto): Promise<Array<MapFeatureDocument>> {
     const filter = {
       'coordinates.lon': { $gte: bbox.lonL, $lte: bbox.lonR },
       'coordinates.lat': { $gte: bbox.latB, $lte: bbox.latT },
@@ -39,11 +39,11 @@ export class MapService {
 
   /**
    * Добавление объекта в базу данных
-   * @param {FullFeaturePropertiesDto} featurePropsDto - данные про объект на карте
+   * @param {FullFeatureDataDto} featurePropsDto - данные про объект на карте
    * @param userId - id пользователя, который добавил объект
    * @returns {MapFeatureDocument} - добавленный объект
    */
-  async addMapObject(featurePropsDto: AddFeaturePropertiesDto, userId: string): Promise<MapFeatureDocument> {
+  async addMapObject(featurePropsDto: CreateFeatureDataDto, userId: string): Promise<MapFeatureDocument> {
     const newMapFeature = new this.mapFeatureModel({ user: userId, type: featurePropsDto.typeId, ...featurePropsDto });
 
     return (await newMapFeature.save()).populate([

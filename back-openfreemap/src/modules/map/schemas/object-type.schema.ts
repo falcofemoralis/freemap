@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { GeometryType, GeometryTypeDocument } from './geometryType.schema';
+import { GeometryType, GeometryTypeDocument } from './geometry-type.schema';
 import * as mongoose from 'mongoose';
 
 @Schema()

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema  } from 'mongoose';
 import { User, UserDocument } from '../../auth/schemas/user.schema';
-import { ObjectType, ObjectTypeDocument } from './objectType.schema';
+import { ObjectType, ObjectTypeDocument } from './object-type.schema';
 
 export interface Coordinate {
   lon: number;

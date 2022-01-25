@@ -6,12 +6,12 @@ import { diskStorage } from 'multer';
 import * as Path from 'path';
 import { v4 } from 'uuid';
 import * as fs from 'fs';
-import { MapObjectGuard } from './guards/mapObjectGuard';
-import { GetMapDataQuery } from './queries/getMapData.query';
-import { FullFeaturePropertiesDto, MapDataDto, MapFeatureDto, NewestFeaturePropertiesDto, GetFeaturePropertiesDto, AddFeaturePropertiesDto, Coordinate } from '../../dto/map/mapData.dto';
+import { MapObjectGuard } from './guards/map-object.guard';
+import { FullFeatureDataDto, MapDataDto, MapFeatureDto, NewestFeatureDataDto, ShortFeatureDataDto, CreateFeatureDataDto, Coordinate } from '../../dto/map/map-data.dto';
 import { UserDto } from '../../dto/auth/user.dto';
-import { ObjectTypeDto } from '../../dto/map/objectType.dto';
-import { GeometryTypeDto } from '../../dto/map/geometryType.dto';
+import { ObjectTypeDto } from '../../dto/map/object-type.dto';
+import { GeometryTypeDto } from '../../dto/map/geometry-type.dto';
+import { BboxDto } from '../../dto/map/bbox.dto';
 
 const MEDIA_PATH = './uploads/media';
 
@@ -21,17 +21,16 @@ export class MapController {
 
   /**
    * Получение объектов на карте
-   * @param {GetMapDataQuery} bbox - область поиска объектов на карте
-   * @returns {MapDataDto<GetFeaturePropertiesDto>} - пак данных с объектами на карте
+   * @param {BboxDto} bbox - область поиска объектов на карте
+   * @returns {MapDataDto<ShortFeatureDataDto>} - пак данных с объектами на карте
    */
   @Get()
-  async getMapData(@Query() bbox: GetMapDataQuery): Promise<MapDataDto<GetFeaturePropertiesDto>> {
+  async getMapData(@Query() bbox: BboxDto): Promise<MapDataDto<ShortFeatureDataDto>> {
     const mapObjects = await this.mapService.getAllObjects(bbox);
 
-    const features = new Array<MapFeatureDto<GetFeaturePropertiesDto>>();
-
+    const features = new Array<MapFeatureDto<ShortFeatureDataDto>>();
     for (const obj of mapObjects) {
-      const featureProperties: GetFeaturePropertiesDto = {
+      const featureProperties: ShortFeatureDataDto = {
         id: obj.id,
         typeId: obj.type.id,
         name: obj.name,
@@ -62,19 +61,25 @@ export class MapController {
 
   /**
    * Добавление нового объекта в базу данных
-   * @param {AddFeaturePropertiesDto} featureDto - веденные данные пользователем про объект
+   * @param {CreateFeatureDataDto} featureDto - веденные данные пользователем про объект
    * @param req - запрос с объектом пользователя
-   * @returns {MapFeatureDto<AddFeaturePropertiesDto>} - объект карты
+   * @returns {MapFeatureDto<ShortFeatureDataDto>} - объект карты
    */
   @UseGuards(JwtAuthGuard)
   @Post('object')
-  async addMapObject(@Body() featureDto: AddFeaturePropertiesDto, @Request() req): Promise<MapFeatureDto<AddFeaturePropertiesDto>> {
+  async addMapObject(@Body() featureDto: CreateFeatureDataDto, @Request() req): Promise<MapFeatureDto<ShortFeatureDataDto>> {
     const insertedMapObject = await this.mapService.addMapObject(featureDto, (req.user as UserDto).id);
-    featureDto.id = insertedMapObject.id;
+
+    const featureProperties: ShortFeatureDataDto = {
+      id: insertedMapObject.id,
+      typeId: insertedMapObject.type.id,
+      name: insertedMapObject.name,
+      date: insertedMapObject._id.getTimestamp(),
+    };
 
     return {
       type: 'Feature',
-      properties: featureDto,
+      properties: featureProperties,
       geometry: {
         type: insertedMapObject.type?.geometryType?.geometry,
         coordinates: this.parseCoordinates(insertedMapObject.coordinates),
@@ -261,16 +266,16 @@ export class MapController {
    * @param amount - количество объектов которые можно получить
    */
   @Get('object/newest/:amount')
-  async getNewestObjects(@Param('amount') amount: number): Promise<Array<MapFeatureDto<NewestFeaturePropertiesDto>>> {
+  async getNewestObjects(@Param('amount') amount: number): Promise<Array<MapFeatureDto<NewestFeatureDataDto>>> {
     if (amount > 100) {
       throw new ForbiddenException();
     }
 
     const mapObjects = await this.mapService.getNewestObjects(amount);
 
-    const newestFeatures = new Array<MapFeatureDto<NewestFeaturePropertiesDto>>();
+    const newestFeatures = new Array<MapFeatureDto<NewestFeatureDataDto>>();
     for (const obj of mapObjects) {
-      const featureProperties: NewestFeaturePropertiesDto = {
+      const featureProperties: NewestFeatureDataDto = {
         id: obj.id,
         userLogin: obj.user.login,
         userAvatar: obj.user.avatar,
@@ -298,7 +303,7 @@ export class MapController {
    * @param id - id объект
    */
   @Get('object/:id')
-  async getMapObject(@Param('id') id: string): Promise<MapFeatureDto<FullFeaturePropertiesDto>> {
+  async getMapObject(@Param('id') id: string): Promise<MapFeatureDto<FullFeatureDataDto>> {
     if (!id) {
       throw new BadRequestException();
     }
@@ -312,7 +317,7 @@ export class MapController {
       //throw new NotFoundException();
     }
 
-    const fullFeaturePropertiesDto: FullFeaturePropertiesDto = {
+    const fullFeaturePropertiesDto: FullFeatureDataDto = {
       id,
       userId: mapObject.user.id,
       userLogin: mapObject.user.login,

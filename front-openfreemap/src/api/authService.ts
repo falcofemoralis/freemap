@@ -2,9 +2,9 @@ import { CreatedUser } from '@/types/CreatedUser';
 import { axiosInstance, getAuthConfig } from '@/api/index';
 import axios from 'axios';
 import store from '@/store/index';
-import { LoginUserDto } from '@/dto/auth/loginUser.dto';
+import { LoginUserDto } from '@/dto/auth/login-user.dto';
 import { CredentialsDto } from '@/dto/auth/credentials.dto';
-import { RegisterUserDto } from '@/dto/auth/registerUser.dto';
+import { RegisterUserDto } from '@/dto/auth/register-user.dto';
 import { UserDto } from '@/dto/auth/user.dto';
 
 export class AuthService {

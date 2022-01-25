@@ -50,9 +50,9 @@ import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { toLonLat } from 'ol/proj';
 import ProjectionType from '@/constants/ProjectionType';
-import { GeometryTypeDto } from '@/dto/map/geometryType.dto';
-import { ObjectTypeDto } from '@/dto/map/objectType.dto';
-import { Coordinate, MapFeatureDto } from '@/dto/map/mapData.dto';
+import { GeometryTypeDto } from '@/dto/map/geometry-type.dto';
+import { ObjectTypeDto } from '@/dto/map/object-type.dto';
+import { Coordinate } from '@/dto/map/map-data.dto';
 
 export default defineComponent({
   name: 'TabCreate',

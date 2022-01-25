@@ -1,7 +1,7 @@
-import { Type } from 'class-transformer';
 import { IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class GetMapDataQuery {
+export class BboxDto {
   @IsNumber()
   @Type(() => Number)
   latT: number; // верхняя точка широты

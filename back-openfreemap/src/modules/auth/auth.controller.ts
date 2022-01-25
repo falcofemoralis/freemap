@@ -6,11 +6,11 @@ import { diskStorage } from 'multer';
 import * as Path from 'path';
 import { v4 } from 'uuid';
 import * as fs from 'fs';
-import { RegisterUserDto } from '../../dto/auth/registerUser.dto';
+import { RegisterUserDto } from '../../dto/auth/register-user.dto';
 import { CredentialsDto } from '../../dto/auth/credentials.dto';
 import { UserDto } from '../../dto/auth/user.dto';
 import { IsNotEmpty } from 'class-validator';
-import { LoginUserDto } from '../../dto/auth/loginUser.dto';
+import { LoginUserDto } from '../../dto/auth/login-user.dto';
 
 const AVATAR_PATH = './uploads/avatars';
 

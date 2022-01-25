@@ -1,7 +1,7 @@
 <template>
   <BaseTab>
     <div class='container'>
-      <div v-for='feature in newestFeatures' :key='feature.id'
+      <div v-for='feature in newestFeatures' :key='feature.properties.id'
            @click='onItemSelected(feature.properties.coordinates, feature.properties.zoom)'
            class='item'>
         <span class='item__name'>{{ feature.properties.name }}</span>
@@ -16,7 +16,7 @@ import { MapService } from '@/api/mapService';
 import { inject, ref } from 'vue';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import Map from 'ol/Map';
-import { Coordinate, MapFeatureDto, NewestFeaturePropertiesDto } from '@/dto/map/mapData.dto';
+import { Coordinate, MapFeatureDto, NewestFeatureDataDto } from '@/dto/map/map-data.dto';
 import { fromLonLat } from 'ol/proj';
 
 export default {
@@ -24,7 +24,7 @@ export default {
   components: { BaseTab },
   async setup() {
     const map = inject<Map>('map');
-    const newestFeatures = ref<Array<MapFeatureDto<NewestFeaturePropertiesDto>>>(await MapService.getNewestObjects(10));
+    const newestFeatures = ref<Array<MapFeatureDto<NewestFeatureDataDto>>>(await MapService.getNewestObjects(10));
     const view = map?.getView();
 
     function onItemSelected(coordinates: Coordinate[], zoom: number) {

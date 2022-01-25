@@ -1,8 +1,8 @@
-import { IsEmail, IsEmpty, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
 
 export class RegisterUserDto {
   @IsNotEmpty()
-  @MaxLength(50)
+  @MaxLength(30)
   login: string;
 
   @IsNotEmpty()

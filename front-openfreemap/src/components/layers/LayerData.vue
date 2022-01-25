@@ -30,7 +30,7 @@ import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import { MapService } from '@/api/mapService';
 import { transformExtent } from 'ol/proj';
-import { FullFeaturePropertiesDto, MapFeatureDto } from '@/dto/map/mapData.dto';
+import { MapFeatureDto, ShortFeatureDataDto } from '@/dto/map/map-data.dto';
 
 export default defineComponent({
   name: 'LayerData',
@@ -43,7 +43,7 @@ export default defineComponent({
     const store = useStore();
     const map = inject<Map>('map');
     const isTabSelectOpen = ref(false);
-    const selectedFeature = ref<MapFeatureDto<FullFeaturePropertiesDto>>();
+    const selectedFeature = ref<MapFeatureDto<ShortFeatureDataDto>>();
 
     /**
      * Стиль объектов на карте
@@ -167,7 +167,7 @@ export default defineComponent({
     selectEvent.on('select', (event: SelectEvent) => {
       isTabSelectOpen.value = true;
 
-      const features: MapFeatureDto<FullFeaturePropertiesDto>[] = event.selected;
+      const features: MapFeatureDto<ShortFeatureDataDto>[] = event.selected;
       if (features.length > 0) {
         selectedFeature.value = features[0];
       }

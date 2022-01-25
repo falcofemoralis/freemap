@@ -5,16 +5,7 @@ export interface Coordinate {
   lat: number;
 }
 
-export class GetFeaturePropertiesDto {
-  id: string;
-  typeId: string;
-  name: string;
-  date: string;
-}
-
-export class AddFeaturePropertiesDto {
-  id?: string;
-
+export class CreateFeatureDataDto {
   @IsNotEmpty()
   typeId: string;
 
@@ -37,7 +28,7 @@ export class AddFeaturePropertiesDto {
   links?: string[];
 }
 
-export class NewestFeaturePropertiesDto {
+export class NewestFeatureDataDto {
   id: string;
   userLogin: string;
   userAvatar?: string;
@@ -47,7 +38,14 @@ export class NewestFeaturePropertiesDto {
   coordinates: Coordinate[];
 }
 
-export class FullFeaturePropertiesDto {
+export class ShortFeatureDataDto {
+  id: string;
+  typeId: string;
+  name: string;
+  date: string;
+}
+
+export class FullFeatureDataDto {
   id: string;
   userId: string;
   userLogin: string;

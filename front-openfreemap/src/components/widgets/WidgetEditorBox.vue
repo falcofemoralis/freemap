@@ -73,7 +73,7 @@ import { Geometry, Polygon } from 'ol/geom';
 import EditType from '@/constants/EditType';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import Animation from '@/components/elements/Animation.vue';
-import { AddFeaturePropertiesDto, MapFeatureDto } from '@/dto/map/mapData.dto';
+import { MapFeatureDto, ShortFeatureDataDto } from '@/dto/map/map-data.dto';
 
 export default defineComponent({
   name: 'WidgetEditorBox',
@@ -188,7 +188,7 @@ export default defineComponent({
      * Обработчик завершения создания нового объекта геометрии
      * @param {MapFeatureDto} mapFeatureDto - созданный объект
      */
-    async function onCreatedHandler(mapFeatureDto: MapFeatureDto<AddFeaturePropertiesDto>) {
+    async function onCreatedHandler(mapFeatureDto: MapFeatureDto<ShortFeatureDataDto>) {
       feature?.setProperties(mapFeatureDto.properties);
 
       // reset values
