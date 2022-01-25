@@ -2,6 +2,7 @@ import { createStore, Module } from 'vuex-smart-module';
 import { editorModule } from '@/store/modules/editorModule';
 import { toolsModule } from '@/store/modules/toolsModule';
 import { authModule } from '@/store/modules/authModule';
+import { mapModule} from '@/store/modules/mapModule';
 
 const store = createStore(
   new Module({
@@ -9,6 +10,7 @@ const store = createStore(
       editorModule,
       toolsModule,
       authModule,
+      mapModule
     },
   }),
   // Vuex store options

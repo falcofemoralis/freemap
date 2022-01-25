@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { MapFeature, MapFeatureDocument } from './schemas/map-feature.schema';
 import { ObjectType, ObjectTypeDocument } from './schemas/object-type.schema';
 import { GeometryType, GeometryTypeDocument } from './schemas/geometry-type.schema';
-import { CreateFeatureDataDto, FullFeatureDataDto } from '../../dto/map/map-data.dto';
+import { CreateFeatureDataDto } from '../../dto/map/map-data.dto';
 import { ObjectTypeDto } from '../../dto/map/object-type.dto';
 import { BboxDto } from '../../dto/map/bbox.dto';
 
@@ -27,7 +27,7 @@ export class MapService {
     const filter = {
       'coordinates.lon': { $gte: bbox.lonL, $lte: bbox.lonR },
       'coordinates.lat': { $gte: bbox.latB, $lte: bbox.latT },
-      zoom: { $gte: bbox.zoom - 2, $lte: bbox.zoom + 2 },
+      zoom: { $gte: bbox.zoom - 3, $lte: bbox.zoom + 3 },
     };
 
     return this.mapFeatureModel.find(filter).populate({

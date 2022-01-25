@@ -96,6 +96,10 @@ export default defineComponent({
         if (updatedquery.map) {
           store.dispatch('setMapType', MapType.getMapType(updatedquery.map as string));
         }
+
+        if (updatedquery.selected) {
+          store.dispatch('setSelectedFeatureId', updatedquery.selected);
+        }
         queryWatch();
       }
     });
@@ -107,13 +111,20 @@ export default defineComponent({
       updateQuery();
     });
 
+    /**
+     * Отслеживание измнения выбранного объекта
+     */
+    watch(computed(() => store.getters.getSelectedFeatureId),  () => {
+      updateQuery();
+    });
 
     /**
      * Обновление url с необходимыми параметрами
      */
     function updateQuery() {
       const query = new Array<string>();
-      const mapType = store.getters.getMapType
+      const mapType = store.getters.getMapType;
+      const featureId = store.getters.getSelectedFeatureId;
 
       if (currentLonLat[0]) {
         query.push(`lon=${currentLonLat[0]}`);
@@ -129,6 +140,10 @@ export default defineComponent({
 
       if (mapType) {
         query.push(`map=${MapType.getMapName(mapType)}`);
+      }
+
+      if (featureId) {
+        query.push(`selected=${featureId}`);
       }
 
       let queryString = '?';

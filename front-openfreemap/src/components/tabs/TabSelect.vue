@@ -1,59 +1,54 @@
 <template>
-  <BaseTab>
-    <h2 class='field'> {{ featureProperties.name }}</h2>
-    <span class='field'> {{ featureProperties.description }}</span>
-    <span class='field'>Адресс: {{ featureProperties.address }}</span>
-    <span class='field'>Ссылки: {{ featureProperties.links }}</span>
+  <BaseTab v-if='mapFeature'>>
+    <h2 class='field'> {{ mapFeature.properties.name }}</h2>
+    <span class='field'> {{ mapFeature.properties.description }}</span>
+    <span class='field'>Адресс: {{ mapFeature.properties.address }}</span>
+    <span class='field'>Ссылки: {{ mapFeature.properties.links }}</span>
     <span class='field'>
-      Автор: {{ featureProperties.userLogin }}
-      <img class='avatarImage' :src='getUserAvatarLink(featureProperties.userAvatar)' />
+      Автор: {{ mapFeature.properties.userLogin }}
+      <img class='avatarImage' :src='getUserAvatarLink(mapFeature.properties.userAvatar)' />
     </span>
-    <div class='imageSlider' v-if='featureProperties.mediaNames.length > 0'>
-      <img v-for='(media, i) in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'
-           @click='openImage(featureProperties.mediaNames, i)'>
-    </div>
+    <!--    <div class='imageSlider' v-if='featureProperties.mediaNames.length > 0'>
+          <img v-for='(media, i) in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'
+               @click='openImage(featureProperties.mediaNames, i)'>
+        </div>-->
   </BaseTab>
 </template>
 
 <script lang='ts'>
-import { defineComponent, ref, watch } from 'vue';
-import { Feature } from 'ol';
-import { Geometry } from 'ol/geom';
+import { computed, defineComponent, ref, watch } from 'vue';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { AuthService } from '@/api/authService';
 import 'viewerjs/dist/viewer.css';
 import { api as viewerApi } from 'v-viewer';
-import {
-  FullFeatureDataDto,
-  ShortFeatureDataDto,
-} from '@/dto/map/map-data.dto';
+import { FullFeatureDataDto, MapFeatureDto, ShortFeatureDataDto } from '@/dto/map/map-data.dto';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   name: 'TabSelect',
   components: { BaseTab },
-  props: {
-    feature: {
-      type: Object,
-    },
-  },
-  async setup(props: any, context: any) {
+  async setup() {
+    const store = useStore();
+
     /**
      * Отслеживание перевыбора объекта на карте. Получение парамтеров объекта карты. Получение данных про пользователя создавшего объект
      */
-    watch(() => props.feature, async (sel: Feature<Geometry>) => {
-      featureProperties.value = await getProperties(sel);
+    const mapFeature = ref<MapFeatureDto<FullFeatureDataDto> | null>(null);
+    watch(computed(() => store.getters.getSelectedFeatureId), async (current) => {
+      if (current) {
+        mapFeature.value = await getProperties(current);
+      } else {
+        mapFeature.value = null;
+      }
     });
-    const featureProperties = ref<FullFeatureDataDto>(await getProperties(props.feature));
 
     /**
      * Получение параметров из feature объекта карты. Также идет получения возможных медиа файлов объекта.
-     * @param feature
+     * @param featureId - id объекта
      */
-    async function getProperties(feature: Feature<Geometry>): Promise<FullFeatureDataDto> {
-      const mapObjectId = (feature.getProperties() as ShortFeatureDataDto).id;
-
-      return await MapService.getMapObject(mapObjectId);
+    async function getProperties(featureId: string): Promise<MapFeatureDto<FullFeatureDataDto>> {
+      return await MapService.getMapObject(featureId);
     }
 
     /**
@@ -61,8 +56,11 @@ export default defineComponent({
      * @param name
      */
     function getMediaUrl(name: string): string {
-      return MapService.getMediaLink(featureProperties.value.id ?? '', name);
-
+      if (mapFeature.value?.properties) {
+        return MapService.getMediaLink(mapFeature.value?.properties.id ?? '', name);
+      } else {
+        return '';
+      }
     }
 
     /**
@@ -97,7 +95,7 @@ export default defineComponent({
     }
 
     return {
-      featureProperties,
+      mapFeature,
 
       getMediaUrl,
       getUserAvatarLink,

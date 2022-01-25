@@ -1,9 +1,9 @@
 <template>
   <div>
     <Animation>
-      <Suspense v-if='isTabSelectOpen'>
+      <Suspense>
         <template #default>
-          <TabSelect @close='closeTab' :feature='selectedFeature' />
+          <TabSelect @close='closeTab' />
         </template>
         <template #fallback>
           <TabLoading />
@@ -42,8 +42,6 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const map = inject<Map>('map');
-    const isTabSelectOpen = ref(false);
-    const selectedFeature = ref<MapFeatureDto<ShortFeatureDataDto>>();
 
     /**
      * Стиль объектов на карте
@@ -176,11 +174,9 @@ export default defineComponent({
      */
     const selectEvent = new Select({ style: selectStyle as any, filter: featureFilter as any }); // any fixes bug
     selectEvent.on('select', (event: SelectEvent) => {
-      isTabSelectOpen.value = true;
-
-      const features: MapFeatureDto<ShortFeatureDataDto>[] = event.selected;
+      const features: Feature<Geometry>[] = event.selected;
       if (features.length > 0) {
-        selectedFeature.value = features[0];
+        store.dispatch('setSelectedFeatureId', features[0].getProperties().id);
       }
     });
     map?.addInteraction(selectEvent);
@@ -238,14 +234,11 @@ export default defineComponent({
      */
     function closeTab() {
       selectEvent.changed();
-      isTabSelectOpen.value = false;
+      store.dispatch('setSelectedFeatureId', null)
       selectEvent.getFeatures().clear();
     }
 
     return {
-      isTabSelectOpen,
-      selectedFeature,
-
       closeTab,
     };
   },

@@ -49,8 +49,8 @@ export class MapService {
     }
   }
 
-  static async getMapObject(id: string): Promise<FullFeatureDataDto> {
-    return (await axiosInstance.get<FullFeatureDataDto>(`/map/object/${id}`)).data;
+  static async getMapObject(id: string): Promise<MapFeatureDto<FullFeatureDataDto>> {
+    return (await axiosInstance.get<MapFeatureDto<FullFeatureDataDto>>(`/map/object/${id}`)).data;
   }
 
   /**
