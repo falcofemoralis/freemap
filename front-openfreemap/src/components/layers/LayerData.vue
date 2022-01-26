@@ -1,7 +1,7 @@
 <template>
   <div>
     <Animation>
-      <Suspense>
+      <Suspense v-if='store.getters.getSelectedFeatureId'>
         <template #default>
           <TabSelect @close='closeTab' />
         </template>
@@ -239,6 +239,8 @@ export default defineComponent({
     }
 
     return {
+      store,
+
       closeTab,
     };
   },

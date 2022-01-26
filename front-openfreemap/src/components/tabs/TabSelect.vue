@@ -1,5 +1,5 @@
 <template>
-  <BaseTab v-if='mapFeature'>
+  <BaseTab>
     <h2 class='field'> {{ mapFeature?.properties.name }}</h2>
     <span class='field'> {{ mapFeature?.properties.description }}</span>
     <span class='field'>Адресс: {{ mapFeature?.properties.address }}</span>
@@ -34,7 +34,6 @@ export default defineComponent({
     /**
      * Отслеживание перевыбора объекта на карте. Получение парамтеров объекта карты. Получение данных про пользователя создавшего объект
      */
-    const mapFeature = ref<MapFeatureDto<FullFeatureDataDto> | null>(null);
     watch(computed(() => store.getters.getSelectedFeatureId), async (current) => {
       if (current) {
         mapFeature.value = await getProperties(current);
@@ -42,6 +41,9 @@ export default defineComponent({
         mapFeature.value = null;
       }
     });
+
+    const properties = await getProperties(store.getters.getSelectedFeatureId);
+    const mapFeature = ref<MapFeatureDto<FullFeatureDataDto> | null>(properties);
 
     /**
      * Получение параметров из feature объекта карты. Также идет получения возможных медиа файлов объекта.

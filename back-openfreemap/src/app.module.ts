@@ -13,7 +13,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     // In order to serve static content for a SPA, we can use the ServeStaticModule to hook up VueJS
     // https://docs.nestjs.com/recipes/serve-static
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../..', 'client'),
+      rootPath: join(__dirname, '..', 'client'),
     }),
     ConfigModule.forRoot({
       isGlobal: true,
