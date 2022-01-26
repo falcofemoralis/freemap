@@ -1,5 +1,5 @@
 <template>
-  <BaseTab>
+  <BaseTab v-if='!isLoading'>
     <div class='type'>
       <div v-for='geometryType in geometryTypes' :key='geometryType.id' class='type__frame'
            :class="{'type__selected': geometryType.key === selectedGeometry?.key}">
@@ -41,6 +41,7 @@
       </li>
     </ul>
   </BaseTab>
+  <TabLoading v-else />
 </template>
 
 <script lang='ts'>
@@ -53,10 +54,11 @@ import ProjectionType from '@/constants/ProjectionType';
 import { GeometryTypeDto } from '@/dto/map/geometry-type.dto';
 import { ObjectTypeDto } from '@/dto/map/object-type.dto';
 import { Coordinate } from '@/dto/map/map-data.dto';
+import TabLoading from '@/components/tabs/TabLoading.vue';
 
 export default defineComponent({
   name: 'TabCreate',
-  components: { BaseTab },
+  components: { BaseTab, TabLoading },
   props: {
     editType: {
       type: String,
@@ -66,6 +68,7 @@ export default defineComponent({
   },
   async setup(props: any, context: any) {
     /* init data */
+    const isLoading = ref(false);
     const errors = ref<Array<string>>([]);
     const geometryTypes = ref<Array<GeometryTypeDto>>(await MapService.getGeometryTypes());
     const selectedGeometry = ref<GeometryTypeDto | undefined>(geometryTypes.value.find((val: GeometryTypeDto) => val.key == props.editType));
@@ -130,12 +133,16 @@ export default defineComponent({
         return;
       }
 
+      isLoading.value = true;
+
       try {
         const createdFeature = await MapService.addMapObject(createdObject);
         context.emit('created', createdFeature);
       } catch (e) {
         errors.value.push((e as Error).message);
       }
+
+      isLoading.value = false;
     }
 
     /**
@@ -154,6 +161,7 @@ export default defineComponent({
       geometryTypes,
       selectedGeometry,
       errors,
+      isLoading,
 
       complete,
       mediaChangedHandler,

@@ -1,17 +1,17 @@
 <template>
-  <BaseTab v-if='mapFeature'>>
-    <h2 class='field'> {{ mapFeature.properties.name }}</h2>
-    <span class='field'> {{ mapFeature.properties.description }}</span>
-    <span class='field'>Адресс: {{ mapFeature.properties.address }}</span>
-    <span class='field'>Ссылки: {{ mapFeature.properties.links }}</span>
+  <BaseTab v-if='mapFeature'>
+    <h2 class='field'> {{ mapFeature?.properties.name }}</h2>
+    <span class='field'> {{ mapFeature?.properties.description }}</span>
+    <span class='field'>Адресс: {{ mapFeature?.properties.address }}</span>
+    <span class='field'>Ссылки: {{ mapFeature?.properties.links }}</span>
     <span class='field'>
-      Автор: {{ mapFeature.properties.userLogin }}
-      <img class='avatarImage' :src='getUserAvatarLink(mapFeature.properties.userAvatar)' />
+      Автор: {{ mapFeature?.properties.userLogin }}
+      <img class='avatarImage' :src='getUserAvatarLink(mapFeature?.properties.userAvatar)' />
     </span>
-    <!--    <div class='imageSlider' v-if='featureProperties.mediaNames.length > 0'>
-          <img v-for='(media, i) in featureProperties.mediaNames' :key='media' :src='getMediaUrl(media)'
-               @click='openImage(featureProperties.mediaNames, i)'>
-        </div>-->
+    <div class='imageSlider' v-if='mapFeature?.properties.mediaNames.length > 0'>
+      <img v-for='(media, i) in mapFeature?.properties.mediaNames' :key='media' :src='getMediaUrl(media)'
+           @click='openImage(mapFeature?.properties.mediaNames, i)'>
+    </div>
   </BaseTab>
 </template>
 
@@ -22,7 +22,7 @@ import { MapService } from '@/api/mapService';
 import { AuthService } from '@/api/authService';
 import 'viewerjs/dist/viewer.css';
 import { api as viewerApi } from 'v-viewer';
-import { FullFeatureDataDto, MapFeatureDto, ShortFeatureDataDto } from '@/dto/map/map-data.dto';
+import { FullFeatureDataDto, MapFeatureDto } from '@/dto/map/map-data.dto';
 import { useStore } from 'vuex';
 
 export default defineComponent({

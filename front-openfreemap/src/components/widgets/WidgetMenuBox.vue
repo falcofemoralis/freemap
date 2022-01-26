@@ -1,7 +1,17 @@
 <template>
   <div>
     <Animation>
-      <TabMenu v-if='isMenuOpen' @close='toggleMenu' />
+      <TabMenu v-if='isMenuOpen' @close='toggleMenu' @selected='toggleTab' />
+    </Animation>
+    <Animation>
+      <Suspense v-if='isTabSelected'>
+        <template #default>
+          <TabNewest @close='toggleTab' />
+        </template>
+        <template #fallback>
+          <TabLoading />
+        </template>
+      </Suspense>
     </Animation>
     <div class='menuBox'>
       <img class='menuBtn' :src="require('@/assets/menu.png')" alt='menu' @click='toggleMenu'>
@@ -13,21 +23,30 @@
 import TabMenu from '@/components/tabs/TabMenu.vue';
 import { ref } from 'vue';
 import Animation from '@/components/elements/Animation.vue';
+import TabNewest from '@/components/tabs/TabNewest.vue';
+import TabLoading from '@/components/tabs/TabLoading.vue';
 
 export default {
   name: 'WidgetMenuBox',
-  components: { Animation, TabMenu },
+  components: { Animation, TabMenu, TabNewest, TabLoading },
   setup() {
     const isMenuOpen = ref(false);
+    const isTabSelected = ref(false);
 
     function toggleMenu() {
       isMenuOpen.value = !isMenuOpen.value;
     }
 
+    function toggleTab() {
+      isTabSelected.value = !isTabSelected.value;
+    }
+
     return {
       isMenuOpen,
+      isTabSelected,
 
       toggleMenu,
+      toggleTab,
     };
   },
 

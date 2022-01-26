@@ -1,17 +1,5 @@
 <template>
   <BaseTab>
-    <Animation>
-      <Suspense v-if='isTabSelected'>
-        <template #default>
-          <TabNewest @close='toggleTab' />
-        </template>
-        <template #fallback>
-          <div>
-            Loading...
-          </div>
-        </template>
-      </Suspense>
-    </Animation>
     <div class='logo'>
       <img class='logo__img' :src="require('@/assets/logo.png')" />
       <span class='logo__text'>OpenFreeMap</span>
@@ -46,24 +34,16 @@
 
 <script lang='ts'>
 import BaseTab from '@/components/tabs/BaseTab.vue';
-import { ref } from 'vue';
-import Animation from '@/components/elements/Animation.vue';
-import TabNewest from '@/components/tabs/TabNewest.vue';
-
 
 export default {
   name: 'TabMenu',
-  components: { TabNewest, Animation, BaseTab },
-  setup() {
-    const isTabSelected = ref(false);
-
+  components: { BaseTab },
+  setup(props: any, context: any) {
     function toggleTab() {
-      isTabSelected.value = !isTabSelected.value;
+      context.emit('selected');
     }
 
     return {
-      isTabSelected,
-
       toggleTab,
     };
   },
