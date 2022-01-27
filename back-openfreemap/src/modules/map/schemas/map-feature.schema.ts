@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema  } from 'mongoose';
+import { Document, ObjectId, Schema as MongooseSchema } from 'mongoose';
 import { User, UserDocument } from '../../auth/schemas/user.schema';
 import { ObjectType, ObjectTypeDocument } from './object-type.schema';
 
@@ -7,6 +7,8 @@ export interface Coordinate {
   lon: number;
   lat: number;
 }
+
+export type MapFeatureDocument = MapFeature & Document;
 
 @Schema()
 export class MapFeature {
@@ -36,5 +38,3 @@ export class MapFeature {
 }
 
 export const MapFeatureSchema = SchemaFactory.createForClass(MapFeature);
-
-export type MapFeatureDocument = MapFeature & Document;

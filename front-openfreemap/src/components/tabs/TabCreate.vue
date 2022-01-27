@@ -1,5 +1,5 @@
 <template>
-  <BaseTab v-if='!isLoading'>
+  <BaseTab>
     <div class='type'>
       <div v-for='geometryType in geometryTypes' :key='geometryType.id' class='type__frame'
            :class="{'type__selected': geometryType.key === selectedGeometry?.key}">
@@ -34,14 +34,14 @@
       <h4>Медиа</h4>
       <input type='file' multiple accept='image/*, video/*' @change='mediaChangedHandler'>
     </div>
-    <button class='submitBtn' @click='complete'>Создать</button>
+    <button v-if='!isLoading' class='submitBtn' @click='complete'>Создать</button>
+    <span v-else>Loading...</span>
     <ul>
       <li v-for='error in errors' :key='error' class='errorText'>
         {{ error }}
       </li>
     </ul>
   </BaseTab>
-  <TabLoading v-else />
 </template>
 
 <script lang='ts'>
@@ -54,11 +54,10 @@ import ProjectionType from '@/constants/ProjectionType';
 import { GeometryTypeDto } from '@/dto/map/geometry-type.dto';
 import { ObjectTypeDto } from '@/dto/map/object-type.dto';
 import { Coordinate } from '@/dto/map/map-data.dto';
-import TabLoading from '@/components/tabs/TabLoading.vue';
 
 export default defineComponent({
   name: 'TabCreate',
-  components: { BaseTab, TabLoading },
+  components: { BaseTab },
   props: {
     editType: {
       type: String,

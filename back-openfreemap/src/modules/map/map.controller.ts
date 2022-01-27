@@ -7,7 +7,7 @@ import * as Path from 'path';
 import { v4 } from 'uuid';
 import * as fs from 'fs';
 import { MapObjectGuard } from './guards/map-object.guard';
-import { FullFeatureDataDto, MapDataDto, MapFeatureDto, NewestFeatureDataDto, ShortFeatureDataDto, CreateFeatureDataDto, Coordinate } from '../../dto/map/map-data.dto';
+import { Coordinate, CreateFeatureDataDto, FullFeatureDataDto, MapDataDto, MapFeatureDto, NewestFeatureDataDto, ShortFeatureDataDto } from '../../dto/map/map-data.dto';
 import { UserDto } from '../../dto/auth/user.dto';
 import { ObjectTypeDto } from '../../dto/map/object-type.dto';
 import { GeometryTypeDto } from '../../dto/map/geometry-type.dto';
@@ -228,8 +228,6 @@ export class MapController {
   async getGeometryTypes(): Promise<Array<GeometryTypeDto>> {
     const types = await this.mapService.getGeometryTypes();
 
-    console.log(types);
-
     const typesDto = new Array<GeometryTypeDto>();
     for (const type of types) {
       typesDto.push({
@@ -309,6 +307,10 @@ export class MapController {
     }
 
     const mapObject = await this.mapService.getObjectById(id);
+
+    if (!mapObject) {
+      throw new NotFoundException();
+    }
 
     let mediaNames = new Array<string>();
     try {
