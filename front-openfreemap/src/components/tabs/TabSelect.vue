@@ -50,7 +50,7 @@ export default defineComponent({
      * @param featureId - id объекта
      */
     async function getProperties(featureId: string): Promise<MapFeatureDto<FullFeatureDataDto>> {
-      return await MapService.getMapObject(featureId);
+      return await MapService.getMapFeature(featureId);
     }
 
     /**

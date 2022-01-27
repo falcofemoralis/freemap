@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Animation>
+    <Animation type='slide'>
       <Suspense v-if='isTabCreateOpen'>
         <template #default>
           <TabCreate @close='closeTab' :editType='selectedEditType' :coordinates='featureCoordinates'

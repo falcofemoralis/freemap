@@ -2,9 +2,9 @@ import { CreatedUser } from '@/types/CreatedUser';
 import { axiosInstance, getAuthConfig } from '@/api/index';
 import axios from 'axios';
 import store from '@/store/index';
-import { LoginUserDto } from '@/dto/auth/login-user.dto';
+import { LoginUserDto } from '@/dto/auth/user.dto';
 import { CredentialsDto } from '@/dto/auth/credentials.dto';
-import { RegisterUserDto } from '@/dto/auth/register-user.dto';
+import { CreateUserDto } from '@/dto/auth/user.dto';
 import { UserDto } from '@/dto/auth/user.dto';
 
 export class AuthService {
@@ -41,14 +41,14 @@ export class AuthService {
    * @param {CreatedUser} createdUser - веденные данные пользователя
    */
   static async register(createdUser: CreatedUser) {
-    const registerUserDto: RegisterUserDto = {
+    const createUserDto: CreateUserDto = {
       login: createdUser.login,
       password: createdUser.password,
       email: createdUser.email,
     };
 
     try {
-      const credentials: CredentialsDto = (await axiosInstance.post('/auth/register', registerUserDto)).data;
+      const credentials: CredentialsDto = (await axiosInstance.post('/auth/register', createUserDto)).data;
       await store.dispatch('setToken', credentials.accessToken);
 
       if (createdUser.avatar && credentials.accessToken) {

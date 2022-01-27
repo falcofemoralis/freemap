@@ -7,7 +7,7 @@ export class MapObjectGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
 
-    const mapObject = await this.mapService.getObjectById(req.params.id);
+    const mapObject = await this.mapService.getMapFeatureById(req.params.id);
 
     if (!mapObject) {
       throw new NotFoundException();

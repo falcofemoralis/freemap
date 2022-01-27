@@ -1,5 +1,5 @@
 <template>
-  <transition name='slide'>
+  <transition :name=type>
     <slot></slot>
   </transition>
 </template>
@@ -7,6 +7,12 @@
 <script lang='ts'>
 export default {
   name: 'Animation',
+  props: {
+    type: {
+      type: String,
+      required: true,
+    },
+  },
 };
 </script>
 

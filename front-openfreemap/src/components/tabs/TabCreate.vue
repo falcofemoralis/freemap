@@ -28,7 +28,7 @@
     </div>
     <div class='field'>
       <h4>Ссылки</h4>
-      <input v-model='createdObject.links' placeholder='Enter links' />
+      <input v-model='createdObject.links[0]' placeholder='Enter links' />
     </div>
     <div class='field'>
       <h4>Медиа</h4>
@@ -50,9 +50,8 @@ import { CreatedObject } from '@/types/CreatedObject';
 import BaseTab from '@/components/tabs/BaseTab.vue';
 import { MapService } from '@/api/mapService';
 import { toLonLat } from 'ol/proj';
-import ProjectionType from '@/constants/ProjectionType';
 import { GeometryTypeDto } from '@/dto/map/geometry-type.dto';
-import { ObjectTypeDto } from '@/dto/map/object-type.dto';
+import { FeatureTypeDto } from '@/dto/map/feature-type.dto';
 import { Coordinate } from '@/dto/map/map-data.dto';
 
 export default defineComponent({
@@ -71,7 +70,7 @@ export default defineComponent({
     const errors = ref<Array<string>>([]);
     const geometryTypes = ref<Array<GeometryTypeDto>>(await MapService.getGeometryTypes());
     const selectedGeometry = ref<GeometryTypeDto | undefined>(geometryTypes.value.find((val: GeometryTypeDto) => val.key == props.editType));
-    const types = ref<Array<ObjectTypeDto>>();
+    const types = ref<Array<FeatureTypeDto>>();
     if (selectedGeometry.value) {
       types.value = await MapService.getTypesByGeometry(selectedGeometry.value.id);
     }
@@ -80,7 +79,7 @@ export default defineComponent({
     const lotLatCoordinates: Coordinate[] = [];
     for (const tuple of props.coordinates as number[][][]) {
       for (const coordinate of tuple) {
-        const lonLat = toLonLat(coordinate, ProjectionType.EPSG3857);
+        const lonLat = toLonLat(coordinate, 'EPSG:3857');
         lotLatCoordinates.push({ lon: lonLat[0], lat: lonLat[1] });
       }
     }
@@ -92,6 +91,7 @@ export default defineComponent({
       typeId: '',
       coordinates: lotLatCoordinates,
       zoom: props.zoom,
+      links: new Array<string>()
     });
 
     /**
@@ -135,7 +135,7 @@ export default defineComponent({
       isLoading.value = true;
 
       try {
-        const createdFeature = await MapService.addMapObject(createdObject);
+        const createdFeature = await MapService.addMapFeature(createdObject);
         context.emit('created', createdFeature);
       } catch (e) {
         errors.value.push((e as Error).message);

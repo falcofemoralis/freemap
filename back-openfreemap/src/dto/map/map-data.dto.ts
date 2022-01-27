@@ -30,19 +30,19 @@ export class CreateFeatureDataDto {
 
 export class NewestFeatureDataDto {
   id: string;
+  userId: string;
   userLogin: string;
   userAvatar?: string;
   name: string;
-  date: string;
+  createdAt: string;
   zoom: number;
   coordinates: Coordinate[];
 }
 
 export class ShortFeatureDataDto {
   id: string;
-  typeId: string;
   name: string;
-  date: string;
+  createdAt: string;
 }
 
 export class FullFeatureDataDto {
@@ -54,7 +54,7 @@ export class FullFeatureDataDto {
   name: string;
   description: string;
   zoom: number;
-  date: string;
+  createdAt: string;
   address?: string;
   links?: string[];
   mediaNames?: Array<string>;

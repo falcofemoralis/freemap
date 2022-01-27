@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Animation>
+    <Animation type='slide'>
       <Suspense v-if='store.getters.getSelectedFeatureId'>
         <template #default>
           <TabSelect @close='closeTab' />

@@ -24,7 +24,7 @@ export default {
   components: { BaseTab },
   async setup() {
     const map = inject<Map>('map');
-    const newestFeatures = ref<Array<MapFeatureDto<NewestFeatureDataDto>>>(await MapService.getNewestObjects(10));
+    const newestFeatures = ref<Array<MapFeatureDto<NewestFeatureDataDto>>>(await MapService.getNewestFeatures(10));
     const view = map?.getView();
 
     function onItemSelected(coordinates: Coordinate[], zoom: number) {

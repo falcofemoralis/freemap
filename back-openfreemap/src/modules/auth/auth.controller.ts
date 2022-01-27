@@ -6,11 +6,10 @@ import { diskStorage } from 'multer';
 import * as Path from 'path';
 import { v4 } from 'uuid';
 import * as fs from 'fs';
-import { RegisterUserDto } from '../../dto/auth/register-user.dto';
 import { CredentialsDto } from '../../dto/auth/credentials.dto';
-import { UserDto } from '../../dto/auth/user.dto';
-import { IsNotEmpty } from 'class-validator';
-import { LoginUserDto } from '../../dto/auth/login-user.dto';
+import { CreateUserDto, LoginUserDto, UserDto } from '../../dto/auth/user.dto';
+import { hash } from 'bcrypt';
+import { User } from './entities/user.entity';
 
 const AVATAR_PATH = './uploads/avatars';
 
@@ -46,16 +45,18 @@ export class AuthController {
    * @returns {CredentialsDto} данные аунтефикации без аватара пользователя
    */
   @Post('register')
-  async register(@Body() registerUserDto: RegisterUserDto): Promise<CredentialsDto> {
-    if (await this.authService.getUserByLogin(registerUserDto.login)) {
+  async register(@Body() createUserDto: CreateUserDto): Promise<CredentialsDto> {
+    if (await this.authService.getUserByLogin(createUserDto.login)) {
       throw new HttpException('User with this login is already exists', HttpStatus.CONFLICT);
     }
 
-    if (await this.authService.getUserByEmail(registerUserDto.email)) {
+    if (await this.authService.getUserByEmail(createUserDto.email)) {
       throw new HttpException('User with this email is already exists', HttpStatus.CONFLICT);
     }
 
-    const token = await this.authService.createToken(await this.authService.register(registerUserDto));
+    const passwordHash = await hash(createUserDto.password, 10); //salt or round
+
+    const token = await this.authService.createToken(await this.authService.register(new User(createUserDto.login, createUserDto.email, passwordHash)));
 
     return {
       accessToken: token,

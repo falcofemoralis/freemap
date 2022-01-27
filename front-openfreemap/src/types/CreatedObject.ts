@@ -1,4 +1,4 @@
-import { Coordinate } from '@/dto/map/mapData.dto';
+import { Coordinate } from '@/dto/map/map-data.dto';
 
 export interface CreatedObject {
   name: string;
@@ -7,6 +7,6 @@ export interface CreatedObject {
   zoom: number;
   typeId: string;
   address?: string;
-  links?: string;
+  links?: string[];
   mediaFiles?: Blob[];
 }

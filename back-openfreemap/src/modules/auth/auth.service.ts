@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compare, hash } from 'bcrypt';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas/user.schema';
-import { Model } from 'mongoose';
+import { compare } from 'bcrypt';
 import { UserDto } from '../../dto/auth/user.dto';
-import { RegisterUserDto } from '../../dto/auth/register-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { MongoRepository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    @InjectModel(User.name)
-    private userModel: Model<UserDocument>,
+    @InjectRepository(User)
+    private userRepository: MongoRepository<User>,
   ) {}
 
   /**
@@ -21,8 +20,8 @@ export class AuthService {
    * @param pass - пароль пользователя
    * @returns {User | null} - пользователь без поля хеша пароля.
    */
-  async validateUser(login: string, pass: string): Promise<UserDocument | null> {
-    const user: UserDocument = await this.userModel.findOne({ login }).exec();
+  async validateUser(login: string, pass: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ login });
 
     if (user && (await compare(pass, user.passwordHash))) {
       return user;
@@ -33,12 +32,12 @@ export class AuthService {
 
   /**
    * Создание токена пользователя.
-   * @param {UserDocument} user - найденный пользователь из базы данных
+   * @param {User} user - найденный пользователь из базы данных
    * @returns {String} - сгенерированный токен
    */
-  async createToken(user: UserDocument): Promise<string> {
-    const payload: UserDto = { id: user.id, login: user.login, avatar: user.avatar, email: user.email };
-
+  async createToken(user: User): Promise<string> {
+    delete user.passwordHash;
+    const payload: UserDto = { ...user };
     return this.jwtService.sign(payload);
   }
 
@@ -55,19 +54,11 @@ export class AuthService {
 
   /**
    * Регистрация нового пользователя в базе данных
-   * @param {RegisterUserDto} registerUserDto - веденные данные пользовател
-   * @returns {UserDocument} - пользователь
+   * @param {User} user - веденные данные пользовател
+   * @returns {User} - пользователь
    */
-  async register(registerUserDto: RegisterUserDto): Promise<UserDocument> {
-    const passwordHash = await hash(registerUserDto.password, 10); //salt or round
-
-    const newUser = new this.userModel({
-      login: registerUserDto.login,
-      passwordHash: passwordHash,
-      email: registerUserDto.email,
-    });
-
-    return newUser.save();
+  async register(user: User): Promise<User> {
+    return this.userRepository.save(user);
   }
 
   /**
@@ -75,34 +66,34 @@ export class AuthService {
    * @param id - id пользователя
    * @param avatar - имя файла аватара
    */
-  async updateUserAvatar(id: string, avatar: string): Promise<UserDocument> {
-    return this.userModel.findByIdAndUpdate(id, { avatar });
+  async updateUserAvatar(id: string, avatar: string) {
+    await this.userRepository.update(id, { avatar });
   }
 
   /**
    * Получение пользователя по id
    * @param id - id пользователя
-   * @returns {UserDocument | null} - найденный пользователь
+   * @returns {User | null} - найденный пользователь
    */
-  async getUserById(id: string): Promise<UserDocument | null> {
-    return this.userModel.findById(id);
+  async getUserById(id: string): Promise<User | null> {
+    return this.userRepository.findOne(id);
   }
 
   /**
    * Получение пользователя по логину
    * @param login - логин пользователя
-   * @returns {UserDocument | null} - найденный пользователь
+   * @returns {User | null} - найденный пользователь
    */
-  async getUserByLogin(login: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ login });
+  async getUserByLogin(login: string): Promise<User | null> {
+    return this.userRepository.findOne({ login });
   }
 
   /**
    * Получение пользователя по email
    * @param email - email пользователя
-   * @returns {UserDocument | null} - найденный пользователь
+   * @returns {User | null} - найденный пользователь
    */
-  async getUserByEmail(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email });
+  async getUserByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ email });
   }
 }

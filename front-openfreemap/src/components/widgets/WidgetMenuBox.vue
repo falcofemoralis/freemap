@@ -1,9 +1,9 @@
 <template>
   <div>
-    <Animation>
+    <Animation type='slide'>
       <TabMenu v-if='isMenuOpen' @close='toggleMenu' @selected='toggleTab' />
     </Animation>
-    <Animation>
+    <Animation type='slide'>
       <Suspense v-if='isTabSelected'>
         <template #default>
           <TabNewest @close='toggleTab' />

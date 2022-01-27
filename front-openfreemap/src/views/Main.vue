@@ -27,7 +27,6 @@ import WidgetSearchBox from '@/components/widgets/WidgetSearchBox.vue';
 import WidgetToolBox from '@/components/widgets/WidgetToolBox.vue';
 import WidgetAccountBox from '@/components/widgets/WidgetAccountBox.vue';
 import WidgetMenuBox from '@/components/widgets/WidgetMenuBox.vue';
-import ProjectionType from '@/constants/ProjectionType';
 import { fromLonLat, toLonLat } from 'ol/proj';
 
 export default defineComponent({
@@ -56,7 +55,7 @@ export default defineComponent({
     const mapView = new View({
       center: [0, 0],
       zoom: 2,
-      projection: ProjectionType.EPSG3857,
+      projection: 'EPSG:3857',
     });
     const map = new Map({
       layers: [baseLayer],
@@ -90,7 +89,7 @@ export default defineComponent({
     const query = computed(() => route.query);
     const queryWatch = watch(query, (updatedquery: Record<string, string | LocationQueryValue[] | null>) => {
       if (updatedquery.lon && updatedquery.lat && updatedquery.z) {
-        mapView.setCenter(fromLonLat([parseFloat(updatedquery.lon.toString()), parseFloat(updatedquery.lat.toString())], ProjectionType.EPSG3857));
+        mapView.setCenter(fromLonLat([parseFloat(updatedquery.lon.toString()), parseFloat(updatedquery.lat.toString())], 'EPSG:3857'));
         mapView.setZoom(parseFloat(updatedquery.z.toString()));
 
         if (updatedquery.map) {
@@ -167,7 +166,7 @@ export default defineComponent({
 
       if (!pathChanged) {
         if (coordinates && zoom) {
-          const [lon, lat] = toLonLat(coordinates, ProjectionType.EPSG3857);
+          const [lon, lat] = toLonLat(coordinates, 'EPSG:3857');
           currentLonLat = [lon, lat];
           currentZoom = zoom;
           updateQuery();
