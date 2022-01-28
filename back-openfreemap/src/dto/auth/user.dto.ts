@@ -3,7 +3,7 @@ import { IsEmail, IsNotEmpty, IsString, Length, MaxLength, MinLength } from 'cla
 export class CreateUserDto {
   @IsString()
   @MinLength(4, {
-    message: 'Your username must be at least 4 characters'
+    message: 'Your username must be at least 4 characters',
   })
   @IsNotEmpty({ message: 'Your username can not be blank.' })
   login: string;
@@ -13,7 +13,7 @@ export class CreateUserDto {
   email: string;
 
   @Length(1, 8, {
-    message: 'Your password must be between 1 and 8 characters.'
+    message: 'Your password must be between 1 and 8 characters.',
   })
   @IsString()
   @IsNotEmpty({ message: 'Your password can not be blank.' })
@@ -23,13 +23,13 @@ export class CreateUserDto {
 export class LoginUserDto {
   @IsString()
   @MinLength(4, {
-    message: 'Your username must be at least 4 characters'
+    message: 'Your username must be at least 4 characters',
   })
   @IsNotEmpty()
   login: string;
 
   @Length(1, 8, {
-    message: 'Your password must be between 1 and 8 characters.'
+    message: 'Your password must be between 1 and 8 characters.',
   })
   @IsString()
   @IsNotEmpty()

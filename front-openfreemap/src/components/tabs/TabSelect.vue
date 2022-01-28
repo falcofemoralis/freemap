@@ -1,5 +1,5 @@
 <template>
-  <BaseTab>
+
     <h2 class='field'> {{ mapFeature?.properties.name }}</h2>
     <span class='field'> {{ mapFeature?.properties.description }}</span>
     <span class='field'>Адресс: {{ mapFeature?.properties.address }}</span>
@@ -12,7 +12,7 @@
       <img v-for='(media, i) in mapFeature?.properties.mediaNames' :key='media' :src='getMediaUrl(media)'
            @click='openImage(mapFeature?.properties.mediaNames, i)'>
     </div>
-  </BaseTab>
+
 </template>
 
 <script lang='ts'>
@@ -27,7 +27,7 @@ import { useStore } from 'vuex';
 
 export default defineComponent({
   name: 'TabSelect',
-  components: { BaseTab },
+  components: {  },
   async setup() {
     const store = useStore();
 
@@ -95,6 +95,8 @@ export default defineComponent({
         });
       }
     }
+
+    await new Promise((resolve => setTimeout(resolve, 2000)))
 
     return {
       mapFeature,

@@ -1,20 +1,22 @@
 <template>
   <div>
     <Animation type='slide'>
-      <Suspense v-if='store.getters.getSelectedFeatureId'>
-        <template #default>
-          <TabSelect @close='closeTab' />
-        </template>
-        <template #fallback>
-          <TabLoading />
-        </template>
-      </Suspense>
+      <BaseTab v-if='store.getters.getSelectedFeatureId' @close='closeTab'>
+        <Suspense>
+          <template #default>
+            <TabSelect />
+          </template>
+          <template #fallback>
+            <span>Loading...</span>
+          </template>
+        </Suspense>
+      </BaseTab>
     </Animation>
   </div>
 </template>
 
 <script lang='ts'>
-import { computed, defineComponent, inject, ref, watch } from 'vue';
+import { computed, defineComponent, inject, watch } from 'vue';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 import { Vector } from 'ol/source';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -30,12 +32,12 @@ import Animation from '@/components/elements/Animation.vue';
 import TabLoading from '@/components/tabs/TabLoading.vue';
 import { MapService } from '@/api/mapService';
 import { transformExtent } from 'ol/proj';
-import { MapFeatureDto, ShortFeatureDataDto } from '@/dto/map/map-data.dto';
+import BaseTab from '@/components/tabs/BaseTab.vue';
 
 export default defineComponent({
   name: 'LayerData',
   components: {
-    TabLoading,
+    BaseTab,
     Animation,
     TabSelect,
   },
@@ -234,7 +236,7 @@ export default defineComponent({
      */
     function closeTab() {
       selectEvent.changed();
-      store.dispatch('setSelectedFeatureId', null)
+      store.dispatch('setSelectedFeatureId', null);
       selectEvent.getFeatures().clear();
     }
 

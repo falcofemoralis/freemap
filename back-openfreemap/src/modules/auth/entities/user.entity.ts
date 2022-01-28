@@ -15,7 +15,7 @@ export class User {
   passwordHash: string;
 
   @Column()
-  avatar?: string;0
+  avatar?: string;
 
   constructor(login: string, email: string, passwordHash: string) {
     this.login = login;
