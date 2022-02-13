@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
 import { User } from 'src/modules/auth/entities/user.entity';
-import { FeatureType, FeatureTypeDocument, FeatureTypeSchema } from './feature-type.entity';
+import { FeatureType } from './feature-type.entity';
 
 export interface Coordinate {
   lon: number;

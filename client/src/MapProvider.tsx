@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
 import Map from 'ol/Map';
+import React, { FC } from 'react';
 
 export interface IMapContext {
     map: Map;

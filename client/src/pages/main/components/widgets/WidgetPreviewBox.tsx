@@ -1,16 +1,28 @@
-import * as React from 'react';
-import { useContext } from 'react';
 import { Paper, Typography } from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { OverviewMap } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import { OverviewMap } from 'ol/control';
-import { MapContext } from '../../../../MapProvider';
+import * as React from 'react';
+import { useContext } from 'react';
 import MapConstant from '../../../../constants/map.constant';
+import { MapContext } from '../../../../MapProvider';
 import { mapStore } from '../../../../store/map.store';
 import '../../styles/Widget.scss';
-import { observer } from 'mobx-react-lite';
 
-export const WidgetPreviewBox = observer(() => {
+const PreviewMapLabel = observer(() => {
+    return (
+        <>
+            {mapStore.mapType === MapConstant.GOOGLE ? (
+                <Typography variant='subtitle2'>Земля</Typography>
+            ) : (
+                <Typography variant='subtitle2'>Карта</Typography>
+            )}
+        </>
+    );
+});
+
+export const WidgetPreviewBox = () => {
     const { map } = useContext(MapContext);
 
     /* Map preview init */
@@ -40,7 +52,7 @@ export const WidgetPreviewBox = observer(() => {
     }
 
     /**
-     * Измненение типа текущей карты (Земля\OSM\etc)
+     * Изменение типа текущей карты (Земля\OSM\etc)
      */
     async function changeMapType() {
         setPreviewMapLayer((await mapStore.toggleMapType()) as string);
@@ -49,12 +61,8 @@ export const WidgetPreviewBox = observer(() => {
     return (
         <Paper className='previewMapBox' elevation={5} onClick={changeMapType}>
             <div className='previewMapBox__label'>
-                {mapStore.mapType === MapConstant.GOOGLE ? (
-                    <Typography variant='subtitle2'>Земля</Typography>
-                ) : (
-                    <Typography variant='subtitle2'>Карта</Typography>
-                )}
+                <PreviewMapLabel />
             </div>
         </Paper>
     );
-});
+};

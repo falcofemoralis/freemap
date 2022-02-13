@@ -1,6 +1,5 @@
-import { Coordinate } from '../types/IMapFeature';
-import { mapStore } from '../store/map.store';
 import MapConstant from '../constants/map.constant';
+import { Coordinate } from '../types/IMapFeature';
 
 export const getQueryParams = (s?: string): Map<string, string> => {
     if (!s || typeof s !== 'string' || s.length < 2) {

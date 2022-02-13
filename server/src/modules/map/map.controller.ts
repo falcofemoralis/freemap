@@ -87,45 +87,6 @@ export class MapController {
   }
 
   // /**
-  //  * Получение типа объекта по id
-  //  * @param id - id типа
-  //  */
-  // @Get('feature/type/:id')
-  // async getFeatureTypeById(@Param('id') id: string): Promise<FeatureTypeDto> {
-  //   return await this.mapService.getFeatureTypeById(id);
-  // }
-
-  // /**
-  //  * Получение типов объектов по id геометрии
-  //  * @param id - id геометрии
-  //  */
-  // @Get('feature/types/:id')
-  // async getObjectTypesByGeometryId(@Param('id') id: string): Promise<Array<FeatureTypeDto>> {
-  //   return await this.mapService.findFeatureTypesByGeometryId(id);
-  // }
-
-  // //--------------
-
-  // /**
-  //  * Получение геометрий объекта
-  //  */
-  // @Get('feature/geometries')
-  // async getGeometryTypes(): Promise<Array<GeometryTypeDto>> {
-  //   return await this.mapService.getGeometryTypes();
-  // }
-
-  // /**
-  //  * Получение геометрий объекта по id
-  //  * @param id - id геометрии
-  //  */
-  // @Get('feature/geometry/:id')
-  // async getGeometryTypeById(@Param('id') id: string): Promise<GeometryTypeDto> {
-  //   return await this.mapService.getGeometryTypeByFeatureId(id);
-  // }
-
-  // //--------------
-
-  // /**
   //  * Получение списка последних добавленных объектов на карту
   //  * @param amount - количество объектов которые можно получить
   //  */

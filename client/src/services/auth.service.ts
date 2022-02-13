@@ -1,6 +1,6 @@
-import { axiosInstance } from './index';
 import { AxiosError } from 'axios';
 import { errorStore } from '../store/error.store';
+import { axiosInstance } from './index';
 
 export default class AuthService {
     private static API_URL = '/auth';

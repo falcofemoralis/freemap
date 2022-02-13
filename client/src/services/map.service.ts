@@ -1,9 +1,9 @@
-import { axiosInstance, headers } from './index';
-import { IMapFeatureType } from '../types/IMapFeatureType';
-import { IMapFeature } from '../types/IMapFeature';
-import { toJS } from 'mobx';
 import { AxiosError } from 'axios';
+import { toJS } from 'mobx';
 import { errorStore } from '../store/error.store';
+import { IMapFeature } from '../types/IMapFeature';
+import { IMapFeatureType } from '../types/IMapFeatureType';
+import { axiosInstance, headers } from './index';
 
 export default class MapService {
     private static API_URL = '/map';

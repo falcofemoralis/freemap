@@ -6,13 +6,14 @@ import { deepOrange } from '@mui/material/colors';
 import { authStore } from '../../../../store/auth.store';
 import { SignUp } from '../auth/SignUp';
 import { SignIn } from '../auth/SignIn';
+import { observer } from 'mobx-react-lite';
 
 enum DialogType {
     SIGN_UP,
     SIGN_IN
 }
 
-export const WidgetAccountBox = () => {
+export const WidgetAccountBox = observer(() => {
     const [isDialog, setDialog] = useState(false);
     const [dialogType, setDialogType] = useState<DialogType>(DialogType.SIGN_IN);
 
@@ -23,21 +24,23 @@ export const WidgetAccountBox = () => {
     return (
         <Box className='accountBox'>
             {!authStore.isAuth ? (
-                <Button variant='contained' onClick={handleAuthOpen}>
-                    Войти
-                </Button>
+                <Box>
+                    <Button variant='contained' onClick={handleAuthOpen}>
+                        Войти
+                    </Button>
+                    <Dialog onClose={handleAuthClose} open={isDialog}>
+                        {dialogType === DialogType.SIGN_IN ? (
+                            <SignIn onSwitch={() => changeDialogType(DialogType.SIGN_UP)} />
+                        ) : (
+                            <SignUp onSwitch={() => changeDialogType(DialogType.SIGN_IN)} />
+                        )}
+                    </Dialog>
+                </Box>
             ) : (
                 <IconButton aria-haspopup='true' color='inherit'>
                     <Avatar sx={{ bgcolor: deepOrange[500] }}>N</Avatar>
                 </IconButton>
             )}
-            <Dialog onClose={handleAuthClose} open={isDialog}>
-                {dialogType === DialogType.SIGN_IN ? (
-                    <SignIn onSwitch={() => changeDialogType(DialogType.SIGN_UP)} />
-                ) : (
-                    <SignUp onSwitch={() => changeDialogType(DialogType.SIGN_IN)} />
-                )}
-            </Dialog>
         </Box>
     );
-};
+});

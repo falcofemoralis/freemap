@@ -1,14 +1,8 @@
-import { IMapFeature, Coordinate } from '../types/IMapFeature';
-import { editorStore } from './editor.store';
 import { makeAutoObservable } from 'mobx';
-import MapConstant from '../constants/map.constant';
-import { getQueryParams, updateQuery } from '../utils/QueryUtil';
 import { fromLonLat } from 'ol/proj';
-import MapService from '../services/map.service';
-import { IMapFeatureType } from '../types/IMapFeatureType';
-import { AxiosError } from 'axios';
-import AuthService from '../services/auth.service';
-import { errorStore } from './error.store';
+import MapConstant from '../constants/map.constant';
+import { Coordinate } from '../types/IMapFeature';
+import { getQueryParams, updateQuery } from '../utils/QueryUtil';
 
 class MapStore {
     mapType: MapConstant = MapConstant.OSM;
@@ -18,6 +12,31 @@ class MapStore {
 
     constructor() {
         makeAutoObservable(this);
+    }
+
+    async toggleMapType(): Promise<MapConstant> {
+        if (mapStore.mapType == MapConstant.OSM) {
+            mapStore.mapType = MapConstant.GOOGLE;
+        } else {
+            mapStore.mapType = MapConstant.OSM;
+        }
+
+        this.updateUrl();
+
+        return mapStore.mapType;
+    }
+
+    async setSelectedFeatureId(featureId: string | null) {
+        this.selectedFeatureId = featureId;
+
+        this.updateUrl();
+    }
+
+    async updateMapPosition(lonLat: Coordinate, zoom: number) {
+        this.lonLat = lonLat;
+        this.zoom = zoom;
+
+        this.updateUrl();
     }
 
     parseUrl(url: string) {
@@ -33,25 +52,6 @@ class MapStore {
 
     updateUrl() {
         updateQuery(this.lonLat, this.zoom, this.selectedFeatureId, this.mapType);
-    }
-
-    async toggleMapType(): Promise<MapConstant> {
-        if (mapStore.mapType == MapConstant.OSM) {
-            mapStore.mapType = MapConstant.GOOGLE;
-        } else {
-            mapStore.mapType = MapConstant.OSM;
-        }
-
-        this.updateUrl();
-
-        return mapStore.mapType;
-    }
-
-    async updateMapPosition(lonLat: Coordinate, zoom: number) {
-        this.lonLat = lonLat;
-        this.zoom = zoom;
-
-        this.updateUrl();
     }
 }
 

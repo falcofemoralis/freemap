@@ -1,8 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AxiosError } from 'axios';
 import { makeAutoObservable } from 'mobx';
 import AuthService from '../services/auth.service';
-import { errorStore } from './error.store';
 
 const TOKEN_ITEM = 'token';
 
@@ -15,11 +13,13 @@ class AuthStore {
     }
 
     public async tryRegister(username: string, email: string, password: string) {
-        this.setToken(await AuthService.register(username, email, password));
+        const token = await AuthService.register(username, email, password);
+        this.setToken(token);
     }
 
     public async tryLogin(email: string, password: string) {
-        this.setToken(await AuthService.login(email, password));
+        const token = await AuthService.login(email, password);
+        this.setToken(token);
     }
 
     private setToken(token: string) {

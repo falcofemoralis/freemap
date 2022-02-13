@@ -1,4 +1,5 @@
 import { observe } from 'mobx';
+import { observer } from 'mobx-react-lite';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
 import { Select } from 'ol/interaction';
@@ -9,12 +10,11 @@ import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
 import { mapStore } from '../../../../store/map.store';
 import { TabSelect } from '../tabs/TabSelect';
-import { observer } from 'mobx-react-lite';
-import MapService from '../../../../services/map.service';
-import { IMapFeature } from '../../../../types/IMapFeature';
 
-export const LayerSelect = observer(() => {
+export const LayerSelect = () => {
     const { map } = useContext(MapContext);
+
+    console.log('init');
 
     /* Select init */
     /**
@@ -65,9 +65,10 @@ export const LayerSelect = observer(() => {
     selectEvent.on('select', (event: SelectEvent) => {
         const features: Feature<Geometry>[] = event.selected;
         if (features.length > 0) {
-            mapStore.selectedFeatureId = features[0].getProperties().id;
+            mapStore.setSelectedFeatureId(features[0].getProperties().id);
         }
     });
+
     map?.addInteraction(selectEvent);
 
     /**
@@ -82,11 +83,10 @@ export const LayerSelect = observer(() => {
     });
 
     const handleTabClose = () => {
+        mapStore.setSelectedFeatureId(null);
         selectEvent.changed();
-        mapStore.selectedFeatureId = null;
         selectEvent.getFeatures().clear();
-        console.log('clear');
     };
 
-    return <>{mapStore.selectedFeatureId && <TabSelect onClose={handleTabClose} featureId={mapStore.selectedFeatureId} />}</>;
-});
+    return <TabSelect onClose={handleTabClose} />;
+};

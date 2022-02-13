@@ -29,8 +29,7 @@ const Main = () => {
                 <ErrorBox />
                 <LayerData />
                 <LayerSelect />
-                {/* 
-                <WidgetMenuBox/>*/}
+                {/*   <WidgetMenuBox/>*/}
             </MainMap>
         </div>
     );

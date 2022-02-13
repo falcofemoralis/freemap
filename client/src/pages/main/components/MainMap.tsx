@@ -14,6 +14,8 @@ import { ErrorBox } from '../../../components/ErrorBox';
 const COORDINATES_CHANGE_TIME = 0.25; // Изменение url каждые 250 мс
 
 export const MainMap: FC = ({ children }) => {
+    console.log('mainmap');
+
     /* Init map */
     const baseLayer = new TileLayer();
     const mapView = new View({

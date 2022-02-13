@@ -1,11 +1,11 @@
-import { observer } from 'mobx-react-lite';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import './styles/App.scss';
-import './styles/position.css';
-import * as React from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
+import { observer } from 'mobx-react-lite';
+import * as React from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Main from './pages/main/Main';
+import './styles/App.scss';
+import './styles/position.css';
 
 const App = observer(() => {
     return (

@@ -1,17 +1,14 @@
-import { Drawer, Alert } from '@mui/material';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
+import { Alert, Drawer } from '@mui/material';
 import Box from '@mui/material/Box';
-import { errorStore } from '../../../../store/error.store';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import { observer } from 'mobx-react-lite';
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { authStore } from '../../../../store/auth.store';
-import { EditSharp } from '@mui/icons-material';
-import { editorStore } from '../../../../store/editor.store';
-import { mapStore } from '../../../../store/map.store';
 import MapService from '../../../../services/map.service';
+import { editorStore } from '../../../../store/editor.store';
+import { errorStore } from '../../../../store/error.store';
 
 const drawerWidth = 324;
 
@@ -27,7 +24,7 @@ interface TabCreateProps {
     onClose: () => void;
 }
 
-export const TabCreate: FC<TabCreateProps> = ({ onSubmit, onClose }) => {
+export const TabCreate: FC<TabCreateProps> = observer(({ onSubmit, onClose }) => {
     const {
         register,
         handleSubmit,
@@ -35,11 +32,11 @@ export const TabCreate: FC<TabCreateProps> = ({ onSubmit, onClose }) => {
     } = useForm<FormData>();
 
     const handleOnSubmit = handleSubmit(async data => {
-        if (editorStore.selectedFeatureType && editorStore.coordinates && editorStore.zoom) {
+        if (editorStore.selectedFeatureType && editorStore.newFeatureCoordinates && editorStore.newFeatureZoom) {
             const addedFeature = await MapService.addFeature({
                 type: editorStore.selectedFeatureType,
-                coordinates: editorStore.coordinates,
-                zoom: editorStore.zoom,
+                coordinates: editorStore.newFeatureCoordinates,
+                zoom: editorStore.newFeatureZoom,
                 ...data
             });
 
@@ -57,13 +54,19 @@ export const TabCreate: FC<TabCreateProps> = ({ onSubmit, onClose }) => {
                 '& .MuiDrawer-paper': { width: drawerWidth, p: 3 }
             }}
             anchor='left'
-            open={true}
+            open={editorStore.isEditorTabOpen}
             onClose={onClose}
         >
             <Box component='form' onSubmit={handleOnSubmit} sx={{ mt: 3 }} noValidate>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <TextField disabled fullWidth id='coordinates' label='Координаты' defaultValue={editorStore.coordinates} />
+                        <TextField
+                            disabled
+                            fullWidth
+                            id='coordinates'
+                            label='Координаты'
+                            defaultValue={editorStore.newFeatureCoordinates}
+                        />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
@@ -105,4 +108,4 @@ export const TabCreate: FC<TabCreateProps> = ({ onSubmit, onClose }) => {
             </Box>
         </Drawer>
     );
-};
+});

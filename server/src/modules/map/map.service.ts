@@ -48,23 +48,12 @@ export class MapService {
     return this.mapFeatureModel.findById(id).populate([{ path: 'user' }, { path: 'type' }]);
   }
 
-  // //--------------
-
   /**
    * Получение всех типов объекта
    */
   async getFeatureTypes(): Promise<Array<FeatureType>> {
     return this.featureTypeModel.find();
   }
-
-  // /**
-  //  * Получение типа объекта по id
-  //  * @param id - id типа объекта
-  //  * @returns {FeatureType} - тип объекта
-  //  */
-  // async getFeatureTypeById(id: string): Promise<FeatureType> {
-  //   return this.featureTypesRepository.findOne(id);
-  // }
 
   /**
    * Создание нового типа объекта
@@ -74,42 +63,6 @@ export class MapService {
     const featureType = new this.featureTypeModel({ ...dto });
     return featureType.save();
   }
-
-  // /**
-  //  * Получение типов объектов по id геотмерии
-  //  * @param id - id геометрии
-  //  */
-  // async findFeatureTypesByGeometryId(id: string): Promise<Array<FeatureType>> {
-  //   return this.featureTypesRepository.find({ where: { geometryTypeId: id } });
-  // }
-
-  // /**
-  //  * Получение типа геометрии по id типа объекта
-  //  * @param id - id геометрии
-  //  */
-  // async getGeometryTypeByTypeId(id: string): Promise<GeometryType> {
-  //   const featureType = await this.featureTypesRepository.findOne(id);
-  //   return await this.geometryTypesRepository.findOne(featureType.geometryTypeId);
-  // }
-
-  // //--------------
-
-  // /**
-  //  * Получение всех типов геометрии объекта
-  //  */
-  // async getGeometryTypes(): Promise<Array<GeometryType>> {
-  //   return this.geometryTypesRepository.find();
-  // }
-
-  // /**
-  //  * Получение типа геометрии объекта по id
-  //  * @param id - id типа геометрии
-  //  */
-  // async getGeometryTypeByFeatureId(id: string): Promise<GeometryType> {
-  //   return this.geometryTypesRepository.findOne(id);
-  // }
-
-  // //--------------
 
   // /**
   //  * Получение последних добавленных объектов
