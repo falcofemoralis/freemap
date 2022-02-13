@@ -1,0 +1,11 @@
+{
+    "semi": true,
+    "tabWidth": 4,
+    "printWidth": 140,
+    "singleQuote": true,
+    "trailingComma": "none",
+    "jsxSingleQuote": true,
+    "endOfLine": "auto",
+    "arrowParens": "avoid",
+    "parser": "typescript"
+  }
