@@ -40,10 +40,14 @@ export const WidgetEditorBox = () => {
         editorStore.isEditorTabOpen = true;
     };
 
+    const handleCreateFeature = () => {
+        editorStore.newFeature = null;
+        handleCloseTab();
+    };
+
     const handleCloseTab = () => {
         editorStore.isEditorTabOpen = false;
         editorStore.toggleEdit();
-        editorStore.newFeature = null;
     };
 
     return (
@@ -64,7 +68,7 @@ export const WidgetEditorBox = () => {
                     onApply={onFeatureTypeApply}
                     onCancel={() => handleEditSelect(null)}
                 />
-                <TabCreate onSubmit={handleCloseTab} onClose={handleCloseTab} />
+                <TabCreate onSubmit={handleCreateFeature} onClose={handleCloseTab} />
             </Paper>
             <Paper className='editorCtrlBox' elevation={5}>
                 <LayerEdit onFinish={handleDrawFinish} />
