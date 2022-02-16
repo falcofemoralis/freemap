@@ -1,3 +1,4 @@
+import { Coordinate } from './../entities/map-feature.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { MapFeature } from '../entities/map-feature.entity';
 
@@ -7,8 +8,8 @@ export class Geometry {
   @ApiProperty({ example: 'LineString', description: 'Тип геометрии объекта' })
   type: string;
 
-  @ApiProperty({ example: '[[[23, 34], [25, 57]]]', description: 'Координаты точек геометрии объекта', isArray: true })
-  coordinates: number[][][];
+  @ApiProperty({ example: '[{lon: 34, lat: 25}]', description: 'Координаты точек геометрии объекта', isArray: true })
+  coordinates: Coordinate[];
 }
 
 class Feature {

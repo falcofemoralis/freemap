@@ -11,13 +11,14 @@ import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
 import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
+import { getCenter, toText } from '../../../../utils/CoordinatesUtil';
 
 interface TabSelectProps {
     onClose: () => void;
 }
 
 export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
-    console.log('initTab');
+    console.log('TabSelect');
 
     return (
         <Drawer
@@ -30,7 +31,7 @@ export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
             open={Boolean(mapStore.selectedFeatureId)}
             onClose={onClose}
         >
-            {mapStore.selectedFeatureId && <DrawerTab featureId={mapStore.selectedFeatureId} />}
+            {mapStore.selectedFeatureId && <TabSelectDrawer featureId={mapStore.selectedFeatureId} />}
         </Drawer>
     );
 });
@@ -42,7 +43,9 @@ interface ViewerImage {
 interface DrawerTabProps {
     featureId: string;
 }
-const DrawerTab: React.FC<DrawerTabProps> = ({ featureId }) => {
+const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
+    console.log('TabSelectDrawer');
+
     const [mapFeature, setMapFeature] = React.useState<IMapFeature | null>(null);
 
     React.useEffect(() => {
@@ -70,7 +73,7 @@ const DrawerTab: React.FC<DrawerTabProps> = ({ featureId }) => {
             <Box sx={{ mt: 3 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <TextField disabled fullWidth label='Координаты' defaultValue={mapFeature.coordinates} />
+                        <TextField disabled fullWidth label='Координаты' defaultValue={toText(getCenter(mapFeature.coordinates))} />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField disabled fullWidth label='Имя' defaultValue={mapFeature.name} />

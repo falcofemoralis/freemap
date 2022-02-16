@@ -12,7 +12,7 @@ import { mapStore } from '../../../store/map.store';
 const COORDINATES_CHANGE_TIME = 0.25; // Изменение url каждые 250 мс
 
 export const MainMap: React.FC = ({ children }) => {
-    console.log('mainmap');
+    console.log('MainMap');
 
     /* Init map */
     const baseLayer = new TileLayer();

@@ -10,6 +10,8 @@ interface TabMenuProps {
 }
 
 export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
+    console.log('TabMenu');
+
     return (
         <Drawer
             sx={{

@@ -69,6 +69,8 @@ interface EditorProps {
     baseLayer: VectorLayer<VectorSource<Geometry>>;
 }
 const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish }) => {
+    console.log('Editor');
+
     const { map } = React.useContext(MapContext);
     const lastCoordinates: Array<Array<number>> = []; // координаты точек полигонов объекта геометрии
     const [draw, setDraw] = React.useState<Draw | null>(null);
@@ -167,8 +169,6 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
             resetDrawing();
         }
     }
-
-    console.log('render editor');
 
     return (
         <>

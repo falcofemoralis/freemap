@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
 import { errorStore } from '../store/error.store';
-import { IMapFeature, Coordinate } from '../types/IMapFeature';
+import { IMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
 import { axiosInstance, headers } from './index';
 export default class MapService {

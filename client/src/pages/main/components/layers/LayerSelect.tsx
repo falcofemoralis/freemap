@@ -11,13 +11,13 @@ import { mapStore } from '../../../../store/map.store';
 import { TabSelect } from '../tabs/TabSelect';
 
 export const LayerSelect = () => {
-    const { map } = React.useContext(MapContext);
+    console.log('LayerSelect');
 
-    console.log('init');
+    const { map } = React.useContext(MapContext);
 
     /* Select init */
     /**
-     * Стиль выбраннного объекта
+     * Стиль выбранного объекта
      */
     const selected = new Style({
         fill: new Fill({

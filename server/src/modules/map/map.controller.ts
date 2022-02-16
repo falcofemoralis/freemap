@@ -36,7 +36,7 @@ export class MapController {
         properties: { id, name, createdAt },
         geometry: {
           type: mapFeature.type.geometry,
-          coordinates: this.convertCoordinatesToArray(mapFeature.coordinates),
+          coordinates: mapFeature.coordinates,
         },
       });
     }
@@ -131,19 +131,6 @@ export class MapController {
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
-  }
-
-  /**
-   * Перевод координат в GeoJson формат т.е Coordinate[] в [][][]
-   * @param coordinates - координаты
-   */
-  convertCoordinatesToArray(coordinates: Coordinate[]): number[][][] {
-    const featureCoordinates: number[][] = [];
-    for (const coordinate of coordinates) {
-      featureCoordinates.push([coordinate.lon, coordinate.lat]);
-    }
-
-    return [featureCoordinates];
   }
 
   // /**

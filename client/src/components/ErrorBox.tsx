@@ -5,6 +5,8 @@ import * as React from 'react';
 import { errorStore } from '../store/error.store';
 
 export const ErrorBox = observer(() => {
+    console.log('ErrorBox');
+
     const handleClose = () => (errorStore.message = null);
 
     return (

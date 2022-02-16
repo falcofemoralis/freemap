@@ -22,6 +22,8 @@ const PreviewMapLabel = observer(() => {
 });
 
 export const WidgetPreviewBox = () => {
+    console.log('WidgetPreviewBox');
+
     const { map } = React.useContext(MapContext);
 
     /* Map preview init */

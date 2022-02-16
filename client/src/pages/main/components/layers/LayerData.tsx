@@ -12,8 +12,11 @@ import React from 'react';
 import { MapContext } from '../../../../MapProvider';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
+import { toArray } from '../../../../utils/CoordinatesUtil';
 
 export const LayerData = () => {
+    console.log('LayerData');
+
     const { map } = React.useContext(MapContext);
 
     /**
@@ -68,14 +71,14 @@ export const LayerData = () => {
         const extent = transformExtent(map.getView().calculateExtent(map.getSize()), 'EPSG:3857', 'EPSG:4326');
 
         if (extent && zoom) {
-            const res = await MapService.getMapData(extent, zoom);
+            const featureCollection = await MapService.getMapData(extent, zoom);
 
             vectorSource.forEachFeature((feature: Feature<Geometry>) => {
                 let isFound = false;
-                for (const newFeature of res.features) {
+                for (const newFeature of featureCollection.features) {
                     if (feature.getProperties().id == newFeature.properties.id) {
                         isFound = true;
-                        res.features.splice(res.features.indexOf(newFeature), 1);
+                        featureCollection.features.splice(featureCollection.features.indexOf(newFeature), 1);
                         return;
                     }
                 }
@@ -85,7 +88,12 @@ export const LayerData = () => {
                 }
             });
 
-            const convertedFeatures = vectorSource?.getFormat()?.readFeatures(res, {
+            featureCollection.features.map((feature: any) => {
+                feature.geometry.coordinates = toArray(feature.geometry.coordinates);
+                return feature;
+            });
+
+            const convertedFeatures = vectorSource?.getFormat()?.readFeatures(featureCollection, {
                 dataProjection: 'EPSG:4326',
                 featureProjection: 'EPSG:3857'
             });

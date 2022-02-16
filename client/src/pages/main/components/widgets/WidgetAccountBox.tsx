@@ -13,6 +13,8 @@ enum DialogType {
 }
 
 export const WidgetAccountBox = observer(() => {
+    console.log('WidgetAccountBox');
+
     const [isDialog, setDialog] = React.useState(false);
     const [dialogType, setDialogType] = React.useState<DialogType>(DialogType.SIGN_IN);
 

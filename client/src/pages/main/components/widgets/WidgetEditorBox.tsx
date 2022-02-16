@@ -83,6 +83,8 @@ interface TypesDialogProps {
     onCancel: () => void;
 }
 const TypesDialog: React.FC<TypesDialogProps> = observer(({ featureTypes, onChange, onCancel, onApply }) => {
+    console.log('TypesDialog');
+
     return (
         <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
             <DialogTitle>Выбрать тип</DialogTitle>

@@ -6,6 +6,8 @@ import { IconButton, Paper } from '@mui/material';
 import * as React from 'react';
 
 export const WidgetToolBox = () => {
+    console.log('WidgetToolBox');
+
     return (
         <>
             <Paper className='toolBox__compass'>

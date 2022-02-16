@@ -13,6 +13,8 @@ import { WidgetToolBox } from './components/widgets/WidgetToolBox';
 import './styles/Main.scss';
 
 const Main = () => {
+    console.log('Main');
+
     /**
      * Получение данных карты из url
      */

@@ -12,6 +12,7 @@ import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { errorStore } from '../../../../store/error.store';
 import { DRAWER_WIDTH } from './index';
+import { getCenter, toText } from '../../../../utils/CoordinatesUtil';
 
 type FormData = {
     name: string;
@@ -42,6 +43,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
             const addedFeature = await MapService.addFeature(
                 {
                     id: '',
+                    createdAt: -1,
                     type: editorStore.selectedFeatureType,
                     coordinates: editorStore.newFeatureCoordinates,
                     zoom: editorStore.newFeatureZoom,
@@ -86,7 +88,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
                             fullWidth
                             id='coordinates'
                             label='Координаты'
-                            defaultValue={editorStore.newFeatureCoordinates}
+                            defaultValue={editorStore.newFeatureCoordinates && toText(getCenter(editorStore.newFeatureCoordinates))}
                         />
                     </Grid>
                     <Grid item xs={12}>

@@ -15,4 +15,5 @@ export interface IMapFeature {
     address?: string;
     links?: string;
     files?: string[];
+    createdAt: number;
 }
