@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { MongooseModule } from '@nestjs/mongoose';
+import { AuthModule } from './modules/auth/auth.module';
 import { MapModule } from './modules/map/map.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({

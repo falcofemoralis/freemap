@@ -1,12 +1,11 @@
-import * as React from 'react';
-import { useState } from 'react';
-import '../../styles/Widget.scss';
 import { Avatar, Box, Button, Dialog, IconButton } from '@mui/material';
 import { deepOrange } from '@mui/material/colors';
-import { authStore } from '../../../../store/auth.store';
-import { SignUp } from '../auth/SignUp';
-import { SignIn } from '../auth/SignIn';
 import { observer } from 'mobx-react-lite';
+import React from 'react';
+import { authStore } from '../../../../store/auth.store';
+import '../../styles/Widget.scss';
+import { SignIn } from '../auth/SignIn';
+import { SignUp } from '../auth/SignUp';
 
 enum DialogType {
     SIGN_UP,
@@ -14,8 +13,8 @@ enum DialogType {
 }
 
 export const WidgetAccountBox = observer(() => {
-    const [isDialog, setDialog] = useState(false);
-    const [dialogType, setDialogType] = useState<DialogType>(DialogType.SIGN_IN);
+    const [isDialog, setDialog] = React.useState(false);
+    const [dialogType, setDialogType] = React.useState<DialogType>(DialogType.SIGN_IN);
 
     const handleAuthOpen = () => setDialog(true);
     const handleAuthClose = () => setDialog(false);

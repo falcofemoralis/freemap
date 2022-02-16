@@ -1,18 +1,17 @@
 import { observe } from 'mobx';
-import { observer } from 'mobx-react-lite';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
 import { Select } from 'ol/interaction';
 import { SelectEvent } from 'ol/interaction/Select';
 import { Fill, Stroke, Style, Text } from 'ol/style';
-import { useContext } from 'react';
+import React from 'react';
 import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
 import { mapStore } from '../../../../store/map.store';
 import { TabSelect } from '../tabs/TabSelect';
 
 export const LayerSelect = () => {
-    const { map } = useContext(MapContext);
+    const { map } = React.useContext(MapContext);
 
     console.log('init');
 

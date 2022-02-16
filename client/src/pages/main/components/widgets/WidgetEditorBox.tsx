@@ -3,8 +3,7 @@ import HomeWorkOutlinedIcon from '@mui/icons-material/HomeWorkOutlined';
 import LinearScaleOutlinedIcon from '@mui/icons-material/LinearScaleOutlined';
 import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, TextField } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import * as React from 'react';
-import { FC } from 'react';
+import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
@@ -83,7 +82,7 @@ interface TypesDialogProps {
     onApply: () => void;
     onCancel: () => void;
 }
-const TypesDialog: FC<TypesDialogProps> = observer(({ featureTypes, onChange, onCancel, onApply }) => {
+const TypesDialog: React.FC<TypesDialogProps> = observer(({ featureTypes, onChange, onCancel, onApply }) => {
     return (
         <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
             <DialogTitle>Выбрать тип</DialogTitle>

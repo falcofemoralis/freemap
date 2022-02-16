@@ -1,20 +1,19 @@
-import * as React from 'react';
-import { FC, useRef } from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { useForm } from 'react-hook-form';
 import { Alert } from '@mui/material';
-import { errorStore } from './../../../../store/error.store';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import Container from '@mui/material/Container';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { authStore } from './../../../../store/auth.store';
+import { errorStore } from './../../../../store/error.store';
 
 type FormData = {
     username: string;
@@ -27,7 +26,7 @@ interface SignUpProps {
     onSwitch: () => void;
 }
 
-export const SignUp: FC<SignUpProps> = ({ onSwitch }) => {
+export const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
     const USERNAME_MIN_LENGTH = 4;
     const USERNAME_MAX_LENGTH = 30;
     const PASSWORD_MIN_LENGTH = 6;
@@ -41,7 +40,7 @@ export const SignUp: FC<SignUpProps> = ({ onSwitch }) => {
     } = useForm<FormData>();
 
     const onSubmit = handleSubmit(data => authStore.tryRegister(data.username, data.email, data.password));
-    const password = useRef({});
+    const password = React.useRef({});
     password.current = watch('password', '');
 
     return (

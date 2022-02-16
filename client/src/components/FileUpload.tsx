@@ -1,12 +1,11 @@
-import * as React from 'react';
-import { FC } from 'react';
+import AttachmentIcon from '@mui/icons-material/Attachment';
 import Box from '@mui/material/Box';
 import { observer, useLocalObservable } from 'mobx-react-lite';
-import AttachmentIcon from '@mui/icons-material/Attachment';
-import { Container } from '@mui/material';
+import React from 'react';
+import './styles/file-upload.scss';
 
 interface FileUploadProps {
-    onUpload: Function;
+    onUpload: (files: File[]) => void;
 }
 
 interface ILocalStore {
@@ -14,7 +13,7 @@ interface ILocalStore {
     files: File[];
 }
 
-export const FileUpload: FC<FileUploadProps> = observer(({ onUpload }) => {
+export const FileUpload: React.FC<FileUploadProps> = observer(({ onUpload }) => {
     const localStore = useLocalObservable<ILocalStore>(() => ({
         fileDragOver: false,
         files: []
@@ -49,17 +48,27 @@ export const FileUpload: FC<FileUploadProps> = observer(({ onUpload }) => {
 
     return (
         <Box sx={{ height: 90, mt: 3 }}>
-            <div style={{ backgroundColor: localStore.fileDragOver ? '#b8eeff' : '' }} className='work-form__file-upload ccc' onDragLeave={dragLeave} onDrop={drop} onDragOver={dragOver}>
+            <div
+                style={{ backgroundColor: localStore.fileDragOver ? '#b8eeff' : '' }}
+                className='file-upload ccc'
+                onDragLeave={dragLeave}
+                onDrop={drop}
+                onDragOver={dragOver}
+            >
                 <div className='rcc'>
                     {!localStore.fileDragOver && <AttachmentIcon />}
-                    <div className='work-form__file-upload-text'>{!localStore.fileDragOver ? 'Перетащите фалйы для загрузки сюда или' : 'Отпустите файлы'}</div>
-                    <label htmlFor='file-upload' className='work-form__file-upload-ref'>
+                    <div className='file-upload-text'>
+                        {!localStore.fileDragOver ? 'Перетащите файлы для загрузки сюда или' : 'Отпустите файлы'}
+                    </div>
+                    <label htmlFor='file-upload' className='file-upload-ref'>
                         {' '}
                         загрузите
                     </label>
-                    <input className='work-form__file-upload-ref-input' id='file-upload' type='file' onChange={uploadFiles} multiple />
+                    <input className='file-upload-ref-input' id='file-upload' type='file' onChange={uploadFiles} multiple />
                 </div>
-                {localStore.files.length != 0 && <div className='work-form__file-uploaded-files'>Загруженные: {localStore.files.map((f: any) => f.name).join(',  ')}</div>}
+                {localStore.files.length != 0 && (
+                    <div className='file-upload-files'>Загруженные: {localStore.files.map((f: any) => f.name).join(',  ')}</div>
+                )}
             </div>
         </Box>
     );

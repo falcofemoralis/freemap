@@ -1,8 +1,8 @@
-import * as React from 'react';
-import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
-import { errorStore } from '../store/error.store';
+import Snackbar from '@mui/material/Snackbar';
 import { observer } from 'mobx-react-lite';
+import * as React from 'react';
+import { errorStore } from '../store/error.store';
 
 export const ErrorBox = observer(() => {
     const handleClose = () => (errorStore.message = null);

@@ -34,7 +34,4 @@ export class CreateFeatureDataDto {
 
   @ApiProperty({ example: '[url1, url2]', description: 'Доп. ссылки' })
   links?: string[];
-
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, description: 'Медиа файлы' })
-  files: any[];
 }

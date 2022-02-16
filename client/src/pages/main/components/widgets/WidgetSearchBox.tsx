@@ -1,19 +1,26 @@
-import * as React from 'react';
-import '../../styles/Widget.scss';
-import { Box } from '@mui/material';
-import Paper from '@mui/material/Paper';
-import InputBase from '@mui/material/InputBase';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
+import DirectionsIcon from '@mui/icons-material/Directions';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import DirectionsIcon from '@mui/icons-material/Directions';
+import { Box } from '@mui/material';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import InputBase from '@mui/material/InputBase';
+import Paper from '@mui/material/Paper';
+import React from 'react';
+import '../../styles/Widget.scss';
+import { TabMenu } from '../tabs/TabMenu';
 
 export const WidgetSearchBox = () => {
+    const [open, setOpen] = React.useState(false);
+
+    const toggleTab = () => {
+        setOpen(!open);
+    };
+
     return (
         <Box className='searchBox'>
             <Paper className='searchBox__paper' component='form' sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
-                <IconButton sx={{ p: '10px' }} aria-label='menu'>
+                <IconButton sx={{ p: '10px' }} aria-label='menu' onClick={toggleTab}>
                     <MenuIcon />
                 </IconButton>
                 <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Search Open Free Map' inputProps={{ 'aria-label': 'search google maps' }} />
@@ -25,6 +32,7 @@ export const WidgetSearchBox = () => {
                     <DirectionsIcon />
                 </IconButton>
             </Paper>
+            <TabMenu open={open} onClose={toggleTab} />
         </Box>
     );
 };

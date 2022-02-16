@@ -1,18 +1,17 @@
-import * as React from 'react';
-import { FC } from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { useForm } from 'react-hook-form';
 import { Alert } from '@mui/material';
-import { errorStore } from './../../../../store/error.store';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { authStore } from './../../../../store/auth.store';
+import { errorStore } from './../../../../store/error.store';
 
 type FormData = {
     email: string;
@@ -23,7 +22,7 @@ interface SignInProps {
     onSwitch: () => void;
 }
 
-export const SignIn: FC<SignInProps> = ({ onSwitch }) => {
+export const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
     const {
         register,
         handleSubmit,

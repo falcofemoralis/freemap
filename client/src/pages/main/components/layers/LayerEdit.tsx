@@ -2,7 +2,6 @@ import CheckIcon from '@mui/icons-material/Check';
 import RedoIcon from '@mui/icons-material/Redo';
 import UndoIcon from '@mui/icons-material/Undo';
 import { Box, IconButton } from '@mui/material';
-import { observe } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Geometry, Polygon } from 'ol/geom';
 import { Draw } from 'ol/interaction';
@@ -10,7 +9,7 @@ import { DrawEvent } from 'ol/interaction/Draw';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
-import { FC, useContext, useState } from 'react';
+import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
@@ -21,10 +20,10 @@ interface LayerEditProps {
     onFinish: () => void;
 }
 
-export const LayerEdit: FC<LayerEditProps> = ({ onFinish }) => {
+export const LayerEdit: React.FC<LayerEditProps> = ({ onFinish }) => {
     console.log('LayerEdit');
 
-    const { map } = useContext(MapContext);
+    const { map } = React.useContext(MapContext);
     const style = new Style({
         fill: new Fill({
             color: 'rgba(255, 255, 255, 0.2)'
@@ -69,10 +68,10 @@ interface EditorProps {
     source: VectorSource<Geometry>;
     baseLayer: VectorLayer<VectorSource<Geometry>>;
 }
-const Editor: FC<EditorProps> = observer(({ source, baseLayer, onFinish }) => {
-    const { map } = useContext(MapContext);
+const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish }) => {
+    const { map } = React.useContext(MapContext);
     const lastCoordinates: Array<Array<number>> = []; // координаты точек полигонов объекта геометрии
-    const [draw, setDraw] = useState<Draw | null>(null);
+    const [draw, setDraw] = React.useState<Draw | null>(null);
 
     /**
      * Завершение создания полигонов

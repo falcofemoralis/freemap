@@ -1,23 +1,25 @@
-import { MapFeature } from './entities/map-feature.entity';
-import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, Query, Request, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, Query, Request, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as Path from 'path';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
-import { AreaDto } from './dto/area.dto';
-import { Coordinate, CreateFeatureDataDto } from './dto/create-feature.dto';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserPayload } from './../auth/guards/jwt-auth.guard';
+import { FilesService } from './../files/files.service';
+import { AreaDto } from './dto/area.dto';
+import { Coordinate, CreateFeatureDataDto } from './dto/create-feature.dto';
 import { FeatureType } from './entities/feature-type.entity';
+import { MapFeature } from './entities/map-feature.entity';
 import MediaInterceptor, { MEDIA_PATH } from './interceptors/media.interceptor';
 import { MapService } from './map.service';
 import { FeatureCollectionDto } from './types/feature-collection.dto';
 
+const MEDIA_FOLDER = 'media';
 @ApiTags('map')
 @Controller('map')
 export class MapController {
-  constructor(private readonly mapService: MapService, private readonly authService: AuthService) {}
+  constructor(private readonly mapService: MapService, private readonly authService: AuthService, private readonly filesService: FilesService) {}
 
   @ApiOperation({ summary: 'Получение данных объект на карте в определенной области' })
   @ApiResponse({ status: 200, type: FeatureCollectionDto, description: 'Пак объектов FeatureCollection' })
@@ -56,18 +58,40 @@ export class MapController {
   @ApiResponse({ status: 201, type: MapFeature, description: 'Объект карты' })
   @UseGuards(JwtAuthGuard)
   @Post('feature')
-  @UseInterceptors(MediaInterceptor)
-  async addMapFeature(@Body() featureDto: CreateFeatureDataDto, @UploadedFiles() files: Array<Express.Multer.File>, @Request() req): Promise<MapFeature> {
-    const media = new Array<string>();
-    if (files) {
-      for (const file of files) {
-        media.push(file.filename);
-      }
+  async addMapFeature(@Body() featureDto: CreateFeatureDataDto, @Request() req): Promise<MapFeature> {
+    try {
+      return await this.mapService.addMapFeature(featureDto, (req.user as UserPayload).id);
+    } catch (e) {
+      throw new InternalServerErrorException(e);
     }
+  }
 
-    const insertedFeature = await this.mapService.addMapFeature(featureDto, media, (req.user as UserPayload).id);
-
-    return insertedFeature;
+  @ApiOperation({ summary: 'Добавление медиа файлов к объекту' })
+  @ApiHeader({ name: 'auth', description: 'Токен пользователя' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, type: [String], description: 'Добавленные медиа файлы' })
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(MediaInterceptor)
+  @Post('feature/:id/media')
+  async addMapFeatureMedia(@Param('id') id: string, @UploadedFiles() files: Array<Express.Multer.File>): Promise<string[]> {
+    try {
+      const uploadedFiles = await this.filesService.saveFiles(files, MEDIA_FOLDER);
+      await this.mapService.addMapFeatureMedia(id, uploadedFiles);
+      return uploadedFiles;
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
   }
 
   @ApiOperation({ summary: 'Добавление нового типа объекта' })
@@ -84,6 +108,42 @@ export class MapController {
   @Get('feature/types')
   async getFeatureTypes(): Promise<Array<FeatureType>> {
     return await this.mapService.getFeatureTypes();
+  }
+
+  @ApiOperation({ summary: 'Получение всех данных про объект' })
+  @ApiResponse({ status: 200, type: MapFeature, description: 'Объект карты' })
+  @Get('feature/:id')
+  async getMapFeature(@Param('id') id: string): Promise<MapFeature> {
+    if (!id) {
+      throw new BadRequestException();
+    }
+
+    const mapFeature = await this.mapService.getMapFeatureById(id);
+
+    if (!mapFeature) {
+      throw new NotFoundException();
+    }
+
+    try {
+      mapFeature.files = await this.filesService.getFiles(mapFeature.files, MEDIA_FOLDER);
+      mapFeature.user.passwordHash = undefined;
+      return mapFeature;
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
+
+  /**
+   * Перевод координат в GeoJson формат т.е Coordinate[] в [][][]
+   * @param coordinates - координаты
+   */
+  convertCoordinatesToArray(coordinates: Coordinate[]): number[][][] {
+    const featureCoordinates: number[][] = [];
+    for (const coordinate of coordinates) {
+      featureCoordinates.push([coordinate.lon, coordinate.lat]);
+    }
+
+    return [featureCoordinates];
   }
 
   // /**
@@ -122,53 +182,4 @@ export class MapController {
 
   //   return newestFeatures;
   // }
-
-  @ApiOperation({ summary: 'Получение всех данных про объект' })
-  @ApiResponse({ status: 200, type: MapFeature, description: 'Объект карты' })
-  @Get('feature/:id')
-  async getMapFeature(@Param('id') id: string): Promise<MapFeature> {
-    if (!id) {
-      throw new BadRequestException();
-    }
-
-    const mapFeature = await this.mapService.getMapFeatureById(id);
-
-    if (!mapFeature) {
-      throw new NotFoundException();
-    }
-
-    mapFeature.user.passwordHash = undefined;
-
-    return mapFeature;
-  }
-
-  @ApiOperation({ summary: 'Получение медиа файла с сервера' })
-  @ApiResponse({ status: 201, type: String, description: 'Медиа файл' })
-  @Get('feature/:id/media/:name')
-  getMediaFile(@Param('id') id: string, @Param('name') name: string, @Res() res) {
-    const path = Path.join(process.cwd(), `${MEDIA_PATH}/${id}/${name}`);
-
-    try {
-      if (fs.existsSync(path)) {
-        res.sendFile(path);
-      } else {
-        new NotFoundException();
-      }
-    } catch (e) {
-      throw new NotFoundException();
-    }
-  }
-
-  /**
-   * Перевод кординат в GeoJson формат т.е Coordinate[] в [][][]
-   * @param coordinates - координаты
-   */
-  convertCoordinatesToArray(coordinates: Coordinate[]): number[][][] {
-    const featureCoordinates: number[][] = [];
-    for (const coordinate of coordinates) {
-      featureCoordinates.push([coordinate.lon, coordinate.lat]);
-    }
-
-    return [featureCoordinates];
-  }
 }

@@ -3,8 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { OverviewMap } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import * as React from 'react';
-import { useContext } from 'react';
+import React from 'react';
 import MapConstant from '../../../../constants/map.constant';
 import { MapContext } from '../../../../MapProvider';
 import { mapStore } from '../../../../store/map.store';
@@ -23,7 +22,7 @@ const PreviewMapLabel = observer(() => {
 });
 
 export const WidgetPreviewBox = () => {
-    const { map } = useContext(MapContext);
+    const { map } = React.useContext(MapContext);
 
     /* Map preview init */
     const baseLayer = new TileLayer();

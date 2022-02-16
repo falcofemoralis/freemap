@@ -1,19 +1,17 @@
-import * as React from 'react';
-import { FC } from 'react';
-import { toLonLat } from 'ol/proj';
-import TileLayer from 'ol/layer/Tile';
-import View from 'ol/View';
-import { MapProvider } from '../../../MapProvider';
-import Map from 'ol/Map';
-import XYZ from 'ol/source/XYZ';
-import { mapStore } from '../../../store/map.store';
 import { observe } from 'mobx';
+import TileLayer from 'ol/layer/Tile';
+import Map from 'ol/Map';
+import { toLonLat } from 'ol/proj';
+import XYZ from 'ol/source/XYZ';
+import View from 'ol/View';
+import * as React from 'react';
 import MapConstant from '../../../constants/map.constant';
-import { ErrorBox } from '../../../components/ErrorBox';
+import { MapProvider } from '../../../MapProvider';
+import { mapStore } from '../../../store/map.store';
 
 const COORDINATES_CHANGE_TIME = 0.25; // Изменение url каждые 250 мс
 
-export const MainMap: FC = ({ children }) => {
+export const MainMap: React.FC = ({ children }) => {
     console.log('mainmap');
 
     /* Init map */

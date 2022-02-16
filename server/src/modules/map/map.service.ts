@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AreaDto } from './dto/area.dto';
 import { MapFeature, MapFeatureDocument } from './entities/map-feature.entity';
 import { FeatureType, FeatureTypeDocument } from './entities/feature-type.entity';
@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateFeatureDataDto } from './dto/create-feature.dto';
 import { FeatureTypeDto } from './dto/feature-type.dto';
+import { Dropbox, Error, files } from 'dropbox';
 
 @Injectable()
 export class MapService {
@@ -35,9 +36,18 @@ export class MapService {
    * @param {MapFeature} mapFeature - данные про объект на карте
    * @returns {MapFeature} - добавленный объект
    */
-  async addMapFeature(mapFeatureDto: CreateFeatureDataDto, files: string[], userId: string): Promise<MapFeature> {
-    const mapFeature = new this.mapFeatureModel({ ...mapFeatureDto, files, user: userId, createdAt: Date.now() });
+  async addMapFeature(mapFeatureDto: CreateFeatureDataDto, userId: string): Promise<MapFeature> {
+    const mapFeature = new this.mapFeatureModel({ ...mapFeatureDto, user: userId, createdAt: Date.now() });
     return (await mapFeature.save()).populate({ path: 'type' });
+  }
+
+  /**
+   * Добавление медиа к объекту
+   * @param {string} id - id объекта
+   * @param {string[]} files - файлы
+   */
+  async addMapFeatureMedia(id: string, files: string[]) {
+    return this.mapFeatureModel.findOneAndUpdate({ id }, { files }, { new: true });
   }
 
   /**

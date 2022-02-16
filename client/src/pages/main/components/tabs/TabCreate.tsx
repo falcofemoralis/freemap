@@ -1,16 +1,17 @@
+import SendIcon from '@mui/icons-material/Send';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Drawer } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import { observer } from 'mobx-react-lite';
-import { FC } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
+import { FileUpload } from '../../../../components/FileUpload';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { errorStore } from '../../../../store/error.store';
-
-const drawerWidth = 324;
+import { DRAWER_WIDTH } from './index';
 
 type FormData = {
     name: string;
@@ -24,38 +25,58 @@ interface TabCreateProps {
     onClose: () => void;
 }
 
-export const TabCreate: FC<TabCreateProps> = observer(({ onSubmit, onClose }) => {
+export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose }) => {
+    const [isLoading, setLoading] = React.useState(false);
+    const [files, setFiles] = React.useState<File[]>([]);
+
     const {
         register,
         handleSubmit,
-        formState: { errors }
+        formState: { errors },
+        reset
     } = useForm<FormData>();
 
     const handleOnSubmit = handleSubmit(async data => {
         if (editorStore.selectedFeatureType && editorStore.newFeatureCoordinates && editorStore.newFeatureZoom) {
-            const addedFeature = await MapService.addFeature({
-                type: editorStore.selectedFeatureType,
-                coordinates: editorStore.newFeatureCoordinates,
-                zoom: editorStore.newFeatureZoom,
-                ...data
-            });
+            setLoading(true);
+            const addedFeature = await MapService.addFeature(
+                {
+                    id: '',
+                    type: editorStore.selectedFeatureType,
+                    coordinates: editorStore.newFeatureCoordinates,
+                    zoom: editorStore.newFeatureZoom,
+                    ...data
+                },
+                files
+            );
 
             editorStore.newFeature?.setProperties(addedFeature);
+
+            reset();
+            setLoading(false);
         }
 
         onSubmit();
     });
 
+    const handleFilesChange = (data: File[]) => setFiles(data);
+
+    const handleClose = () => {
+        reset();
+        setLoading(false);
+        onClose();
+    };
+
     return (
         <Drawer
             sx={{
-                width: drawerWidth,
+                width: DRAWER_WIDTH,
                 flexShrink: 0,
-                '& .MuiDrawer-paper': { width: drawerWidth, p: 3 }
+                '& .MuiDrawer-paper': { width: DRAWER_WIDTH, p: 3 }
             }}
             anchor='left'
             open={editorStore.isEditorTabOpen}
-            onClose={onClose}
+            onClose={handleClose}
         >
             <Box component='form' onSubmit={handleOnSubmit} sx={{ mt: 3 }} noValidate>
                 <Grid container spacing={2}>
@@ -100,10 +121,22 @@ export const TabCreate: FC<TabCreateProps> = observer(({ onSubmit, onClose }) =>
                     <Grid item xs={12}>
                         <TextField error={!!errors.links} helperText={errors.links?.message ?? ''} fullWidth id='links' label='Ссылки' />
                     </Grid>
+                    <Grid item xs={12}>
+                        <FileUpload onUpload={handleFilesChange} />
+                    </Grid>
                 </Grid>
-                <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-                    Добавить
-                </Button>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                    <LoadingButton
+                        onClick={handleOnSubmit}
+                        endIcon={<SendIcon />}
+                        loading={isLoading}
+                        loadingPosition='end'
+                        variant='contained'
+                    >
+                        Добавить
+                    </LoadingButton>
+                </Box>
+
                 {errorStore.message && <Alert severity='error'>{errorStore.message}</Alert>}
             </Box>
         </Drawer>

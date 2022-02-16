@@ -10,10 +10,3 @@ export const headers = () => {
         Authorization: `Bearer ${authStore.token ?? ''}`
     };
 };
-
-export const headersJSON = () => {
-    return {
-        Authorization: `Bearer ${authStore.token ?? ''}`,
-        'Content-Type': 'application/json'
-    };
-};

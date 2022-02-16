@@ -1,3 +1,5 @@
+import { FilesModule } from '../files/files.module';
+import { AppModule } from './../../app.module';
 import { Module } from '@nestjs/common';
 import { MapController } from './map.controller';
 import { MapService } from './map.service';
@@ -13,6 +15,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       { name: MapFeature.name, schema: MapFeatureSchema },
       { name: FeatureType.name, schema: FeatureTypeSchema },
     ]),
+    FilesModule,
   ],
   controllers: [MapController],
   providers: [MapService],

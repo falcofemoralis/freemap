@@ -1,9 +1,9 @@
-import { Coordinate } from '../types/IMapFeature';
 import { makeAutoObservable } from 'mobx';
-import { IMapFeatureType } from '../types/IMapFeatureType';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
 import { GeometryType } from '../constants/geometry.type';
+import { Coordinate } from '../types/IMapFeature';
+import { IMapFeatureType } from '../types/IMapFeatureType';
 
 class EditorStore {
     isDrawing = false;

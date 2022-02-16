@@ -1,21 +1,20 @@
-import { useContext } from 'react';
-import { MapContext } from '../../../../MapProvider';
-import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
-import { Vector } from 'ol/source';
-import { Vector as VectorLayer } from 'ol/layer';
-import { Feature, Map } from 'ol';
-import { GeoJSON } from 'ol/format';
-import { Select } from 'ol/interaction';
-import { Geometry } from 'ol/geom';
+import { observe } from 'mobx';
+import { Feature } from 'ol';
 import { pointerMove } from 'ol/events/condition';
-import { SelectEvent } from 'ol/interaction/Select';
+import { GeoJSON } from 'ol/format';
+import { Geometry } from 'ol/geom';
+import { Select } from 'ol/interaction';
+import { Vector as VectorLayer } from 'ol/layer';
 import { transformExtent } from 'ol/proj';
-import { observable, observe } from 'mobx';
-import { editorStore } from '../../../../store/editor.store';
+import { Vector } from 'ol/source';
+import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
+import React from 'react';
+import { MapContext } from '../../../../MapProvider';
 import MapService from '../../../../services/map.service';
+import { editorStore } from '../../../../store/editor.store';
 
 export const LayerData = () => {
-    const { map } = useContext(MapContext);
+    const { map } = React.useContext(MapContext);
 
     /**
      * Стиль объектов на карте

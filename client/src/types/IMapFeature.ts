@@ -6,6 +6,7 @@ export interface Coordinate {
 }
 
 export interface IMapFeature {
+    id: string;
     type: IMapFeatureType;
     coordinates: Coordinate[];
     zoom: number;

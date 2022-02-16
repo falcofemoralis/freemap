@@ -3,25 +3,28 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import { observer } from 'mobx-react-lite';
-import { FC, useEffect, useState } from 'react';
+import React from 'react';
+import { Carousel } from 'react-responsive-carousel';
+import Viewer from 'react-viewer';
+import { DRAWER_WIDTH } from '.';
 import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
+import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 
-const drawerWidth = 324;
 interface TabSelectProps {
     onClose: () => void;
 }
 
-export const TabSelect: FC<TabSelectProps> = observer(({ onClose }) => {
+export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
     console.log('initTab');
 
     return (
         <Drawer
             sx={{
-                width: drawerWidth,
+                width: DRAWER_WIDTH,
                 flexShrink: 0,
-                '& .MuiDrawer-paper': { width: drawerWidth, p: 3 }
+                '& .MuiDrawer-paper': { width: DRAWER_WIDTH, p: 3 }
             }}
             anchor='left'
             open={Boolean(mapStore.selectedFeatureId)}
@@ -32,19 +35,35 @@ export const TabSelect: FC<TabSelectProps> = observer(({ onClose }) => {
     );
 });
 
+interface ViewerImage {
+    src: string;
+    alt: string;
+}
 interface DrawerTabProps {
     featureId: string;
 }
-const DrawerTab: FC<DrawerTabProps> = ({ featureId }) => {
-    const [mapFeature, setMapFeature] = useState<IMapFeature | null>(null);
+const DrawerTab: React.FC<DrawerTabProps> = ({ featureId }) => {
+    const [mapFeature, setMapFeature] = React.useState<IMapFeature | null>(null);
 
-    useEffect(() => {
+    React.useEffect(() => {
         const fetchData = async () => {
             setMapFeature(await MapService.getMapFeature(featureId));
         };
 
         fetchData();
     }, []);
+
+    const getViewerImages = (files?: string[]): ViewerImage[] => {
+        const images: ViewerImage[] = [];
+        if (files) {
+            for (const file of files) {
+                images.push({ src: file, alt: file });
+            }
+        }
+        console.log(images);
+
+        return images;
+    };
 
     if (mapFeature) {
         return (
@@ -57,6 +76,22 @@ const DrawerTab: FC<DrawerTabProps> = ({ featureId }) => {
                         <TextField disabled fullWidth label='Имя' defaultValue={mapFeature.name} />
                     </Grid>
                 </Grid>
+                <Carousel>
+                    {mapFeature.files?.map(file => (
+                        <div key={file}>
+                            <img src={file} />
+                            <p className='legend'>Legend 1</p>
+                        </div>
+                    ))}
+                </Carousel>
+                {/* <Viewer
+                    visible={false}
+                    images={[
+                        {
+                            src: 'https://ucb80a6a4a2604d29742aee5e284.dl.dropboxusercontent.com/cd/0/get/Bf0HLPCYk6ufS0XR3_ZIgx4TczPwZhH75gLl1veRlKjZtn2xl8SK4SjsnpsTC0W-VzTk_G3mI8uoihtrFUq3qSi8n5h6gS3-pxUZMBUALC5S04PMbdOPTDtJ-32235O1BJCZT5NihWJxloemWmpjdDkY/file'
+                        }
+                    ]}
+                /> */}
             </Box>
         );
     } else {
