@@ -13,7 +13,7 @@ import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
-import { toTuple } from '../../../../utils/CoordinatesUtil';
+import { formatCoordinate, toTuple } from '../../../../utils/CoordinatesUtil';
 import '../../styles/Widget.scss';
 
 interface LayerEditProps {

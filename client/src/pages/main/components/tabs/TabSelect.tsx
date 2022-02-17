@@ -11,7 +11,7 @@ import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
 import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
-import { getCenter, toText } from '../../../../utils/CoordinatesUtil';
+import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
 
 interface TabSelectProps {
     onClose: () => void;
@@ -73,7 +73,12 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
             <Box sx={{ mt: 3 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <TextField disabled fullWidth label='Координаты' defaultValue={toText(getCenter(mapFeature.coordinates))} />
+                        <TextField
+                            disabled
+                            fullWidth
+                            label='Координаты'
+                            defaultValue={toText(formatCoordinate(getCenter(mapFeature.coordinates)))}
+                        />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField disabled fullWidth label='Имя' defaultValue={mapFeature.name} />

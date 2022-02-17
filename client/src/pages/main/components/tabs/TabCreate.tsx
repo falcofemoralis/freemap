@@ -12,7 +12,7 @@ import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { errorStore } from '../../../../store/error.store';
 import { DRAWER_WIDTH } from './index';
-import { getCenter, toText } from '../../../../utils/CoordinatesUtil';
+import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
 
 type FormData = {
     name: string;
@@ -88,7 +88,9 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
                             fullWidth
                             id='coordinates'
                             label='Координаты'
-                            defaultValue={editorStore.newFeatureCoordinates && toText(getCenter(editorStore.newFeatureCoordinates))}
+                            defaultValue={
+                                editorStore.newFeatureCoordinates && toText(formatCoordinate(getCenter(editorStore.newFeatureCoordinates)))
+                            }
                         />
                     </Grid>
                     <Grid item xs={12}>

@@ -1,6 +1,29 @@
 import { toLonLat } from 'ol/proj';
 import { Coordinate } from './../types/IMapFeature';
 
+export const COORDINATE_PRECISION = 5;
+
+// Overload signatures
+export function formatCoordinate(coordinate: number[]): Coordinate;
+export function formatCoordinate(coordinate: Coordinate): Coordinate;
+export function formatCoordinate(coordinate: unknown): Coordinate {
+    if (Array.isArray(coordinate)) {
+        return {
+            lon: Number(coordinate[0].toFixed(COORDINATE_PRECISION)),
+            lat: Number(coordinate[1].toFixed(COORDINATE_PRECISION))
+        };
+    } else {
+        return {
+            lon: Number((coordinate as Coordinate)?.lon?.toFixed(COORDINATE_PRECISION)),
+            lat: Number((coordinate as Coordinate)?.lat?.toFixed(COORDINATE_PRECISION))
+        };
+    }
+}
+
+export function formatZoom(zoom: number): number {
+    return Number(zoom.toFixed(COORDINATE_PRECISION));
+}
+
 export const getCenter = (coordinates: Coordinate[]): Coordinate => {
     let sumX = 0;
     let sumY = 0;

@@ -47,7 +47,9 @@ export class MapService {
    * @param {string[]} files - файлы
    */
   async addMapFeatureMedia(id: string, files: string[]) {
-    return this.mapFeatureModel.findOneAndUpdate({ id }, { files }, { new: true });
+    console.log(files);
+
+    return this.mapFeatureModel.findOneAndUpdate({ _id: id }, { files }, { new: true });
   }
 
   /**

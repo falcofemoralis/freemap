@@ -8,6 +8,7 @@ import * as React from 'react';
 import MapConstant from '../../../constants/map.constant';
 import { MapProvider } from '../../../MapProvider';
 import { mapStore } from '../../../store/map.store';
+import { formatCoordinate, formatZoom } from '../../../utils/CoordinatesUtil';
 
 const COORDINATES_CHANGE_TIME = 0.25; // Изменение url каждые 250 мс
 
@@ -61,7 +62,7 @@ export const MainMap: React.FC = ({ children }) => {
         if (!pathChanged) {
             if (coordinates && zoom) {
                 const newCoordinates = toLonLat(coordinates, 'EPSG:3857');
-                mapStore.updateMapPosition({ lon: newCoordinates[0], lat: newCoordinates[1] }, zoom);
+                mapStore.updateMapPosition(formatCoordinate(newCoordinates), formatZoom(zoom));
             }
 
             pathChanged = true;
