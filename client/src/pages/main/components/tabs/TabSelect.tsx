@@ -1,18 +1,20 @@
-import { CircularProgress, Drawer } from '@mui/material';
+import { Button, CircularProgress, Divider, Drawer, TextFieldProps, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import Viewer from 'react-viewer';
+import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import { DRAWER_WIDTH } from '.';
 import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
-import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
+import RoomIcon from '@mui/icons-material/Room';
 import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
-import { height } from '@mui/system';
+import { FileUpload } from '../../../../components/FileUpload';
+import HomeIcon from '@mui/icons-material/Home';
+import LinkIcon from '@mui/icons-material/Link';
+import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled';
 
 interface TabSelectProps {
     onClose: () => void;
@@ -36,6 +38,21 @@ export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
         </Drawer>
     );
 });
+
+interface IconFieldProps {
+    icon: React.ReactNode;
+    text: string;
+}
+const IconField: React.FC<IconFieldProps> = ({ icon, text }) => {
+    return (
+        <Button sx={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'flex-start', pl: 3, pr: 3, pt: 1, pb: 1 }}>
+            {icon}
+            <Typography variant='body1' sx={{ ml: 3, wordBreak: 'break-all', textTransform: 'none', textAlign: 'start', color: 'black' }}>
+                {text}
+            </Typography>
+        </Button>
+    );
+};
 
 interface ViewerImage {
     src: string;
@@ -79,17 +96,57 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
                         </div>
                     ))}
                 </Carousel>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} sx={{ p: 3 }}>
                     <Grid item xs={12}>
-                        <TextField
-                            disabled
-                            fullWidth
-                            label='Координаты'
-                            defaultValue={toText(formatCoordinate(getCenter(mapFeature.coordinates)))}
-                        />
+                        <Box>
+                            <Typography variant='caption' gutterBottom>
+                                {mapFeature.type.name}
+                            </Typography>
+                            <Typography variant='h5' gutterBottom>
+                                {mapFeature.name}
+                            </Typography>
+                            <Typography variant='body1' gutterBottom>
+                                {mapFeature.description}
+                            </Typography>
+                            <Typography variant='caption' gutterBottom>
+                                2,517 комментариев
+                            </Typography>
+                        </Box>
                     </Grid>
+                </Grid>
+                <Divider />
+                <Grid container spacing={1} sx={{ mt: 2, mb: 2 }}>
+                    {mapFeature.address && (
+                        <Grid item xs={12}>
+                            <IconField icon={<HomeIcon />} text={mapFeature.address} />
+                        </Grid>
+                    )}
+                    {mapFeature.wiki && (
+                        <Grid item xs={12}>
+                            <IconField icon={<LinkIcon />} text={mapFeature.wiki} />
+                        </Grid>
+                    )}
+                    {mapFeature.phone && (
+                        <Grid item xs={12}>
+                            <IconField icon={<PhoneEnabledIcon />} text={mapFeature.phone} />
+                        </Grid>
+                    )}
                     <Grid item xs={12}>
-                        <TextField disabled fullWidth label='Имя' defaultValue={mapFeature.name} />
+                        <IconField icon={<RoomIcon />} text={toText(formatCoordinate(getCenter(mapFeature.coordinates)))} />
+                    </Grid>
+                    {mapFeature.links?.map(link => (
+                        <Grid item xs={12} key={link}>
+                            <IconField icon={<LinkIcon />} text={link} />
+                        </Grid>
+                    ))}
+                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <FileUpload onUpload={files => console.log(files)} />
+                    </Grid>
+                </Grid>
+                <Divider />
+                <Grid container spacing={2} sx={{ p: 3 }}>
+                    <Grid item xs={12}>
+                        <Typography variant='h6'>Комментарии</Typography>
                     </Grid>
                 </Grid>
                 {/* <Viewer
@@ -103,6 +160,10 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
             </Box>
         );
     } else {
-        return <CircularProgress />;
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress />
+            </Box>
+        );
     }
 };

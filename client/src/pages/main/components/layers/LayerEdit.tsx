@@ -80,6 +80,7 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
      */
     const completeDrawing = () => {
         const coordinates = (editorStore.newFeature?.getGeometry() as Polygon).getCoordinates();
+
         editorStore.newFeatureCoordinates = toTuple(coordinates);
         editorStore.newFeatureZoom = map?.getView()?.getZoom() ?? -1;
 

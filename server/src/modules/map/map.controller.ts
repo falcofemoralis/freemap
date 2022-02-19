@@ -60,6 +60,8 @@ export class MapController {
   @Post('feature')
   async addMapFeature(@Body() featureDto: CreateFeatureDataDto, @Request() req): Promise<MapFeature> {
     try {
+      console.log(featureDto);
+
       return await this.mapService.addMapFeature(featureDto, (req.user as UserPayload).id);
     } catch (e) {
       throw new InternalServerErrorException(e);

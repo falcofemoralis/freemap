@@ -1,30 +1,36 @@
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Button, Dialog, Divider, Drawer, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Alert, Divider, Drawer, Typography } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
-import MuiPhoneNumber from 'material-ui-phone-number';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { AutocompleteType } from '../../../../components/AutocompleteType';
 import { FileUpload } from '../../../../components/FileUpload';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { errorStore } from '../../../../store/error.store';
+import { mapStore } from '../../../../store/map.store';
+import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
 import { DRAWER_WIDTH } from './index';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Chip from '@mui/material/Chip';
-import Autocomplete from '@mui/material/Autocomplete';
 
 type FormData = {
     name: string;
     description: string;
     address: string;
-    links: string;
-    category: string;
+    phone: string;
+    wiki: string;
 };
+
+interface ErrorData {
+    coordinates: string;
+    type: string;
+}
 
 interface TabCreateProps {
     onSubmit: () => void;
@@ -35,6 +41,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     const [isLoading, setLoading] = React.useState(false);
     const [files, setFiles] = React.useState<File[]>([]);
     const [links, setLinks] = React.useState<string[]>([]);
+    const [selectedType, setSelectedType] = React.useState<IMapFeatureType | null>(null);
+    const [errorData, setErrorData] = React.useState<ErrorData>({ coordinates: '', type: '' });
 
     const {
         register,
@@ -44,36 +52,54 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     } = useForm<FormData>();
 
     const handleOnSubmit = handleSubmit(async data => {
-        if (editorStore.selectedFeatureType && editorStore.newFeatureCoordinates && editorStore.newFeatureZoom) {
-            setLoading(true);
-            const addedFeature = await MapService.addFeature(
-                {
-                    id: '',
-                    createdAt: -1,
-                    type: editorStore.selectedFeatureType,
-                    coordinates: editorStore.newFeatureCoordinates,
-                    zoom: editorStore.newFeatureZoom,
-                    ...data
-                },
-                files
-            );
-
-            editorStore.newFeature?.setProperties(addedFeature);
-
-            reset();
-            setLoading(false);
+        if (!editorStore.selectedFeatureType && !selectedType) {
+            setErrorData({ ...errorData, type: 'Необходимо выбрать категорию' });
+            return;
         }
 
-        onSubmit();
-    });
+        if (!editorStore.newFeatureCoordinates || !editorStore.newFeatureZoom) {
+            setErrorData({ ...errorData, coordinates: 'Отсутствуют координаты. Ошибка?' });
+            return;
+        }
 
-    const handleFilesChange = (data: File[]) => setFiles(data);
+        if (editorStore.selectedFeatureType && editorStore.newFeatureCoordinates && editorStore.newFeatureZoom) {
+            setLoading(true);
+
+            try {
+                const addedFeature = await MapService.addFeature(
+                    {
+                        id: '',
+                        createdAt: -1,
+                        type: selectedType ? selectedType : editorStore.selectedFeatureType,
+                        coordinates: editorStore.newFeatureCoordinates,
+                        zoom: editorStore.newFeatureZoom,
+                        links,
+                        ...data
+                    },
+                    files
+                );
+
+                editorStore.newFeature?.setProperties(addedFeature);
+
+                reset();
+                setLoading(false);
+                onSubmit();
+            } catch (e) {
+                console.log(e);
+                setLoading(false);
+            }
+        }
+    });
 
     const handleClose = () => {
         reset();
         setLoading(false);
         onClose();
     };
+
+    const handleFilesChange = (data: File[]) => setFiles(data);
+    const handleFeatureTypeSelect = (type: IMapFeatureType | null) => setSelectedType(type);
+    const handleLinksChange = (links: string[]) => setLinks(links);
 
     return (
         <Drawer
@@ -116,28 +142,29 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
-                            error={!!errors.category}
-                            helperText={errors.category?.message ?? ''}
-                            fullWidth
-                            required
-                            id='category'
-                            label='Категория'
-                            {...register('category', { required: 'Необходимо выбрать категорию' })}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
                             multiline
                             error={!!errors.description}
                             helperText={errors.description?.message ?? ''}
                             fullWidth
                             id='description'
                             label='Описание'
-                            {...register('description', { required: 'Необходимо указать описание' })}
+                            {...register('description', { required: 'Необходимо выбрать описание' })}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <AutocompleteType
+                            error={Boolean(errorData.type)}
+                            helperText={errorData.type}
+                            onChange={handleFeatureTypeSelect}
+                            featureTypes={mapStore.featureTypes}
+                            selectedGeometry={editorStore.selectedFeatureType?.geometry}
+                            selectedType={editorStore.selectedFeatureType}
                         />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
+                            error={Boolean(errorData.coordinates)}
+                            helperText={errorData.coordinates}
                             required
                             disabled
                             fullWidth
@@ -154,28 +181,29 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField fullWidth id='address' label='Адрес' />
+                        <TextField fullWidth id='address' label='Адрес' {...register('address')} />
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField fullWidth id='phone' label='Телефон' />
+                        <TextField fullWidth id='phone' label='Телефон' {...register('phone')} />
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField fullWidth id='wiki' label='Wikipedia' />
+                        <TextField fullWidth id='wiki' label='Wikipedia' {...register('wiki')} />
                     </Grid>
                     <Grid item xs={12}>
                         <Autocomplete
                             multiple
                             id='tags-filled'
                             options={links}
+                            onChange={(event, value) => handleLinksChange(value)}
                             freeSolo
                             renderTags={(value: readonly string[], getTagProps) =>
                                 value.map((option: string, index: number) => (
-                                    <div key={option}>
+                                    <div key={option} style={{ maxWidth: '100%' }}>
                                         <Chip variant='outlined' label={option} {...getTagProps({ index })} />
                                     </div>
                                 ))
                             }
-                            renderInput={params => <TextField {...params} variant='outlined' label='Ссылки' placeholder='Url' />}
+                            renderInput={params => <TextField {...params} variant='outlined' label='Ссылки' placeholder='url' />}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -217,3 +245,12 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
         </Drawer>
     );
 });
+
+// interface TypeFieldProps {
+//     onChange: (type: IMapFeatureType | null) => void;
+// }
+// const TypeField: React.FC<TypeFieldProps> = ({ onChange }) => {
+//     return (
+
+//     );
+// };

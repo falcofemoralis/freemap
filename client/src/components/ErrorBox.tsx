@@ -9,8 +9,9 @@ export const ErrorBox = observer(() => {
 
     const handleClose = () => (errorStore.message = null);
 
+    // autoHideDuration={6000}
     return (
-        <Snackbar open={Boolean(errorStore.message)} autoHideDuration={6000} onClose={handleClose}>
+        <Snackbar open={Boolean(errorStore.message)} onClose={handleClose}>
             <MuiAlert elevation={6} onClose={handleClose} severity='error' sx={{ width: '100%' }} variant='filled'>
                 {errorStore.message}
             </MuiAlert>

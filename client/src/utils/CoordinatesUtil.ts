@@ -48,13 +48,21 @@ export const toArray = (coordinates: Coordinate[]): number[][][] => {
 };
 
 export const toTuple = (coordinates: number[][][]): Coordinate[] => {
+    console.log(coordinates);
+
     const lotLatCoordinates: Coordinate[] = [];
     for (const tuple of coordinates) {
         for (const coordinate of tuple) {
+            console.log(coordinate);
+
             const lonLat = toLonLat(coordinate, 'EPSG:3857');
+            console.log(lonLat);
+
             lotLatCoordinates.push({ lon: lonLat[0], lat: lonLat[1] });
         }
     }
+
+    console.log(lotLatCoordinates);
 
     return lotLatCoordinates;
 };

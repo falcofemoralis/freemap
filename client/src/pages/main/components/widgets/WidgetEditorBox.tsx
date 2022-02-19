@@ -4,9 +4,11 @@ import LinearScaleOutlinedIcon from '@mui/icons-material/LinearScaleOutlined';
 import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, TextField } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import { AutocompleteType } from '../../../../components/AutocompleteType';
 import { GeometryType } from '../../../../constants/geometry.type';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
+import { mapStore } from '../../../../store/map.store';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
 import { LayerEdit } from '../layers/LayerEdit';
@@ -14,11 +16,6 @@ import { TabCreate } from '../tabs/TabCreate';
 
 export const WidgetEditorBox = () => {
     console.log('WidgetEditorBox');
-
-    const featureTypes: Array<IMapFeatureType> = [];
-    MapService.getFeatureTypes().then(types => {
-        featureTypes.push(...types);
-    });
 
     const handleEditSelect = (type: GeometryType | null) => {
         editorStore.selectedEditType = type;
@@ -61,12 +58,7 @@ export const WidgetEditorBox = () => {
                 <IconButton className='editorBtn' size='large' onClick={() => handleEditSelect(GeometryType.MULTI_POLYGON)}>
                     <HighlightAltOutlinedIcon />
                 </IconButton>
-                <TypesDialog
-                    featureTypes={featureTypes}
-                    onChange={handleFeatureTypeSelect}
-                    onApply={onFeatureTypeApply}
-                    onCancel={() => handleEditSelect(null)}
-                />
+                <TypesDialog onChange={handleFeatureTypeSelect} onApply={onFeatureTypeApply} onCancel={() => handleEditSelect(null)} />
                 <TabCreate onSubmit={handleCreateFeature} onClose={handleCloseTab} />
             </Paper>
             <Paper className='editorCtrlBox' elevation={5}>
@@ -77,48 +69,22 @@ export const WidgetEditorBox = () => {
 };
 
 interface TypesDialogProps {
-    featureTypes: Array<IMapFeatureType>;
     onChange: (type: IMapFeatureType | null) => void;
     onApply: () => void;
     onCancel: () => void;
 }
-const TypesDialog: React.FC<TypesDialogProps> = observer(({ featureTypes, onChange, onCancel, onApply }) => {
+const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, onApply }) => {
     console.log('TypesDialog');
 
     return (
         <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
             <DialogTitle>Выбрать тип</DialogTitle>
             <DialogContent>
-                <Autocomplete
-                    sx={{ width: 300, mt: 2 }}
-                    options={featureTypes}
-                    autoHighlight
-                    getOptionLabel={type => type.name}
-                    onChange={(event, value) => onChange(value)}
-                    renderOption={(props, type) =>
-                        type.geometry == editorStore.selectedEditType && (
-                            <Box component='li' sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                                <img
-                                    loading='lazy'
-                                    width='20'
-                                    src={`https://flagcdn.com/w20/aq.png`}
-                                    srcSet={`https://flagcdn.com/w40/aq.png 2x`}
-                                    alt=''
-                                />
-                                {type.name}
-                            </Box>
-                        )
-                    }
-                    renderInput={params => (
-                        <TextField
-                            {...params}
-                            label='Выбрать тип'
-                            inputProps={{
-                                ...params.inputProps,
-                                autoComplete: 'new-password' // disable autocomplete and autofill
-                            }}
-                        />
-                    )}
+                <AutocompleteType
+                    sx={{ mt: 3, width: 300 }}
+                    onChange={onChange}
+                    featureTypes={mapStore.featureTypes}
+                    selectedGeometry={editorStore.selectedEditType}
                 />
             </DialogContent>
             <DialogActions>

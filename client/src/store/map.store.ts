@@ -1,17 +1,24 @@
+import { IMapFeatureType } from './../types/IMapFeatureType';
+import { IMapFeature } from './../types/IMapFeature';
 import { makeAutoObservable } from 'mobx';
 import { fromLonLat } from 'ol/proj';
 import MapConstant from '../constants/map.constant';
 import { Coordinate } from '../types/IMapFeature';
 import { getQueryParams, updateQuery } from '../utils/QueryUtil';
+import MapService from '../services/map.service';
 
 class MapStore {
     mapType: MapConstant = MapConstant.OSM;
     lonLat: Coordinate = { lon: 0, lat: 0 };
     zoom = 2;
     selectedFeatureId: string | null = null;
+    featureTypes: IMapFeatureType[] = [];
 
     constructor() {
         makeAutoObservable(this);
+        MapService.getFeatureTypes().then(types => {
+            this.featureTypes = types;
+        });
     }
 
     async toggleMapType(): Promise<MapConstant> {

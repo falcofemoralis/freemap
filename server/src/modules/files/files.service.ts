@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Dropbox } from 'dropbox';
 import * as Path from 'path';
 import { v4 } from 'uuid';
+import sharp from 'sharp';
 
 @Injectable()
 export class FilesService {
@@ -25,6 +26,9 @@ export class FilesService {
         // console.log(e);
       }
     }
+
+    // gen thumbnail
+    //  const thumbnail = await sharp(files[0].buffer).resize(320, 240).toBuffer();
 
     return uploadedFiles;
   }

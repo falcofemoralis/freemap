@@ -4,9 +4,9 @@ $side: 96px;
     &-btn {
         height: $side;
         width: $side;
-        border-radius: 4px;
-        border-width: 1px;
-        border-style: solid;
+        border: rgb(228, 228, 228) solid !important;
+        border-radius: 10% !important;
+        border-width: 1px !important;
     }
 
     &-img {

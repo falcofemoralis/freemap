@@ -44,6 +44,14 @@ export class MapFeature {
   @Prop()
   address?: string;
 
+  @ApiProperty({ example: '3809153355', description: 'Телефон' })
+  @Prop()
+  phone?: string;
+
+  @ApiProperty({ example: 'wiki.com/...', description: 'Ссылка на википедию' })
+  @Prop()
+  wiki?: string;
+
   @ApiProperty({ example: '[url1, url2]', description: 'Дополнительные ссылки объекта' })
   @Prop()
   links?: string[];

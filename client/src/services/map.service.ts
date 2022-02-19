@@ -20,14 +20,14 @@ export default class MapService {
     }
 
     static async addFeature(feature: IMapFeature, files: File[]): Promise<IMapFeature> {
-        const filesFormData = new FormData();
-        for (const file of files) {
-            filesFormData.append('files', file);
-        }
         const body = { ...feature, type: feature.type.id, coordinates: toJS(feature.coordinates) };
 
         try {
             const { data } = await axiosInstance.post<IMapFeature>(`${this.API_URL}/feature`, body, { headers: headers() });
+            const filesFormData = new FormData();
+            for (const file of files) {
+                filesFormData.append('files', file);
+            }
             await axiosInstance.post(`${this.API_URL}/feature/${data.id}/media`, filesFormData, { headers: headers() });
             return data;
         } catch (e: AxiosError | unknown) {
