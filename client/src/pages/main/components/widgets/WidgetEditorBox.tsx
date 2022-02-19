@@ -112,7 +112,7 @@ const TypesDialog: React.FC<TypesDialogProps> = observer(({ featureTypes, onChan
                     renderInput={params => (
                         <TextField
                             {...params}
-                            label='Choose a country'
+                            label='Выбрать тип'
                             inputProps={{
                                 ...params.inputProps,
                                 autoComplete: 'new-password' // disable autocomplete and autofill

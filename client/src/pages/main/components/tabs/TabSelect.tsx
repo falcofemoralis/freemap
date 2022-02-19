@@ -12,6 +12,7 @@ import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
 import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
+import { height } from '@mui/system';
 
 interface TabSelectProps {
     onClose: () => void;
@@ -25,7 +26,7 @@ export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
             sx={{
                 width: DRAWER_WIDTH,
                 flexShrink: 0,
-                '& .MuiDrawer-paper': { width: DRAWER_WIDTH, p: 3 }
+                '& .MuiDrawer-paper': { width: DRAWER_WIDTH }
             }}
             anchor='left'
             open={Boolean(mapStore.selectedFeatureId)}
@@ -70,7 +71,14 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
 
     if (mapFeature) {
         return (
-            <Box sx={{ mt: 3 }}>
+            <Box>
+                <Carousel showThumbs={false} swipeable={true}>
+                    {mapFeature.files?.map(file => (
+                        <div key={file}>
+                            <img loading='lazy' src={file} style={{ height: '240px', objectFit: 'cover' }} />
+                        </div>
+                    ))}
+                </Carousel>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <TextField
@@ -84,14 +92,6 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
                         <TextField disabled fullWidth label='Имя' defaultValue={mapFeature.name} />
                     </Grid>
                 </Grid>
-                <Carousel>
-                    {mapFeature.files?.map(file => (
-                        <div key={file}>
-                            <img src={file} />
-                            <p className='legend'>Legend 1</p>
-                        </div>
-                    ))}
-                </Carousel>
                 {/* <Viewer
                     visible={false}
                     images={[

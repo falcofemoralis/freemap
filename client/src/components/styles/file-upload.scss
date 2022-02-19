@@ -1,40 +1,19 @@
+$side: 96px;
+
 .file-upload{
-    flex: 1;
-    height: 100%;
-    background-color: white;
-    outline: dashed 2px gray;
-    outline-offset: -3px;
-    padding: 15px;
-
-    &-text {    
-        font-size: 16px;
-        font-weight: 400;
-
-        line-height: 18px;
-        color: #757575;
+    &-btn {
+        height: $side;
+        width: $side;
+        border-radius: 4px;
+        border-width: 1px;
+        border-style: solid;
     }
 
-    &-files {
-        font-size: 16px;
-        font-weight: 400;
-
-        line-height: 18px;
-        color: #009aff;
-    }
-    
     &-img {
-        height: 40px;
-        width: 40px;
-        margin-right: 10px;
-    }
-    
-    &-ref {
-        color: #009aff;
-        cursor: pointer;
+        height: $side;
+        width: $side;
         margin-left: 5px;
-
-        &-input {
-            display: none;
-        }
-    } 
+        margin-right: 5px;
+        border-radius: 5px;
+    }
 }

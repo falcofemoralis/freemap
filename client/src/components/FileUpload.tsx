@@ -3,25 +3,31 @@ import Box from '@mui/material/Box';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import React from 'react';
 import './styles/file-upload.scss';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import Button from '@mui/material/Button';
+import styled from '@emotion/styled';
+import { IconButton, Typography } from '@mui/material';
 
 interface FileUploadProps {
     onUpload: (files: File[]) => void;
 }
 
 interface ILocalStore {
-    fileDragOver: boolean;
     files: File[];
 }
 
+const Input = styled('input')({
+    display: 'none'
+});
+
 export const FileUpload: React.FC<FileUploadProps> = observer(({ onUpload }) => {
     const localStore = useLocalObservable<ILocalStore>(() => ({
-        fileDragOver: false,
         files: []
     }));
 
     const addFiles = (files: File[]) => {
-        onUpload(files);
-        localStore.files = files;
+        localStore.files.push(...files);
+        onUpload(localStore.files);
     };
 
     const uploadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,46 +36,29 @@ export const FileUpload: React.FC<FileUploadProps> = observer(({ onUpload }) => 
         }
     };
 
-    const dragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        localStore.fileDragOver = true;
-    };
-
-    const dragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        localStore.fileDragOver = false;
-    };
-
-    const drop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        addFiles(Array.from(e.dataTransfer.files));
-        localStore.fileDragOver = false;
+    const getFileSrc = (file: File): string => {
+        return URL.createObjectURL(file);
     };
 
     return (
-        <Box sx={{ height: 90, mt: 3 }}>
-            <div
-                style={{ backgroundColor: localStore.fileDragOver ? '#b8eeff' : '' }}
-                className='file-upload ccc'
-                onDragLeave={dragLeave}
-                onDrop={drop}
-                onDragOver={dragOver}
-            >
-                <div className='rcc'>
-                    {!localStore.fileDragOver && <AttachmentIcon />}
-                    <div className='file-upload-text'>
-                        {!localStore.fileDragOver ? 'Перетащите файлы для загрузки сюда или' : 'Отпустите файлы'}
-                    </div>
-                    <label htmlFor='file-upload' className='file-upload-ref'>
-                        {' '}
-                        загрузите
-                    </label>
-                    <input className='file-upload-ref-input' id='file-upload' type='file' onChange={uploadFiles} multiple />
-                </div>
-                {localStore.files.length != 0 && (
-                    <div className='file-upload-files'>Загруженные: {localStore.files.map((f: any) => f.name).join(',  ')}</div>
+        <Box sx={{ display: 'flex', overflowX: localStore.files.length > 0 ? 'scroll' : 'hidden' }}>
+            <label htmlFor='contained-button-file'>
+                <Input accept='image/*' id='contained-button-file' multiple type='file' onChange={uploadFiles} />
+                {localStore.files.length == 0 ? (
+                    <Button variant='outlined' component='span' startIcon={<PhotoCamera />}>
+                        Add photos
+                    </Button>
+                ) : (
+                    <IconButton className='file-upload-btn' color='primary' aria-label='upload picture' component='span'>
+                        <PhotoCamera />
+                    </IconButton>
                 )}
-            </div>
+            </label>
+            <Box sx={{ display: 'flex' }}>
+                {localStore.files.map((file: File, index: number) => (
+                    <img className='file-upload-img' key={index} src={getFileSrc(file)}></img>
+                ))}
+            </Box>
         </Box>
     );
 });
