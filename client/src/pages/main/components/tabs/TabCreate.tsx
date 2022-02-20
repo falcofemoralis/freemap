@@ -82,18 +82,25 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
                 editorStore.newFeature?.setProperties(addedFeature);
 
                 reset();
-                setLoading(false);
+                resetData();
                 onSubmit();
             } catch (e) {
                 console.log(e);
-                setLoading(false);
+                resetData();
             }
         }
     });
 
+    const resetData = () => {
+        setFiles([]);
+        setLinks([]);
+        setSelectedType(null);
+        setLoading(false);
+    };
+
     const handleClose = () => {
         reset();
-        setLoading(false);
+        resetData();
         onClose();
     };
 

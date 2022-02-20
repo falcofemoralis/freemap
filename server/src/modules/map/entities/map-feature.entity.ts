@@ -60,9 +60,13 @@ export class MapFeature {
   @Prop()
   createdAt: number;
 
-  @ApiProperty({ example: '[1.png, 2.png]', description: 'Медиа файлы' })
+  @ApiProperty({ example: '[1.jpg, 2.jpg]', description: 'Медиа файлы' })
   @Prop()
   files: string[];
+
+  @ApiProperty({ example: '[1_thumbnail.jpg, 2_thumbnail.jpg]', description: 'Превью медиа файлов' })
+  @Prop()
+  preview: string[];
 }
 
 export const MapFeatureSchema = SchemaFactory.createForClass(MapFeature);

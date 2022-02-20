@@ -1,11 +1,10 @@
-import { IMapFeatureType } from './../types/IMapFeatureType';
-import { IMapFeature } from './../types/IMapFeature';
 import { makeAutoObservable } from 'mobx';
 import { fromLonLat } from 'ol/proj';
 import MapConstant from '../constants/map.constant';
+import MapService from '../services/map.service';
 import { Coordinate } from '../types/IMapFeature';
 import { getQueryParams, updateQuery } from '../utils/QueryUtil';
-import MapService from '../services/map.service';
+import { IMapFeatureType } from './../types/IMapFeatureType';
 
 class MapStore {
     mapType: MapConstant = MapConstant.OSM;

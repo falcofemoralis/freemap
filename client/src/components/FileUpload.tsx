@@ -1,12 +1,11 @@
-import AttachmentIcon from '@mui/icons-material/Attachment';
+import styled from '@emotion/styled';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import React from 'react';
 import './styles/file-upload.scss';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
-import Button from '@mui/material/Button';
-import styled from '@emotion/styled';
-import { IconButton, Typography } from '@mui/material';
 
 interface FileUploadProps {
     onUpload: (files: File[]) => void;

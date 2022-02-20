@@ -1,6 +1,5 @@
 import { Autocomplete, Box, SxProps, TextField, Theme } from '@mui/material';
 import React from 'react';
-import { UseFormRegisterReturn } from 'react-hook-form';
 import { GeometryType } from '../constants/geometry.type';
 import { IMapFeatureType } from '../types/IMapFeatureType';
 

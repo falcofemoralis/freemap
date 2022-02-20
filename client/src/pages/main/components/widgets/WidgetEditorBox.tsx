@@ -1,12 +1,11 @@
 import HighlightAltOutlinedIcon from '@mui/icons-material/HighlightAltOutlined';
 import HomeWorkOutlinedIcon from '@mui/icons-material/HomeWorkOutlined';
 import LinearScaleOutlinedIcon from '@mui/icons-material/LinearScaleOutlined';
-import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, TextField } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { AutocompleteType } from '../../../../components/AutocompleteType';
 import { GeometryType } from '../../../../constants/geometry.type';
-import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';

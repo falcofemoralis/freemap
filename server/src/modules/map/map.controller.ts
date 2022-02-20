@@ -1,3 +1,4 @@
+import { MapFeatureGuard } from './guards/map-feature.guard';
 import { BadRequestException, Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, Query, Request, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as fs from 'fs';
@@ -60,8 +61,6 @@ export class MapController {
   @Post('feature')
   async addMapFeature(@Body() featureDto: CreateFeatureDataDto, @Request() req): Promise<MapFeature> {
     try {
-      console.log(featureDto);
-
       return await this.mapService.addMapFeature(featureDto, (req.user as UserPayload).id);
     } catch (e) {
       throw new InternalServerErrorException(e);
@@ -83,12 +82,12 @@ export class MapController {
     },
   })
   @ApiResponse({ status: 201, type: [String], description: 'Добавленные медиа файлы' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, MapFeatureGuard)
   @UseInterceptors(MediaInterceptor)
   @Post('feature/:id/media')
   async addMapFeatureMedia(@Param('id') id: string, @UploadedFiles() files: Array<Express.Multer.File>): Promise<string[]> {
     try {
-      const uploadedFiles = await this.filesService.saveFiles(files, MEDIA_FOLDER);
+      const uploadedFiles = await this.filesService.saveFiles(files, { maxWidth: 1920, previewMaxWidth: 420, subfolder: MEDIA_FOLDER });
       await this.mapService.addMapFeatureMedia(id, uploadedFiles);
       return uploadedFiles;
     } catch (e) {
@@ -114,6 +113,7 @@ export class MapController {
 
   @ApiOperation({ summary: 'Получение всех данных про объект' })
   @ApiResponse({ status: 200, type: MapFeature, description: 'Объект карты' })
+  @UseGuards(MapFeatureGuard)
   @Get('feature/:id')
   async getMapFeature(@Param('id') id: string): Promise<MapFeature> {
     if (!id) {
@@ -127,6 +127,7 @@ export class MapController {
     }
 
     try {
+      mapFeature.preview = await this.filesService.getPreview(mapFeature.files, MEDIA_FOLDER);
       mapFeature.files = await this.filesService.getFiles(mapFeature.files, MEDIA_FOLDER);
       mapFeature.user.passwordHash = undefined;
       return mapFeature;

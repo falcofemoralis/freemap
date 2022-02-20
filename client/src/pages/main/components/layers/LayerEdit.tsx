@@ -13,7 +13,7 @@ import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
-import { formatCoordinate, toTuple } from '../../../../utils/CoordinatesUtil';
+import { toTuple } from '../../../../utils/CoordinatesUtil';
 import '../../styles/Widget.scss';
 
 interface LayerEditProps {
@@ -112,6 +112,7 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
         if (draw) {
             console.log('removed draw');
             map?.removeInteraction(draw);
+            setDraw(null);
         }
     };
 
@@ -142,6 +143,7 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
         if (editorStore.isDrawing) {
             if (!draw) {
                 console.log('draw init');
+                console.log(editorStore.selectedFeatureType?.geometry);
 
                 setDraw(new Draw({ source, type: editorStore.selectedFeatureType?.geometry }));
             } else if (draw) {

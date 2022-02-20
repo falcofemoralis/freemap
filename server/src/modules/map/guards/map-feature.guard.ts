@@ -7,11 +7,11 @@ export class MapFeatureGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
 
-    /*     const mapObject = await this.mapService.getMapFeatureById(req.params.id);
+    const mapObject = await this.mapService.getMapFeatureById(req.params.id);
 
     if (!mapObject) {
       throw new NotFoundException();
-    } */
+    }
 
     return true;
   }
