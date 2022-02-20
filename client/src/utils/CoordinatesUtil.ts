@@ -1,3 +1,4 @@
+import { GeometryType } from './../constants/geometry.type';
 import { toLonLat } from 'ol/proj';
 import { Coordinate } from './../types/IMapFeature';
 
@@ -38,34 +39,46 @@ export const getCenter = (coordinates: Coordinate[]): Coordinate => {
     return { lon: sumX / n, lat: sumY / n };
 };
 
-export const toArray = (coordinates: Coordinate[]): number[][][] => {
+export function toArray(coordinates: Coordinate[], type: GeometryType): any {
     const featureCoordinates: number[][] = [];
     for (const coordinate of coordinates) {
         featureCoordinates.push([coordinate.lon, coordinate.lat]);
     }
 
-    return [featureCoordinates];
-};
+    if (type == GeometryType.POLYGON || type == GeometryType.MULTI_POLYGON) {
+        return [featureCoordinates];
+    } else if (type == GeometryType.LINE_STRING) {
+        return featureCoordinates;
+    } else {
+        return featureCoordinates;
+    }
+}
 
-export const toTuple = (coordinates: number[][][]): Coordinate[] => {
-    console.log(coordinates);
-
+export function toTuple(coordinates: number[][][], type: GeometryType): Coordinate[];
+export function toTuple(coordinates: number[][], type: GeometryType): Coordinate[];
+export function toTuple(coordinates: unknown, type: GeometryType): Coordinate[] {
     const lotLatCoordinates: Coordinate[] = [];
-    for (const tuple of coordinates) {
-        for (const coordinate of tuple) {
-            console.log(coordinate);
 
+    if (type == GeometryType.POLYGON || type == GeometryType.MULTI_POLYGON) {
+        for (const tuple of coordinates as number[][][]) {
+            for (const coordinate of tuple) {
+                const lonLat = toLonLat(coordinate, 'EPSG:3857');
+                lotLatCoordinates.push({ lon: lonLat[0], lat: lonLat[1] });
+            }
+        }
+
+        return lotLatCoordinates;
+    } else if (type == GeometryType.LINE_STRING) {
+        for (const coordinate of coordinates as number[][]) {
             const lonLat = toLonLat(coordinate, 'EPSG:3857');
-            console.log(lonLat);
-
             lotLatCoordinates.push({ lon: lonLat[0], lat: lonLat[1] });
         }
+
+        return lotLatCoordinates;
+    } else {
+        return lotLatCoordinates;
     }
-
-    console.log(lotLatCoordinates);
-
-    return lotLatCoordinates;
-};
+}
 
 export const toText = (coordinate: Coordinate): string => {
     return `${coordinate.lon}, ${coordinate.lat}`;

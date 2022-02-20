@@ -3,7 +3,7 @@ import RedoIcon from '@mui/icons-material/Redo';
 import UndoIcon from '@mui/icons-material/Undo';
 import { Box, IconButton } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { Geometry, Polygon } from 'ol/geom';
+import { Geometry, LineString, MultiLineString, Polygon } from 'ol/geom';
 import { Draw } from 'ol/interaction';
 import { DrawEvent } from 'ol/interaction/Draw';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -79,9 +79,23 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
      * Завершение создания полигонов
      */
     const completeDrawing = () => {
-        const coordinates = (editorStore.newFeature?.getGeometry() as Polygon).getCoordinates();
+        // IF ELSE FOR TEST !!!
+        if (editorStore.selectedFeatureType?.geometry == GeometryType.POLYGON) {
+            console.log('POLYGON');
+            const coordinates = (editorStore.newFeature?.getGeometry() as Polygon).getCoordinates();
+            editorStore.newFeatureCoordinates = toTuple(coordinates, GeometryType.POLYGON);
+        } else if (editorStore.selectedFeatureType?.geometry == GeometryType.LINE_STRING) {
+            console.log('LINE_STRING');
+            const coordinates = (editorStore.newFeature?.getGeometry() as LineString).getCoordinates();
+            editorStore.newFeatureCoordinates = toTuple(coordinates, GeometryType.LINE_STRING);
+        } else if (editorStore.selectedFeatureType?.geometry == GeometryType.MULTI_POLYGON) {
+            console.log('MULTI_POLYGON');
+            const coordinates = (editorStore.newFeature?.getGeometry() as MultiLineString).getCoordinates();
+            editorStore.newFeatureCoordinates = toTuple(coordinates, GeometryType.MULTI_POLYGON);
+        } else {
+            return;
+        }
 
-        editorStore.newFeatureCoordinates = toTuple(coordinates);
         editorStore.newFeatureZoom = map?.getView()?.getZoom() ?? -1;
 
         //isTabCreateOpen.value = true;

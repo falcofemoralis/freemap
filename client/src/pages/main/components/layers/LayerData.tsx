@@ -89,7 +89,7 @@ export const LayerData = () => {
             });
 
             featureCollection.features.map((feature: any) => {
-                feature.geometry.coordinates = toArray(feature.geometry.coordinates);
+                feature.geometry.coordinates = toArray(feature.geometry.coordinates, feature.geometry.type);
                 return feature;
             });
 
