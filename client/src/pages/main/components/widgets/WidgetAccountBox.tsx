@@ -1,7 +1,9 @@
-import { Avatar, Box, Button, Dialog, IconButton } from '@mui/material';
-import { deepOrange } from '@mui/material/colors';
+import { Box, Button, Dialog, IconButton } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import { AccountSettings } from '../../../../components/AccountSettings';
+import { UserAvatar } from '../../../../components/UserAvatar';
+import { FileType } from '../../../../constants/file.type';
 import { authStore } from '../../../../store/auth.store';
 import '../../styles/Widget.scss';
 import { SignIn } from '../auth/SignIn';
@@ -15,8 +17,13 @@ enum DialogType {
 export const WidgetAccountBox = observer(() => {
     console.log('WidgetAccountBox');
 
+    if (authStore.isAuth && !authStore.user) {
+        authStore.getUserProfile();
+    }
+
     const [isDialog, setDialog] = React.useState(false);
     const [dialogType, setDialogType] = React.useState<DialogType>(DialogType.SIGN_IN);
+    const [open, setOpen] = React.useState(false);
 
     const handleAuthOpen = () => setDialog(true);
     const handleAuthClose = () => setDialog(false);
@@ -38,10 +45,13 @@ export const WidgetAccountBox = observer(() => {
                     </Dialog>
                 </Box>
             ) : (
-                <IconButton aria-haspopup='true' color='inherit'>
-                    <Avatar sx={{ bgcolor: deepOrange[500] }}>N</Avatar>
+                <IconButton aria-haspopup='true' color='inherit' onClick={() => setOpen(true)}>
+                    <UserAvatar user={authStore.user} type={FileType.THUMBNAIL} />
                 </IconButton>
             )}
+            <Dialog open={open} onClose={() => setOpen(false)}>
+                <AccountSettings />
+            </Dialog>
         </Box>
     );
 });

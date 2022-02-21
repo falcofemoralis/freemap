@@ -71,4 +71,8 @@ export class AuthService {
   async findUserByUsername(username: string): Promise<User | null> {
     return this.userModel.findOne({ username });
   }
+
+  async updateUserAvatar(id: string, userAvatar: string): Promise<User> {
+    return this.userModel.findOneAndUpdate({ _id: id }, { userAvatar }, { new: true });
+  }
 }

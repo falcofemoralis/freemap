@@ -2,10 +2,13 @@ import HighlightAltOutlinedIcon from '@mui/icons-material/HighlightAltOutlined';
 import HomeWorkOutlinedIcon from '@mui/icons-material/HomeWorkOutlined';
 import LinearScaleOutlinedIcon from '@mui/icons-material/LinearScaleOutlined';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { AutocompleteType } from '../../../../components/AutocompleteType';
 import { GeometryType } from '../../../../constants/geometry.type';
+import { authStore } from '../../../../store/auth.store';
 import { editorStore } from '../../../../store/editor.store';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
@@ -15,8 +18,13 @@ import { TabCreate } from '../tabs/TabCreate';
 
 export const WidgetEditorBox = () => {
     console.log('WidgetEditorBox');
+    const [alert, setAlert] = React.useState(false);
 
     const handleEditSelect = (type: GeometryType | null) => {
+        if (!authStore.isAuth) {
+            setAlert(true);
+            return;
+        }
         editorStore.selectedEditType = type;
     };
 
@@ -63,6 +71,11 @@ export const WidgetEditorBox = () => {
             <Paper className='editorCtrlBox' elevation={5}>
                 <LayerEdit onFinish={handleDrawFinish} />
             </Paper>
+            <Snackbar open={alert} onClose={() => setAlert(false)} autoHideDuration={2000}>
+                <MuiAlert elevation={5} onClose={() => setAlert(false)} severity='error' sx={{ width: '100%' }} variant='filled'>
+                    Необходимо авторизоваться!
+                </MuiAlert>
+            </Snackbar>
         </Box>
     );
 };

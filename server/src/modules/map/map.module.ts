@@ -1,12 +1,11 @@
-import { FilesModule } from '../files/files.module';
-import { AppModule } from './../../app.module';
 import { Module } from '@nestjs/common';
-import { MapController } from './map.controller';
-import { MapService } from './map.service';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
+import { FilesModule } from '../files/files.module';
 import { FeatureType, FeatureTypeSchema } from './entities/feature-type.entity';
 import { MapFeature, MapFeatureSchema } from './entities/map-feature.entity';
-import { MongooseModule } from '@nestjs/mongoose';
+import { MapController } from './map.controller';
+import { MapService } from './map.service';
 
 @Module({
   imports: [

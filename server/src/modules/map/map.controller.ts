@@ -1,19 +1,19 @@
-import { MapFeatureGuard } from './guards/map-feature.guard';
 import { BadRequestException, Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, Query, Request, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import * as fs from 'fs';
-import * as Path from 'path';
+import { Response } from 'express';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserPayload } from './../auth/guards/jwt-auth.guard';
 import { FilesService } from './../files/files.service';
-import { AreaDto } from './dto/area.dto';
-import { Coordinate, CreateFeatureDataDto } from './dto/create-feature.dto';
+import { FileOptionsQuery } from './../files/query/media.query';
+import { CreateFeatureDataDto } from './dto/create-feature.dto';
 import { FeatureType } from './entities/feature-type.entity';
 import { MapFeature } from './entities/map-feature.entity';
-import MediaInterceptor, { MEDIA_PATH } from './interceptors/media.interceptor';
+import { MapFeatureGuard } from './guards/map-feature.guard';
+import MediaInterceptor from './interceptors/media.interceptor';
 import { MapService } from './map.service';
+import { AreaQuery } from './query/area.query';
 import { FeatureCollectionDto } from './types/feature-collection.dto';
 
 const MEDIA_FOLDER = 'media';
@@ -25,8 +25,8 @@ export class MapController {
   @ApiOperation({ summary: 'Получение данных объект на карте в определенной области' })
   @ApiResponse({ status: 200, type: FeatureCollectionDto, description: 'Пак объектов FeatureCollection' })
   @Get()
-  async getMapData(@Query() areaDto: AreaDto): Promise<FeatureCollectionDto> {
-    const mapFeatures = await this.mapService.getAllMapFeatures(areaDto);
+  async getMapData(@Query() areaQuery: AreaQuery): Promise<FeatureCollectionDto> {
+    const mapFeatures = await this.mapService.getAllMapFeatures(areaQuery);
 
     const features = [];
     for (const mapFeature of mapFeatures) {
@@ -111,6 +111,26 @@ export class MapController {
     return await this.mapService.getFeatureTypes();
   }
 
+  @ApiOperation({ summary: 'Получение файла медиа с сервера' })
+  @ApiResponse({ status: 200, type: String, description: 'Медиа файл' })
+  @Get('feature/media/:file')
+  async getFeatureMedia(@Param('file') file: string, @Res() res: Response, @Query() optionsQuery: FileOptionsQuery) {
+    try {
+      const media = (await this.filesService.downloadFiles([file], { subfolder: MEDIA_FOLDER, fileType: optionsQuery.type }))[0];
+
+      res.writeHead(200, {
+        'Content-Disposition': `attachment; filename="${media.filename}"`,
+        'Content-Type': media.mimeType,
+      });
+
+      res.end(media.buffer);
+    } catch (e) {
+      console.log(e);
+
+      throw new NotFoundException();
+    }
+  }
+
   @ApiOperation({ summary: 'Получение всех данных про объект' })
   @ApiResponse({ status: 200, type: MapFeature, description: 'Объект карты' })
   @UseGuards(MapFeatureGuard)
@@ -127,8 +147,6 @@ export class MapController {
     }
 
     try {
-      mapFeature.preview = await this.filesService.getPreview(mapFeature.files, MEDIA_FOLDER);
-      mapFeature.files = await this.filesService.getFiles(mapFeature.files, MEDIA_FOLDER);
       mapFeature.user.passwordHash = undefined;
       return mapFeature;
     } catch (e) {

@@ -1,7 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import { fromLonLat } from 'ol/proj';
 import MapConstant from '../constants/map.constant';
-import MapService from '../services/map.service';
 import { Coordinate } from '../types/IMapFeature';
 import { getQueryParams, updateQuery } from '../utils/QueryUtil';
 import { IMapFeatureType } from './../types/IMapFeatureType';
@@ -15,9 +14,6 @@ class MapStore {
 
     constructor() {
         makeAutoObservable(this);
-        MapService.getFeatureTypes().then(types => {
-            this.featureTypes = types;
-        });
     }
 
     async toggleMapType(): Promise<MapConstant> {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { ErrorBox } from '../../components/ErrorBox';
+import MapService from '../../services/map.service';
 import { mapStore } from '../../store/map.store';
 import { LayerData } from './components/layers/LayerData';
 import { LayerSelect } from './components/layers/LayerSelect';
@@ -14,6 +15,8 @@ import './styles/Main.scss';
 
 const Main = () => {
     console.log('Main');
+
+    MapService.getFeatureTypes().then(types => (mapStore.featureTypes = types));
 
     /**
      * Получение данных карты из url

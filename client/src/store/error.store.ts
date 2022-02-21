@@ -21,7 +21,7 @@ class ErrorStore {
                 authStore.clearToken();
             }
         } else {
-            console.log('not axious error');
+            console.log('not axios error');
             console.log(e);
         }
     }

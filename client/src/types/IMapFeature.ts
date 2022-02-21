@@ -15,7 +15,6 @@ export interface IMapFeature {
     address?: string;
     links?: string[];
     files?: string[];
-    preview?: string[];
     createdAt: number;
     wiki?: string;
     phone?: string;

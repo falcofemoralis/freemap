@@ -12,6 +12,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { materialColor } from '../../../../utils/MaterialColorGenerator';
 import { authStore } from './../../../../store/auth.store';
 import { errorStore } from './../../../../store/error.store';
 
@@ -39,7 +40,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
         watch
     } = useForm<FormData>();
 
-    const onSubmit = handleSubmit(data => authStore.tryRegister(data.username, data.email, data.password));
+    const onSubmit = handleSubmit(data => authStore.tryRegister(data.username, data.email, data.password, materialColor()));
     const password = React.useRef({});
     password.current = watch('password', '');
 

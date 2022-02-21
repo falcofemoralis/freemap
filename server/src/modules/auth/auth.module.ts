@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { PassportModule } from '@nestjs/passport';
-import { AuthController } from './auth.controller';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User, UserSchema } from './entities/user.entity';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
+import { FilesModule } from '../files/files.module';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { User, UserSchema } from './entities/user.entity';
 import { JwtStrategy } from './guards/jwt-auth.guard';
 
 @Module({
@@ -19,6 +20,7 @@ import { JwtStrategy } from './guards/jwt-auth.guard';
       }),
       inject: [ConfigService],
     }),
+    FilesModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

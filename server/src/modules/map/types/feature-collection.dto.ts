@@ -1,6 +1,6 @@
-import { Coordinate } from './../entities/map-feature.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { MapFeature } from '../entities/map-feature.entity';
+import { Coordinate } from './../entities/map-feature.entity';
 
 type FeatureProps = Pick<MapFeature, 'id' | 'name' | 'createdAt'>;
 

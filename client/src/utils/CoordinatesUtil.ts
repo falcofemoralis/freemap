@@ -1,5 +1,5 @@
-import { GeometryType } from './../constants/geometry.type';
 import { toLonLat } from 'ol/proj';
+import { GeometryType } from './../constants/geometry.type';
 import { Coordinate } from './../types/IMapFeature';
 
 export const COORDINATE_PRECISION = 5;

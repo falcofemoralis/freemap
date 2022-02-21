@@ -1,5 +1,6 @@
 import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
+import { FileType } from '../constants/file.type';
 import { errorStore } from '../store/error.store';
 import { IMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
@@ -46,5 +47,12 @@ export default class MapService {
             errorStore.errorHandle(e);
             throw e;
         }
+    }
+
+    static getMedia(media?: string, type?: FileType): string {
+        if (!media) {
+            return '';
+        }
+        return `${axiosInstance.defaults.baseURL}${MapService.API_URL}/feature/media/${media}${type ? `?type=${type}` : ''}`;
     }
 }

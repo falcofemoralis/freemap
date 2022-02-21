@@ -13,6 +13,7 @@ import Viewer from 'react-viewer';
 import { ImageDecorator } from 'react-viewer/lib/ViewerProps';
 import { DRAWER_WIDTH } from '.';
 import { FileUpload } from '../../../../components/FileUpload';
+import { FileType } from '../../../../constants/file.type';
 import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
@@ -99,7 +100,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
         const images: ImageDecorator[] = [];
         if (files) {
             for (const file of files) {
-                images.push({ src: file });
+                images.push({ src: MapService.getMedia(file) });
             }
         }
         console.log(images);
@@ -109,7 +110,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
 
     const openFullImage = (img: string) => {
         setViewerOpen(!viewerOpen);
-        const ind = mapFeature?.preview?.findIndex(el => el == img);
+        const ind = mapFeature?.files?.findIndex(el => el == img);
         console.log(ind);
 
         setActiveImage(ind);
@@ -119,9 +120,9 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
         return (
             <Box>
                 <Carousel showThumbs={false} swipeable={true}>
-                    {mapFeature.preview?.map(file => (
+                    {mapFeature.files?.map(file => (
                         <div key={file} onClick={() => openFullImage(file)} style={{ cursor: 'pointer' }}>
-                            <img src={file} style={{ height: '240px', objectFit: 'cover' }} />
+                            <img src={MapService.getMedia(file, FileType.THUMBNAIL)} style={{ height: '240px', objectFit: 'cover' }} />
                         </div>
                     ))}
                 </Carousel>
@@ -137,8 +138,11 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
                             <Typography variant='body1' gutterBottom>
                                 {mapFeature.description}
                             </Typography>
-                            <Typography variant='caption' gutterBottom>
+                            {/* <Typography variant='caption' gutterBottom>
                                 2,517 комментариев
+                            </Typography> */}
+                            <Typography variant='caption' gutterBottom>
+                                {new Date(mapFeature.createdAt).toLocaleDateString()}
                             </Typography>
                         </Box>
                     </Grid>

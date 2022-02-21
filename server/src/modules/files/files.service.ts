@@ -2,14 +2,24 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Dropbox } from 'dropbox';
 import * as sharp from 'sharp';
 import { v4 } from 'uuid';
+import { IFile } from './types/IFile';
 
-const THUMBNAIL = '_thumbnail';
 const EXT = '.jpg';
+const FILE_TYPE = 'image/jpeg';
 
 export interface FileUploadOptions {
   subfolder?: string;
   maxWidth?: number;
   previewMaxWidth?: number;
+}
+
+export interface FileDownloadOptions {
+  subfolder?: string;
+  fileType?: FileType;
+}
+
+export enum FileType {
+  THUMBNAIL = 'thumbnail',
 }
 
 @Injectable()
@@ -35,6 +45,22 @@ export class FilesService {
     return uploadedFiles;
   }
 
+  async downloadFiles(filenames: string[], options?: FileDownloadOptions): Promise<Array<IFile>> {
+    const files: IFile[] = [];
+
+    for (const name of filenames) {
+      try {
+        const { result } = await this.dbx.filesDownload({ path: `/${options.subfolder ? `${options.subfolder}/` : ''}${name}${options.fileType ? `_${options.fileType}` : ''}${EXT}` });
+
+        files.push({ buffer: Buffer.from((<any>result).fileBinary, 'base64'), filename: name, mimeType: FILE_TYPE });
+      } catch (e: any) {
+        //console.log(e);
+        throw e;
+      }
+    }
+    return files;
+  }
+
   private async uploadFile(data: Buffer, fileName: string, options?: FileUploadOptions): Promise<number> {
     const image = await sharp(data)
       .jpeg({ mozjpeg: true, quality: 90 })
@@ -54,39 +80,10 @@ export class FilesService {
       .resize({ width: options.previewMaxWidth ?? 420, withoutEnlargement: true })
       .toBuffer();
     const res = await this.dbx.filesUpload({
-      path: `/${options?.subfolder ? `${options.subfolder}/` : ''}${fileName}${THUMBNAIL}${EXT}`,
+      path: `/${options?.subfolder ? `${options.subfolder}/` : ''}${fileName}_${FileType.THUMBNAIL}${EXT}`,
       contents: thumbnail.buffer,
     });
 
     return res.status;
-  }
-
-  async getFiles(filenames: string[], subfolder?: string): Promise<string[]> {
-    const links: string[] = [];
-
-    for (const name of filenames) {
-      try {
-        const { result } = await this.dbx.filesGetTemporaryLink({
-          path: `/${subfolder ? `${subfolder}/` : ''}${name}${EXT}`,
-        });
-
-        links.push(result.link);
-      } catch (e: any) {
-        //console.log(e);
-        throw e;
-      }
-    }
-    return links;
-  }
-
-  async getPreview(filenames: string[], subfolder?: string): Promise<string[]> {
-    const names: string[] = [];
-    for (const file of filenames) {
-      names.push(file + THUMBNAIL);
-    }
-
-    const links = await this.getFiles(names, subfolder);
-
-    return links;
   }
 }

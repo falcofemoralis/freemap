@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { GeometryType } from '../constants/geometry.type';
-import * as mongoose from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import * as mongoose from 'mongoose';
+import { GeometryType } from '../constants/geometry.type';
 
 export type FeatureTypeDocument = FeatureType & Document & { _id: mongoose.Types.ObjectId };
 

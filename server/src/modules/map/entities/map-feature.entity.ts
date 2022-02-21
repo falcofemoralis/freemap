@@ -40,7 +40,7 @@ export class MapFeature {
   @Prop()
   coordinates: Coordinate[]; // [[lon, lat]]
 
-  @ApiProperty({ example: 'qwerty', description: 'Адресс объекта' })
+  @ApiProperty({ example: 'qwerty', description: 'Адрес объекта' })
   @Prop()
   address?: string;
 
@@ -63,10 +63,6 @@ export class MapFeature {
   @ApiProperty({ example: '[1.jpg, 2.jpg]', description: 'Медиа файлы' })
   @Prop()
   files: string[];
-
-  @ApiProperty({ example: '[1_thumbnail.jpg, 2_thumbnail.jpg]', description: 'Превью медиа файлов' })
-  @Prop()
-  preview: string[];
 }
 
 export const MapFeatureSchema = SchemaFactory.createForClass(MapFeature);

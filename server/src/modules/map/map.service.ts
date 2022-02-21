@@ -1,12 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { AreaDto } from './dto/area.dto';
-import { MapFeature, MapFeatureDocument } from './entities/map-feature.entity';
-import { FeatureType, FeatureTypeDocument } from './entities/feature-type.entity';
-import { Model } from 'mongoose';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateFeatureDataDto } from './dto/create-feature.dto';
 import { FeatureTypeDto } from './dto/feature-type.dto';
-import { Dropbox, Error, files } from 'dropbox';
+import { FeatureType, FeatureTypeDocument } from './entities/feature-type.entity';
+import { MapFeature, MapFeatureDocument } from './entities/map-feature.entity';
+import { AreaQuery } from './query/area.query';
 
 @Injectable()
 export class MapService {
@@ -21,11 +20,11 @@ export class MapService {
    * Получение всех объектов на карте
    * @returns {Array<MapFeature>} - массив объектов
    */
-  async getAllMapFeatures(areaDto: AreaDto): Promise<Array<MapFeature>> {
+  async getAllMapFeatures(areaQuery: AreaQuery): Promise<Array<MapFeature>> {
     const filter = {
-      'coordinates.lon': { $gte: areaDto.lonL, $lte: areaDto.lonR },
-      'coordinates.lat': { $gte: areaDto.latB, $lte: areaDto.latT },
-      zoom: { $gte: areaDto.zoom - 3, $lte: areaDto.zoom + 3 },
+      'coordinates.lon': { $gte: areaQuery.lonL, $lte: areaQuery.lonR },
+      'coordinates.lat': { $gte: areaQuery.latB, $lte: areaQuery.latT },
+      zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
     };
 
     return this.mapFeatureModel.find(filter).populate({ path: 'type' });

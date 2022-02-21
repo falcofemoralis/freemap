@@ -22,6 +22,14 @@ export class User {
   @ApiProperty({ example: 'email@gmail.com', description: 'Email пользователя' })
   @Prop()
   email: string;
+
+  @ApiProperty({ example: '1.jpg', description: 'Аватар пользователя' })
+  @Prop()
+  userAvatar: string;
+
+  @ApiProperty({ example: '#ff6f00', description: 'Цвет пользователя' })
+  @Prop()
+  userColor: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

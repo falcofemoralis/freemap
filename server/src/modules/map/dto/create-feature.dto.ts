@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMinSize, IsNotEmpty, MaxLength, IsString, IsArray, IsNumber } from 'class-validator';
+import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
 
 export interface Coordinate {
   lon: number;
