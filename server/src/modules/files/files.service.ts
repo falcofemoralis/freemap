@@ -76,8 +76,8 @@ export class FilesService {
 
   private async uploadPreview(data: Buffer, fileName: string, options?: FileUploadOptions): Promise<number> {
     const thumbnail = await sharp(data)
-      .jpeg({ mozjpeg: true, quality: 70 })
-      .resize({ width: options.previewMaxWidth ?? 420, withoutEnlargement: true })
+      .jpeg({ mozjpeg: true, quality: 80 })
+      .resize({ width: options.previewMaxWidth ?? 100, withoutEnlargement: true })
       .toBuffer();
     const res = await this.dbx.filesUpload({
       path: `/${options?.subfolder ? `${options.subfolder}/` : ''}${fileName}_${FileType.THUMBNAIL}${EXT}`,

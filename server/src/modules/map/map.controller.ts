@@ -30,11 +30,11 @@ export class MapController {
 
     const features = [];
     for (const mapFeature of mapFeatures) {
-      const { id, name, createdAt } = mapFeature;
+      const { id, name, createdAt, type } = mapFeature;
 
       features.push({
         type: 'Feature',
-        properties: { id, name, createdAt },
+        properties: { id, name, createdAt, type },
         geometry: {
           type: mapFeature.type.geometry,
           coordinates: mapFeature.coordinates,
@@ -96,9 +96,9 @@ export class MapController {
   }
 
   @ApiOperation({ summary: 'Добавление нового типа объекта' })
-  @ApiHeader({ name: 'Authorization', description: 'Токен пользователя' })
+  //  @ApiHeader({ name: 'Authorization', description: 'Токен пользователя' })
   @ApiResponse({ status: 201, type: FeatureType, description: 'Тип объекта' })
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('feature/type')
   async createFeatureType(@Body() featureTypeDto: FeatureTypeDto): Promise<FeatureType> {
     return await this.mapService.createFeatureType(featureTypeDto);

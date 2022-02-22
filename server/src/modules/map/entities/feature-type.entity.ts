@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
 import { GeometryType } from '../constants/geometry.type';
+import { TypeStyle } from '../types/type-style.dto';
 
 export type FeatureTypeDocument = FeatureType & Document & { _id: mongoose.Types.ObjectId };
 
@@ -17,6 +18,14 @@ export class FeatureType {
   @ApiProperty({ enum: Object.values(GeometryType), description: 'Тип геометрии объекта' })
   @Prop()
   geometry: string;
+
+  @ApiProperty({ example: '[][]', description: 'Стили типа' })
+  @Prop()
+  styles: TypeStyle[][];
+
+  @ApiProperty({ example: '[]', description: 'Иконка типа' })
+  @Prop()
+  icon?: string;
 }
 
 export const FeatureTypeSchema = SchemaFactory.createForClass(FeatureType);

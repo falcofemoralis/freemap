@@ -7,44 +7,19 @@ import { Select } from 'ol/interaction';
 import { Vector as VectorLayer } from 'ol/layer';
 import { transformExtent } from 'ol/proj';
 import { Vector } from 'ol/source';
-import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
+import { Fill, Stroke, Style } from 'ol/style';
 import React from 'react';
 import { MapContext } from '../../../../MapProvider';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
+import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import { toArray } from '../../../../utils/CoordinatesUtil';
+import { createLabelStyle, createStyles } from './styles/OlStyles';
 
 export const LayerData = () => {
     console.log('LayerData');
 
     const { map } = React.useContext(MapContext);
-
-    /**
-     * Стиль объектов на карте
-     */
-    const style = new Style({
-        fill: new Fill({
-            color: 'rgba(255,255,255,0)'
-        }),
-        stroke: new Stroke({
-            color: '#969696',
-            width: 2
-        }),
-        image: new Circle({
-            radius: 7,
-            fill: new Fill({
-                color: '#ffcc33'
-            })
-        }),
-        text: new Text({
-            font: '14px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({
-                color: '#fff',
-                width: 2
-            })
-        })
-    });
 
     // const url = ref('https://ahocevar.com/geoserver/wfs?service=wfs&request=getfeature&typename=topp:states&cql_filter=STATE_NAME=\'Idaho\'&outputformat=application/json');
     /* Data object init */
@@ -60,8 +35,9 @@ export const LayerData = () => {
     const baseLayer = new VectorLayer({
         source: vectorSource,
         style: function (feature) {
-            style.getText().setText(feature.get('name'));
-            return [style];
+            const styles = createStyles((feature.getProperties().type as IMapFeatureType).styles);
+            const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), styles.length + 1, feature.getGeometry());
+            return [...styles, labelStyle];
         },
         renderBuffer: 5000
     });
@@ -123,29 +99,20 @@ export const LayerData = () => {
     /**
      * Стиль наведенного объекта
      */
-    const hovered = new Style({
+    const hoveredStyle = new Style({
+        zIndex: 0,
         fill: new Fill({
             color: 'rgba(229,229,229,0.35)'
         }),
         stroke: new Stroke({
             color: '#26bae8',
             width: 5
-        }),
-        text: new Text({
-            font: '14px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({
-                color: '#fff',
-                width: 2
-            })
         })
     });
 
     function hoverStyle(feature: Feature<Geometry>) {
-        // const color = feature.get('COLOR') || '#eeeeee';
-        // hovered.getFill().setColor(color);
-        hovered.getText().setText(feature.get('name'));
-        return [hovered];
+        const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), 1, feature.getGeometry());
+        return [hoveredStyle, labelStyle];
     }
 
     /**

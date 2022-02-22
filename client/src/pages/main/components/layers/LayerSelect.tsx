@@ -9,6 +9,8 @@ import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
 import { mapStore } from '../../../../store/map.store';
 import { TabSelect } from '../tabs/TabSelect';
+import { IMapFeatureType } from '../../../../types/IMapFeatureType';
+import { createLabelStyle, createStyles } from './styles/OlStyles';
 
 export const LayerSelect = () => {
     console.log('LayerSelect');
@@ -20,29 +22,15 @@ export const LayerSelect = () => {
      * Стиль выбранного объекта
      */
     const selected = new Style({
+        zIndex: 0,
         fill: new Fill({
             color: 'rgba(255,0,0,0.17)'
         }),
         stroke: new Stroke({
             color: 'rgba(255,26,26,0.7)',
             width: 2
-        }),
-        text: new Text({
-            font: '14px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({
-                color: '#fff',
-                width: 2
-            })
         })
     });
-
-    function selectStyle(feature: Feature<Geometry>) {
-        // const color = feature.get('COLOR') || '#eeeeee';
-        // selected.getFill().setColor(color);
-        selected.getText().setText(feature.get('name'));
-        return [selected];
-    }
 
     /**
      * Фильтр объектов на карте
@@ -60,7 +48,13 @@ export const LayerSelect = () => {
     /**
      * Событие нажатия на объект
      */
-    const selectEvent = new Select({ style: selectStyle as any, filter: featureFilter as any }); // any fixes bug
+    const selectEvent = new Select({
+        filter: featureFilter as any,
+        style: function (feature) {
+            const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), 1, feature.getGeometry());
+            return [selected, labelStyle];
+        }
+    });
     selectEvent.on('select', (event: SelectEvent) => {
         const features: Feature<Geometry>[] = event.selected;
         if (features.length > 0) {

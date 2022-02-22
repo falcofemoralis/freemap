@@ -3,7 +3,7 @@ import RedoIcon from '@mui/icons-material/Redo';
 import UndoIcon from '@mui/icons-material/Undo';
 import { Box, IconButton } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { Geometry, LineString, MultiLineString, Polygon } from 'ol/geom';
+import { Geometry, LineString, MultiLineString, MultiPolygon, Polygon } from 'ol/geom';
 import { Draw } from 'ol/interaction';
 import { DrawEvent } from 'ol/interaction/Draw';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -13,8 +13,10 @@ import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
+import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import { toTuple } from '../../../../utils/CoordinatesUtil';
 import '../../styles/Widget.scss';
+import { createLabelStyle, createStyles } from './styles/OlStyles';
 
 interface LayerEditProps {
     onFinish: () => void;
@@ -24,37 +26,19 @@ export const LayerEdit: React.FC<LayerEditProps> = ({ onFinish }) => {
     console.log('LayerEdit');
 
     const { map } = React.useContext(MapContext);
-    const style = new Style({
-        fill: new Fill({
-            color: 'rgba(255, 255, 255, 0.2)'
-        }),
-        stroke: new Stroke({
-            color: '#ffcc33',
-            width: 2
-        }),
-        image: new Circle({
-            radius: 7,
-            fill: new Fill({
-                color: '#ffcc33'
-            })
-        }),
-        text: new Text({
-            font: '12px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({
-                color: '#fff',
-                width: 2
-            })
-        })
-    });
 
     /* Edit Layer Init */
     const source = new VectorSource();
     const baseLayer = new VectorLayer({
         source,
         style: function (feature) {
-            style.getText().setText(feature.get('name'));
-            return [style];
+            if (feature.getProperties().type) {
+                const styles = createStyles((feature.getProperties().type as IMapFeatureType).styles);
+                const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), styles.length + 1, feature.getGeometry());
+                return [...styles, labelStyle];
+            } else {
+                return [];
+            }
         },
         renderBuffer: 5000
     });
@@ -79,24 +63,29 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
      * Завершение создания полигонов
      */
     const completeDrawing = () => {
-        // IF ELSE FOR TEST !!!
-        if (editorStore.selectedFeatureType?.geometry == GeometryType.POLYGON) {
-            console.log('POLYGON');
-            const coordinates = (editorStore.newFeature?.getGeometry() as Polygon).getCoordinates();
-            editorStore.newFeatureCoordinates = toTuple(coordinates, GeometryType.POLYGON);
-        } else if (editorStore.selectedFeatureType?.geometry == GeometryType.LINE_STRING) {
-            console.log('LINE_STRING');
-            const coordinates = (editorStore.newFeature?.getGeometry() as LineString).getCoordinates();
-            editorStore.newFeatureCoordinates = toTuple(coordinates, GeometryType.LINE_STRING);
-        } else if (editorStore.selectedFeatureType?.geometry == GeometryType.MULTI_POLYGON) {
-            console.log('MULTI_POLYGON');
-            const coordinates = (editorStore.newFeature?.getGeometry() as MultiLineString).getCoordinates();
-            editorStore.newFeatureCoordinates = toTuple(coordinates, GeometryType.MULTI_POLYGON);
-        } else {
-            return;
-        }
-
         editorStore.newFeatureZoom = map?.getView()?.getZoom() ?? -1;
+
+        switch (editorStore.selectedFeatureType?.geometry) {
+            case GeometryType.POLYGON:
+                editorStore.newFeatureCoordinates = toTuple(
+                    (editorStore.newFeature?.getGeometry() as Polygon).getCoordinates(),
+                    GeometryType.POLYGON
+                );
+                break;
+            case GeometryType.LINE_STRING:
+                editorStore.newFeatureCoordinates = toTuple(
+                    (editorStore.newFeature?.getGeometry() as LineString).getCoordinates(),
+                    GeometryType.LINE_STRING
+                );
+                break;
+            case GeometryType.MULTI_POLYGON:
+                // TODO FIX TO MULTI_POLYGON !!!!!!!!!!!!!!!!!!!!!!!!!!!
+                editorStore.newFeatureCoordinates = toTuple(
+                    (editorStore.newFeature?.getGeometry() as MultiLineString).getCoordinates(),
+                    GeometryType.MULTI_POLYGON
+                );
+                break;
+        }
 
         //isTabCreateOpen.value = true;
         if (draw) {
@@ -157,9 +146,13 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
         if (editorStore.isDrawing) {
             if (!draw) {
                 console.log('draw init');
-                console.log(editorStore.selectedFeatureType?.geometry);
-
-                setDraw(new Draw({ source, type: editorStore.selectedFeatureType?.geometry }));
+                setDraw(
+                    new Draw({
+                        source,
+                        type: editorStore.selectedFeatureType?.geometry,
+                        style: createStyles(editorStore.selectedFeatureType.styles)
+                    })
+                );
             } else if (draw) {
                 console.log('add draw');
 
