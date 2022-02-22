@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsHexColor, IsNotEmpty, IsOptional, IsString, Length, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsHexColor, IsNotEmpty, IsOptional, IsString, Length, MinLength } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'Jane_Doe', description: 'Никнейм пользователя' })
@@ -18,6 +18,11 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty({ message: 'Your password can not be blank.' })
   password: string;
+
+  @ApiProperty({ example: 'true', description: 'Подтверждение на рассылку' })
+  @IsBoolean()
+  @IsNotEmpty({ message: 'Is mailing can not be blank.' })
+  isMailing: boolean;
 
   @ApiProperty({ type: 'string', format: 'binary', description: 'Файл аватара пользователя' })
   @IsOptional()

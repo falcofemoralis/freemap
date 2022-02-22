@@ -21,13 +21,15 @@ type FormData = {
     email: string;
     password: string;
     repeatPassword: string;
+    isMailing: boolean;
 };
 
 interface SignUpProps {
     onSwitch: () => void;
+    onClose: () => void;
 }
 
-export const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
+export const SignUp: React.FC<SignUpProps> = ({ onSwitch, onClose }) => {
     const USERNAME_MIN_LENGTH = 4;
     const USERNAME_MAX_LENGTH = 30;
     const PASSWORD_MIN_LENGTH = 6;
@@ -40,7 +42,10 @@ export const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
         watch
     } = useForm<FormData>();
 
-    const onSubmit = handleSubmit(data => authStore.tryRegister(data.username, data.email, data.password, materialColor()));
+    const onSubmit = handleSubmit(async data => {
+        await authStore.tryRegister(data.username, data.email, data.password, Boolean(data.isMailing), materialColor());
+        onClose;
+    });
     const password = React.useRef({});
     password.current = watch('password', '');
 
@@ -134,7 +139,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
                         </Grid>
                         <Grid item xs={12}>
                             <FormControlLabel
-                                control={<Checkbox value='allowExtraEmails' color='primary' />}
+                                control={<Checkbox value='allowExtraEmails' color='primary' {...register('isMailing')} />}
                                 label='Я хочу получать вдохновение, маркетинговые акции и обновления по электронной почте.'
                             />
                         </Grid>

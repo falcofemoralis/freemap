@@ -11,8 +11,8 @@ export default class AuthService {
      * Регистрация нового пользователя
      * @returns token
      */
-    static async register(username: string, email: string, password: string, userColor: string): Promise<string> {
-        const createUserDto = { username, password, email, userColor };
+    static async register(username: string, email: string, password: string, isMailing: boolean, userColor: string): Promise<string> {
+        const createUserDto = { username, password, email, isMailing, userColor };
 
         try {
             const { data } = await axiosInstance.post<string>(`${AuthService.API_URL}/register`, createUserDto);

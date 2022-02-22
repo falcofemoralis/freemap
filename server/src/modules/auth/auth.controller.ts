@@ -80,8 +80,9 @@ export class AuthController {
   @ApiResponse({ status: 200, type: String })
   @Put('profile/user/avatar')
   async updateUserAvatar(@UploadedFile() avatar: Express.Multer.File, @Req() req): Promise<string> {
+    // TODO удалить предыдущий аватар
     try {
-      const fileName = (await this.filesService.saveFiles([avatar], { subfolder: AVATAR_FOLDER, maxWidth: 100, previewMaxWidth: 32 }))[0];
+      const fileName = (await this.filesService.saveFiles([avatar], { subfolder: AVATAR_FOLDER, maxWidth: 100, previewMaxWidth: 42 }))[0];
       this.authService.updateUserAvatar(req.user.id, fileName);
       return fileName;
     } catch (e) {

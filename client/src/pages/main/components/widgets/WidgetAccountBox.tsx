@@ -1,7 +1,6 @@
-import { Box, Button, Dialog, IconButton } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, IconButton, Paper, styled, Typography, Divider } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
-import { AccountSettings } from '../../../../components/AccountSettings';
+import React, { useState } from 'react';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
 import { authStore } from '../../../../store/auth.store';
@@ -13,6 +12,8 @@ enum DialogType {
     SIGN_UP,
     SIGN_IN
 }
+
+const SETTINGS_WIDTH = 372;
 
 export const WidgetAccountBox = observer(() => {
     console.log('WidgetAccountBox');
@@ -38,9 +39,9 @@ export const WidgetAccountBox = observer(() => {
                     </Button>
                     <Dialog onClose={handleAuthClose} open={isDialog}>
                         {dialogType === DialogType.SIGN_IN ? (
-                            <SignIn onSwitch={() => changeDialogType(DialogType.SIGN_UP)} />
+                            <SignIn onSwitch={() => changeDialogType(DialogType.SIGN_UP)} onClose={handleAuthClose} />
                         ) : (
-                            <SignUp onSwitch={() => changeDialogType(DialogType.SIGN_IN)} />
+                            <SignUp onSwitch={() => changeDialogType(DialogType.SIGN_IN)} onClose={handleAuthClose} />
                         )}
                     </Dialog>
                 </Box>
@@ -50,8 +51,59 @@ export const WidgetAccountBox = observer(() => {
                 </IconButton>
             )}
             <Dialog open={open} onClose={() => setOpen(false)}>
-                <AccountSettings />
+                <AccountSettings onClose={() => setOpen(false)} />
             </Dialog>
         </Box>
+    );
+});
+
+interface AccountSettingsProps {
+    onClose: () => void;
+}
+const AccountSettings: React.FC<AccountSettingsProps> = observer(({ onClose }) => {
+    const [loading, setLoading] = useState(false);
+
+    const Input = styled('input')({
+        display: 'none'
+    });
+
+    const onImgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            setLoading(true);
+            await authStore.updateUserAvatar(files[0]);
+            setLoading(false);
+        }
+    };
+
+    const handleLogOut = () => {
+        authStore.logOut();
+        onClose();
+    };
+
+    return (
+        <Paper
+            sx={{ p: 4, display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', width: SETTINGS_WIDTH }}
+        >
+            <IconButton>
+                {loading ? (
+                    <CircularProgress />
+                ) : (
+                    <label htmlFor='contained-button-file'>
+                        <Input accept='image/*' id='contained-button-file' type='file' onChange={onImgUpload} />
+                        <UserAvatar sx={{ width: 64, height: 64, cursor: 'pointer' }} user={authStore.user} />
+                    </label>
+                )}
+            </IconButton>
+
+            <Typography variant='h4'>{authStore?.user?.username}</Typography>
+            <Typography variant='subtitle1'>{authStore?.user?.email}</Typography>
+            <Typography variant='body1'>Уровень 1</Typography>
+            <Divider sx={{ width: '100%', mt: 2, mb: 2 }} />
+            <Button variant='outlined' onClick={handleLogOut}>
+                Выйти
+            </Button>
+            <Divider sx={{ width: '100%', mt: 2, mb: 2 }} />
+        </Paper>
     );
 });

@@ -72,7 +72,7 @@ export const WidgetEditorBox = () => {
                 <LayerEdit onFinish={handleDrawFinish} />
             </Paper>
             <Snackbar open={alert} onClose={() => setAlert(false)} autoHideDuration={2000}>
-                <MuiAlert elevation={5} onClose={() => setAlert(false)} severity='error' sx={{ width: '100%' }} variant='filled'>
+                <MuiAlert elevation={5} onClose={() => setAlert(false)} severity='info' sx={{ width: '100%' }} variant='filled'>
                     Необходимо авторизоваться!
                 </MuiAlert>
             </Snackbar>

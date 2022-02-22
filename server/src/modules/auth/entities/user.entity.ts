@@ -23,6 +23,10 @@ export class User {
   @Prop()
   email: string;
 
+  @ApiProperty({ example: 'true', description: 'Получает ли рассылку пользователь' })
+  @Prop()
+  isMailing: boolean;
+
   @ApiProperty({ example: '1.jpg', description: 'Аватар пользователя' })
   @Prop()
   userAvatar: string;

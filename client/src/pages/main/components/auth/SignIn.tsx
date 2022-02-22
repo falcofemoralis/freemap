@@ -20,15 +20,19 @@ type FormData = {
 
 interface SignInProps {
     onSwitch: () => void;
+    onClose: () => void;
 }
 
-export const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
+export const SignIn: React.FC<SignInProps> = ({ onSwitch, onClose }) => {
     const {
         register,
         handleSubmit,
         formState: { errors }
     } = useForm<FormData>();
-    const onSubmit = handleSubmit(data => authStore.tryLogin(data.email, data.password));
+    const onSubmit = handleSubmit(async data => {
+        await authStore.tryLogin(data.email, data.password);
+        onClose();
+    });
 
     return (
         <Container component='main' maxWidth='xs'>

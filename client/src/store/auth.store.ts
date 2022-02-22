@@ -14,8 +14,8 @@ class AuthStore {
         this.token = localStorage.getItem(TOKEN_ITEM);
     }
 
-    public async tryRegister(username: string, email: string, password: string, userColor: string) {
-        const token = await AuthService.register(username, email, password, userColor);
+    public async tryRegister(username: string, email: string, password: string, isMailing: boolean, userColor: string) {
+        const token = await AuthService.register(username, email, password, isMailing, userColor);
         this.setToken(token);
     }
 
@@ -48,6 +48,10 @@ class AuthStore {
     public async updateUserAvatar(file: File) {
         const filename = await AuthService.updateUserAvatar(file);
         if (this.user) this.user.userAvatar = filename;
+    }
+
+    public logOut() {
+        this.clearToken();
     }
 }
 
