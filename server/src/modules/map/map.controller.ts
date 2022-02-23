@@ -2,11 +2,11 @@ import { BadRequestException, Body, Controller, Get, InternalServerErrorExceptio
 import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
-import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserPayload } from './../auth/guards/jwt-auth.guard';
 import { FilesService } from './../files/files.service';
 import { FileOptionsQuery } from './../files/query/media.query';
+import { UsersService } from './../users/users.service';
 import { CreateFeatureDataDto } from './dto/create-feature.dto';
 import { FeatureType } from './entities/feature-type.entity';
 import { MapFeature } from './entities/map-feature.entity';
@@ -20,7 +20,7 @@ const MEDIA_FOLDER = 'media';
 @ApiTags('map')
 @Controller('map')
 export class MapController {
-  constructor(private readonly mapService: MapService, private readonly authService: AuthService, private readonly filesService: FilesService) {}
+  constructor(private readonly mapService: MapService, private readonly usersService: UsersService, private readonly filesService: FilesService) {}
 
   @ApiOperation({ summary: 'Получение данных объект на карте в определенной области' })
   @ApiResponse({ status: 200, type: FeatureCollectionDto, description: 'Пак объектов FeatureCollection' })
@@ -61,7 +61,10 @@ export class MapController {
   @Post('feature')
   async addMapFeature(@Body() featureDto: CreateFeatureDataDto, @Request() req): Promise<MapFeature> {
     try {
-      return await this.mapService.addMapFeature(featureDto, (req.user as UserPayload).id);
+      const userId = (req.user as UserPayload).id;
+      const insertedFeature = await this.mapService.addMapFeature(featureDto, userId);
+      await this.usersService.addUserExperience(userId, 1000);
+      return insertedFeature;
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

@@ -1,10 +1,11 @@
-import { BadRequestException, Body, Controller, Get, HttpException, HttpStatus, InternalServerErrorException, NotFoundException, Param, Post, Put, Query, Req, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpException, HttpStatus, InternalServerErrorException, NotFoundException, Param, Post, Put, Query, Req, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CreateUserDto } from 'src/modules/auth/dto/create-user.dto';
 import { LoginUserDto } from 'src/modules/auth/dto/login-user.dto';
 import { FilesService } from '../files/files.service';
 import { FileOptionsQuery } from '../files/query/media.query';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -15,7 +16,7 @@ const AVATAR_FOLDER = 'avatar';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService, private readonly filesService: FilesService) {}
+  constructor(private readonly authService: AuthService, private readonly filesService: FilesService, private usersService: UsersService) {}
 
   @ApiOperation({ summary: 'Авторизация пользователя' })
   @ApiResponse({ status: 200, type: String, description: 'Токен пользователя' })
@@ -35,11 +36,11 @@ export class AuthController {
   @UseInterceptors(AvatarInterceptor)
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
-    if (await this.authService.findUserByUsername(createUserDto.username)) {
+    if (await this.usersService.findUserByUsername(createUserDto.username)) {
       throw new HttpException('User with this login is already exists', HttpStatus.CONFLICT);
     }
 
-    if (await this.authService.findUserByEmail(createUserDto.email)) {
+    if (await this.usersService.findUserByEmail(createUserDto.email)) {
       throw new HttpException('User with this email is already exists', HttpStatus.CONFLICT);
     }
 
@@ -68,16 +69,20 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Получение профиля пользователя по токену' })
   @ApiResponse({ status: 200, type: User, description: 'Полный профиль пользователя' })
+  @ApiHeader({ name: 'auth', description: 'Токен пользователя' })
   @UseGuards(JwtAuthGuard)
   @Get('profile/user')
-  getUserProfile(@Req() req) {
-    return this.authService.findUserById(req.user.id);
+  async getUserProfile(@Req() req) {
+    const user = await this.usersService.findUserById(req.user.id);
+    user.passwordHash = undefined;
+    return user;
   }
 
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(AvatarInterceptor)
   @ApiOperation({ summary: 'Добавление аватарки' })
   @ApiResponse({ status: 200, type: String })
+  @ApiHeader({ name: 'auth', description: 'Токен пользователя' })
+  @UseGuards(JwtAuthGuard)
   @Put('profile/user/avatar')
   async updateUserAvatar(@UploadedFile() avatar: Express.Multer.File, @Req() req): Promise<string> {
     // TODO удалить предыдущий аватар
@@ -88,23 +93,5 @@ export class AuthController {
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
-  }
-
-  @ApiOperation({ summary: 'Получение профиля пользователя по его id' })
-  @ApiResponse({ status: 200, type: User, description: 'Профиль любого пользователя' })
-  @Get('profile/user/:id')
-  async getUserProfileById(@Param('id') id: string): Promise<User> {
-    if (!id) {
-      throw new BadRequestException();
-    }
-
-    const user = await this.authService.findUserById(id);
-    if (!user) {
-      throw new NotFoundException();
-    }
-
-    user.passwordHash = undefined;
-
-    return user;
   }
 }

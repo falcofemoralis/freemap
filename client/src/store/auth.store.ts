@@ -2,6 +2,7 @@
 import { makeAutoObservable } from 'mobx';
 import AuthService from '../services/auth.service';
 import { IUser } from './../types/IUser';
+import UsersService from '../services/users.serivce';
 
 const TOKEN_ITEM = 'token';
 
@@ -52,6 +53,12 @@ class AuthStore {
 
     public logOut() {
         this.clearToken();
+    }
+
+    async updateUserLvl() {
+        if (this.user) {
+            this.user.experience = (await UsersService.getUserExp()).experience;
+        }
     }
 }
 

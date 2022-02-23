@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import * as mongoose from 'mongoose';
+import { Level } from 'src/modules/users/types/level';
 
 export type UserDocument = User & Document & { _id: mongoose.Types.ObjectId };
 
@@ -34,6 +35,10 @@ export class User {
   @ApiProperty({ example: '#ff6f00', description: 'Цвет пользователя' })
   @Prop()
   userColor: string;
+
+  @ApiProperty({ example: '1000', description: 'Количество опыта у юзера' })
+  @Prop()
+  experience: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

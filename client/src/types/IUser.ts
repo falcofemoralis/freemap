@@ -3,4 +3,5 @@ export interface IUser {
     email?: string;
     userColor: string;
     userAvatar?: string;
+    experience: number;
 }

@@ -1,3 +1,4 @@
+import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -10,7 +11,7 @@ import { UserPayload } from './guards/jwt-auth.guard';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService, @InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(private jwtService: JwtService, @InjectModel(User.name) private userModel: Model<UserDocument>, private usersService: UsersService) {}
 
   /**
    * Валидация пользователя по его логину и паролю
@@ -19,7 +20,7 @@ export class AuthService {
    * @returns {User | null} - пользователь без поля хеша пароля.
    */
   async login(loginUserDto: LoginUserDto): Promise<User | null> {
-    const user = await this.findUserByEmail(loginUserDto.email);
+    const user = await this.usersService.findUserByEmail(loginUserDto.email);
 
     if (user && (await compare(loginUserDto.password, user.passwordHash))) {
       return user;
@@ -58,18 +59,6 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { iat, exp, ...res } = payload;
     return res;
-  }
-
-  async findUserById(id: string): Promise<User | null> {
-    return this.userModel.findById(id);
-  }
-
-  async findUserByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ email });
-  }
-
-  async findUserByUsername(username: string): Promise<User | null> {
-    return this.userModel.findOne({ username });
   }
 
   async updateUserAvatar(id: string, userAvatar: string): Promise<User> {

@@ -1,3 +1,4 @@
+import { UsersModule } from './../users/users.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
@@ -15,6 +16,7 @@ import { MapService } from './map.service';
       { name: FeatureType.name, schema: FeatureTypeSchema },
     ]),
     FilesModule,
+    UsersModule,
   ],
   controllers: [MapController],
   providers: [MapService],

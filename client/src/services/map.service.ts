@@ -1,3 +1,4 @@
+import { authStore } from './../store/auth.store';
 import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
 import { FileType } from '../constants/file.type';
@@ -30,6 +31,9 @@ export default class MapService {
                 filesFormData.append('files', file);
             }
             await axiosInstance.post(`${this.API_URL}/feature/${data.id}/media`, filesFormData, { headers: headers() });
+
+            authStore.updateUserLvl();
+
             return data;
         } catch (e: AxiosError | unknown) {
             errorStore.errorHandle(e);

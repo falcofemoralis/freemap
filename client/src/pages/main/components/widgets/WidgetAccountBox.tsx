@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
+import UsersService from '../../../../services/users.serivce';
 import { authStore } from '../../../../store/auth.store';
 import '../../styles/Widget.scss';
 import { SignIn } from '../auth/SignIn';
@@ -61,8 +62,9 @@ interface AccountSettingsProps {
     onClose: () => void;
 }
 const AccountSettings: React.FC<AccountSettingsProps> = observer(({ onClose }) => {
-    const [loading, setLoading] = useState(false);
+    console.log('AccountSettings');
 
+    const [loading, setLoading] = useState(false);
     const Input = styled('input')({
         display: 'none'
     });
@@ -98,7 +100,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = observer(({ onClose }) =
 
             <Typography variant='h4'>{authStore?.user?.username}</Typography>
             <Typography variant='subtitle1'>{authStore?.user?.email}</Typography>
-            <Typography variant='body1'>Уровень 1</Typography>
+            <Typography variant='body1'>{authStore?.user?.experience}</Typography>
             <Divider sx={{ width: '100%', mt: 2, mb: 2 }} />
             <Button variant='outlined' onClick={handleLogOut}>
                 Выйти
