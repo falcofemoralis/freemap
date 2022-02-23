@@ -15,6 +15,7 @@ import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
 import { LayerEdit } from '../layers/LayerEdit';
 import { TabCreate } from '../tabs/TabCreate';
+import MapService from '../../../../services/map.service';
 
 export const WidgetEditorBox = () => {
     console.log('WidgetEditorBox');
@@ -88,6 +89,10 @@ interface TypesDialogProps {
 const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, onApply }) => {
     console.log('TypesDialog');
 
+    if (!editorStore.featureTypes && Boolean(editorStore.selectedEditType)) {
+        editorStore.getFeatureTypes();
+    }
+
     return (
         <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
             <DialogTitle>Выбрать тип</DialogTitle>
@@ -95,7 +100,7 @@ const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, 
                 <AutocompleteType
                     sx={{ mt: 3, width: 300 }}
                     onChange={onChange}
-                    featureTypes={mapStore.featureTypes}
+                    featureTypes={editorStore.featureTypes ?? []}
                     selectedGeometry={editorStore.selectedEditType}
                 />
             </DialogContent>

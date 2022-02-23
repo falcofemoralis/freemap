@@ -16,8 +16,6 @@ import './styles/Main.scss';
 const Main = () => {
     console.log('Main');
 
-    MapService.getFeatureTypes().then(types => (mapStore.featureTypes = types));
-
     /**
      * Получение данных карты из url
      */

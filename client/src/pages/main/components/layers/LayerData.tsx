@@ -34,6 +34,9 @@ export const LayerData = () => {
      */
     const baseLayer = new VectorLayer({
         source: vectorSource,
+        properties: {
+            name: 'Data Layer'
+        },
         style: function (feature) {
             const styles = createStyles((feature.getProperties().type as IMapFeatureType).styles);
             const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), styles.length + 1, feature.getGeometry());

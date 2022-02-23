@@ -163,7 +163,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
                             error={Boolean(errorData.type)}
                             helperText={errorData.type}
                             onChange={handleFeatureTypeSelect}
-                            featureTypes={mapStore.featureTypes}
+                            featureTypes={editorStore.featureTypes ?? []}
                             selectedGeometry={editorStore.selectedFeatureType?.geometry}
                             selectedType={editorStore.selectedFeatureType}
                         />

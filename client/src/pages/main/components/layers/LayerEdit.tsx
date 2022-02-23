@@ -31,6 +31,9 @@ export const LayerEdit: React.FC<LayerEditProps> = ({ onFinish }) => {
     const source = new VectorSource();
     const baseLayer = new VectorLayer({
         source,
+        properties: {
+            name: 'Edit Layer'
+        },
         style: function (feature) {
             if (feature.getProperties().type) {
                 const styles = createStyles((feature.getProperties().type as IMapFeatureType).styles);
@@ -87,7 +90,6 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
                 break;
         }
 
-        //isTabCreateOpen.value = true;
         if (draw) {
             console.log('finish');
 
@@ -107,8 +109,6 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
 
         if (editorStore.newFeature) {
             console.log('removed');
-            console.log(editorStore.newFeature);
-
             baseLayer?.getSource().removeFeature(editorStore.newFeature);
         }
 
@@ -145,35 +145,43 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
     if (editorStore.selectedFeatureType) {
         if (editorStore.isDrawing) {
             if (!draw) {
-                console.log('draw init');
-                setDraw(
-                    new Draw({
-                        source,
-                        type: editorStore.selectedFeatureType?.geometry,
-                        style: createStyles(editorStore.selectedFeatureType.styles)
-                    })
-                );
-            } else if (draw) {
-                console.log('add draw');
+                console.log('create draw');
+
+                let style;
+                if (editorStore.selectedFeatureType.geometry == GeometryType.LINE_STRING) {
+                    style = createStyles(editorStore.selectedFeatureType.styles);
+                }
+
+                const draw = new Draw({
+                    source,
+                    style,
+                    type: editorStore.selectedFeatureType?.geometry
+                });
 
                 draw?.on('drawstart', (event: DrawEvent) => {
+                    console.log('drawstart');
+
                     editorStore.newFeature = event.feature; // запоминание текущего создаваемого объекта геометрии
+                    editorStore.newFeature?.setProperties({ type: editorStore.selectedFeatureType });
                 });
 
                 draw?.on('drawend', () => {
+                    console.log('drawend');
+
                     completeDrawing();
                 });
-                if (draw) {
-                    map?.addInteraction(draw);
 
-                    window.addEventListener('keyup', function (event) {
-                        if (event.key === 'Escape') {
-                            if (editorStore.isDrawing) {
-                                editorStore.toggleEdit();
-                            }
+                map?.addInteraction(draw);
+
+                window.addEventListener('keyup', function (event) {
+                    if (event.key === 'Escape') {
+                        if (editorStore.isDrawing) {
+                            editorStore.toggleEdit();
                         }
-                    });
-                }
+                    }
+                });
+
+                setDraw(draw);
             }
         } else {
             resetDrawing();

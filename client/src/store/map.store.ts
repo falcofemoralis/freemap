@@ -10,7 +10,6 @@ class MapStore {
     lonLat: Coordinate = { lon: 0, lat: 0 };
     zoom = 2;
     selectedFeatureId: string | null = null;
-    featureTypes: IMapFeatureType[] = [];
 
     constructor() {
         makeAutoObservable(this);

@@ -16,7 +16,11 @@ export const MainMap: React.FC = ({ children }) => {
     console.log('MainMap');
 
     /* Init map */
-    const baseLayer = new TileLayer();
+    const baseLayer = new TileLayer({
+        properties: {
+            name: 'Main Map'
+        }
+    });
     const mapView = new View({
         center: [mapStore.lonLat.lon, mapStore.lonLat.lat],
         zoom: mapStore.zoom,

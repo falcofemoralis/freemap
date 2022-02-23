@@ -19,7 +19,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
                 sx={{
                     width: DRAWER_WIDTH,
                     flexShrink: 0,
-                    '& .MuiDrawer-paper': { width: DRAWER_WIDTH, p: 3 }
+                    '& .MuiDrawer-paper': { width: 320, p: 3 }
                 }}
                 anchor='left'
                 open={open}
