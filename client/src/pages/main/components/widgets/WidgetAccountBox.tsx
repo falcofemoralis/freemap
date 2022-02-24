@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, IconButton, Paper, styled, Typography, Divider } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, IconButton, Paper, styled, Typography, Divider, LinearProgress } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { UserAvatar } from '../../../../components/UserAvatar';
@@ -100,7 +100,10 @@ const AccountSettings: React.FC<AccountSettingsProps> = observer(({ onClose }) =
 
             <Typography variant='h4'>{authStore?.user?.username}</Typography>
             <Typography variant='subtitle1'>{authStore?.user?.email}</Typography>
-            <Typography variant='body1'>{authStore?.user?.experience}</Typography>
+            <Typography variant='body1'>Уровень {Math.ceil((authStore?.user?.experience ?? 1) / 5000)}</Typography>
+            <Box sx={{ width: '100%', mt: 1 }}>
+                <LinearProgress variant='determinate' value={(((authStore?.user?.experience ?? 1) / 5000) % 1) * 100} />
+            </Box>
             <Divider sx={{ width: '100%', mt: 2, mb: 2 }} />
             <Button variant='outlined' onClick={handleLogOut}>
                 Выйти

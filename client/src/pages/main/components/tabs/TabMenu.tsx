@@ -1,8 +1,10 @@
-import MailIcon from '@mui/icons-material/Mail';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
+import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import React from 'react';
-import { DRAWER_WIDTH } from './index';
 import { TabAdmin } from './TabAdmin';
 
 interface TabMenuProps {
@@ -17,7 +19,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
         <>
             <Drawer
                 sx={{
-                    width: DRAWER_WIDTH,
+                    width: 320,
                     flexShrink: 0,
                     '& .MuiDrawer-paper': { width: 320, p: 3 }
                 }}
@@ -26,22 +28,28 @@ export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
                 onClose={onClose}
             >
                 <List>
-                    {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                        <ListItem button key={text}>
-                            <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItem>
-                    ))}
+                    <ListItem button>
+                        <ListItemIcon>{<FeedOutlinedIcon />}</ListItemIcon>
+                        <ListItemText primary={'Новинки'} />
+                    </ListItem>
+                    <ListItem button>
+                        <ListItemIcon>{<HomeOutlinedIcon />}</ListItemIcon>
+                        <ListItemText primary={'Главная'} />
+                    </ListItem>
+                    <ListItem button>
+                        <ListItemIcon>{<CategoryOutlinedIcon />}</ListItemIcon>
+                        <ListItemText primary={'Категории'} />
+                    </ListItem>
+                    <ListItem button>
+                        <ListItemIcon>{<AssignmentTurnedInOutlinedIcon />}</ListItemIcon>
+                        <ListItemText primary={'Проверка'} />
+                    </ListItem>
                 </List>
                 <Divider />
-                <List>
-                    {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                        <ListItem button key={text}>
-                            <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItem>
-                    ))}
-                </List>
+                <ListItem button>
+                    <ListItemIcon>{<SettingsOutlinedIcon />}</ListItemIcon>
+                    <ListItemText primary={'Настройки'} />
+                </ListItem>
             </Drawer>
             <TabAdmin />
         </>
