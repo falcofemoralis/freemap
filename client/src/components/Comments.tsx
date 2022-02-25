@@ -11,30 +11,56 @@ import { authStore } from '../store/auth.store';
 import { IComment } from '../types/IComment';
 import { UserAvatar } from './UserAvatar';
 
+interface UserComment {
+    comment: IComment;
+    dataIndent: number;
+}
 interface CommentsProps {
     comments: IComment[];
     featureId: string;
 }
+
 export const Comments: React.FC<CommentsProps> = ({ comments, featureId }) => {
-    const [commentsArr, setComments] = React.useState<IComment[]>(comments);
-    const onSubmit = (comment: IComment) => setComments([...commentsArr, comment]);
+    const sortedComment = comments.sort((el1, el2) => el2.createdAt - el1.createdAt);
+    const allComments: UserComment[] = [];
+
+    const getReplies = (replies: IComment[], indent: number) => {
+        for (const reply of replies) {
+            allComments.push({ comment: reply, dataIndent: indent });
+            console.log('added ' + reply.text + '' + indent);
+
+            if (reply.replies.length > 0) {
+                getReplies(reply.replies, indent + 1);
+            }
+        }
+    };
+
+    for (const comment of sortedComment) {
+        allComments.push({ comment, dataIndent: 0 });
+        console.log('added ' + comment.text);
+
+        getReplies(comment.replies, 1);
+    }
+
+    const [commentsArr, setComments] = React.useState<UserComment[]>(allComments);
+    const onSubmit = (comment: UserComment) => setComments([comment, ...commentsArr]);
     return (
         <Box>
             {authStore.isAuth && <CommentForm featureId={featureId} onSubmit={onSubmit} />}
-            {commentsArr.length > 0 &&
-                commentsArr
-                    .sort((el1, el2) => el2.createdAt - el1.createdAt)
-                    .map(comment => <Comment key={comment.id} comment={comment} />)}
+            {commentsArr.map(comment => (
+                <Comment key={comment.comment.id} comment={comment.comment} indent={comment.dataIndent} />
+            ))}
         </Box>
     );
 };
 
 interface CommentProps {
     comment: IComment;
+    indent: number;
 }
-const Comment: React.FC<CommentProps> = ({ comment }) => {
+const Comment: React.FC<CommentProps> = ({ comment, indent }) => {
     return (
-        <Box sx={{ display: 'flex', mt: 2 }}>
+        <Box sx={{ display: 'flex', mt: 2, ml: 2 * indent }}>
             <UserAvatar user={comment.user} sx={{ mr: 1 }} />
             <Box>
                 <Typography variant='subtitle2'>
@@ -49,7 +75,7 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
 
 interface CommentFormProps {
     featureId: string;
-    onSubmit: (comment: IComment) => void;
+    onSubmit: (comment: UserComment) => void;
 }
 const CommentForm: React.FC<CommentFormProps> = ({ featureId, onSubmit }) => {
     const [text, setText] = React.useState('');
@@ -62,7 +88,7 @@ const CommentForm: React.FC<CommentFormProps> = ({ featureId, onSubmit }) => {
         setLoading(true);
         try {
             const comment = await CommentsService.addComment(featureId, text);
-            onSubmit(comment);
+            onSubmit({ comment, dataIndent: 0 });
         } catch (e) {
             console.log(e);
         }

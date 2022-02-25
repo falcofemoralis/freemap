@@ -22,9 +22,9 @@ export class UserComment {
   @Prop()
   createdAt: number;
 
-  @ApiProperty({ example: 'id', description: 'Главный комментарий' })
-  @Prop()
-  parentCommentId: string;
+  @ApiProperty({ example: '[]', description: 'Ответы' })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], autopopulate: true, ref: 'UserComment' })
+  replies: string[];
 }
 
 export const CommentSchema = SchemaFactory.createForClass(UserComment);

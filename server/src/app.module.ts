@@ -15,7 +15,13 @@ import { UsersModule } from './modules/users/users.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
     }),
-    MongooseModule.forRoot(process.env.DB_URL),
+    MongooseModule.forRoot(process.env.DB_URL, {
+      connectionFactory: (connection) => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        connection.plugin(require('mongoose-autopopulate'));
+        return connection;
+      },
+    }),
     AuthModule,
     MapModule,
     UsersModule,
