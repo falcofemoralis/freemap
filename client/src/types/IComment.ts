@@ -6,4 +6,5 @@ export interface IComment {
     text: string;
     user: IUser;
     replies: IComment[];
+    indent?: number;
 }
