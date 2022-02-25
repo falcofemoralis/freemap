@@ -1,3 +1,4 @@
+import { IComment } from './IComment';
 import { IMapFeatureType } from './IMapFeatureType';
 
 export interface Coordinate {
@@ -18,4 +19,5 @@ export interface IMapFeature {
     createdAt: number;
     wiki?: string;
     phone?: string;
+    comments: IComment[];
 }

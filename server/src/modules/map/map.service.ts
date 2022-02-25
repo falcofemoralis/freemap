@@ -56,7 +56,7 @@ export class MapService {
    * @param id - id объекта
    */
   async getMapFeatureById(id: string): Promise<MapFeature> {
-    return this.mapFeatureModel.findById(id).populate([{ path: 'user' }, { path: 'type' }]);
+    return this.mapFeatureModel.findById(id).populate([{ path: 'user', select: '-passwordHash -email -experience' }, { path: 'type' }, { path: 'comments', populate: { path: 'user', select: '-passwordHash -email -experience' } }]);
   }
 
   /**

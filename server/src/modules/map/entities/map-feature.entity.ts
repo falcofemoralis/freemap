@@ -1,3 +1,4 @@
+import { UserComment } from '../../comments/entities/user-comment';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
@@ -63,6 +64,10 @@ export class MapFeature {
   @ApiProperty({ example: '[1.jpg, 2.jpg]', description: 'Медиа файлы' })
   @Prop()
   files: string[];
+
+  @ApiProperty({ example: '[]', description: 'Комментарии' })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'UserComment' })
+  comments: string[];
 }
 
 export const MapFeatureSchema = SchemaFactory.createForClass(MapFeature);

@@ -10,15 +10,25 @@ export default class MapService {
     private static API_URL = '/map';
 
     static async getFeatureTypes(): Promise<Array<IMapFeatureType>> {
-        const { data } = await axiosInstance.get<Array<IMapFeatureType>>(`${this.API_URL}/feature/types`);
-        return data;
+        try {
+            const { data } = await axiosInstance.get<Array<IMapFeatureType>>(`${this.API_URL}/feature/types`);
+            return data;
+        } catch (e: AxiosError | unknown) {
+            errorStore.errorHandle(e);
+            throw e;
+        }
     }
 
     static async getMapData(ext: number[], zoom: number) {
-        const { data } = await axiosInstance.get(
-            `${this.API_URL}?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=${zoom}`
-        );
-        return data;
+        try {
+            const { data } = await axiosInstance.get(
+                `${this.API_URL}?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=${zoom}`
+            );
+            return data;
+        } catch (e: AxiosError | unknown) {
+            errorStore.errorHandle(e);
+            throw e;
+        }
     }
 
     static async addFeature(feature: IMapFeature, files: File[]): Promise<IMapFeature> {

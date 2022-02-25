@@ -18,6 +18,8 @@ import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
 import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
+import { Comments } from '../../../../components/Comments';
+import { authStore } from '../../../../store/auth.store';
 
 interface TabSelectProps {
     onClose: () => void;
@@ -180,6 +182,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
                 <Grid container spacing={2} sx={{ p: 3 }}>
                     <Grid item xs={12}>
                         <Typography variant='h6'>Комментарии</Typography>
+                        <Comments comments={mapFeature.comments} featureId={mapFeature.id} />
                     </Grid>
                 </Grid>
                 <Viewer

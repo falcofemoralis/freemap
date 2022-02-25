@@ -74,6 +74,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
                         coordinates: editorStore.newFeatureCoordinates,
                         zoom: editorStore.newFeatureZoom,
                         links,
+                        comments: [],
                         ...data
                     },
                     files
