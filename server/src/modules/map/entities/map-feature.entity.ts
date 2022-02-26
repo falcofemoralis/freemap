@@ -18,7 +18,7 @@ export class MapFeature {
   id: string;
 
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Пользователь который добавил объект' })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', autopopulate: { select: 'username userColor userAvatar' } })
   user: User;
 
   @ApiProperty({ example: 'Building - Qwerty', description: 'Название объекта' })
@@ -30,7 +30,7 @@ export class MapFeature {
   description: string;
 
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Тип объекта' })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'FeatureType' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'FeatureType', autopopulate: true })
   type: FeatureType;
 
   @ApiProperty({ example: '15.23', description: 'Расположение объекта относительно приближения' })
@@ -66,7 +66,7 @@ export class MapFeature {
   files: string[];
 
   @ApiProperty({ example: '[]', description: 'Комментарии' })
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'UserComment' })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'UserComment', autopopulate: true })
   comments: string[];
 }
 

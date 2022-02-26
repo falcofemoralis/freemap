@@ -27,7 +27,7 @@ export class MapService {
       zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
     };
 
-    return this.mapFeatureModel.find(filter).populate({ path: 'type' });
+    return this.mapFeatureModel.find(filter);
   }
 
   /**
@@ -37,7 +37,7 @@ export class MapService {
    */
   async addMapFeature(mapFeatureDto: CreateFeatureDataDto, userId: string): Promise<MapFeature> {
     const mapFeature = new this.mapFeatureModel({ ...mapFeatureDto, user: userId, createdAt: Date.now() });
-    return (await mapFeature.save()).populate({ path: 'type' });
+    return mapFeature.save();
   }
 
   /**
@@ -56,7 +56,7 @@ export class MapService {
    * @param id - id объекта
    */
   async getMapFeatureById(id: string): Promise<MapFeature> {
-    return this.mapFeatureModel.findById(id).populate([{ path: 'user', select: '-passwordHash -email -experience' }, { path: 'type' }, { path: 'comments' }]);
+    return this.mapFeatureModel.findById(id);
   }
 
   /**
