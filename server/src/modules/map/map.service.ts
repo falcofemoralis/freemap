@@ -37,7 +37,7 @@ export class MapService {
    */
   async addMapFeature(mapFeatureDto: CreateFeatureDataDto, userId: string): Promise<MapFeature> {
     const mapFeature = new this.mapFeatureModel({ ...mapFeatureDto, user: userId, createdAt: Date.now() });
-    return mapFeature.save();
+    return (await mapFeature.save()).populate({ path: 'type' });
   }
 
   /**
@@ -75,12 +75,12 @@ export class MapService {
     return featureType.save();
   }
 
-  // /**
-  //  * Получение последних добавленных объектов
-  //  * @param amount - количество объектов для выборки
-  //  * @returns {MapFeature} - последние amount добавленных объектов
-  //  */
-  // async getNewestFeatures(amount: number): Promise<Array<MapFeature>> {
-  //   return this.mapFeaturesRepository.find({ order: { id: 'DESC' }, take: amount });
-  // }
+  /**
+   * Получение последних добавленных объектов
+   * @param amount - количество объектов для выборки
+   * @returns {MapFeature} - последние amount добавленных объектов
+   */
+  async getNewestFeatures(amount: number): Promise<Array<MapFeature>> {
+    return this.mapFeatureModel.find().sort({ _id: -1 }).limit(amount);
+  }
 }

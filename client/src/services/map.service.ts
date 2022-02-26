@@ -63,10 +63,17 @@ export default class MapService {
         }
     }
 
-    static getMedia(media?: string, type?: FileType): string {
+    static getMedia(media: string, fileType: FileType): string {
         if (!media) {
             return '';
         }
-        return `${axiosInstance.defaults.baseURL}${MapService.API_URL}/feature/media/${media}${type ? `?type=${type}` : ''}`;
+        return `${axiosInstance.defaults.baseURL}${MapService.API_URL}/feature/media/${media}${
+            fileType == FileType.ORIGINAL ? '' : `?type=${fileType}`
+        }`;
+    }
+
+    static async getNewestFeatures(amount: number): Promise<Array<IMapFeature>> {
+        const { data } = await axiosInstance.get<Array<IMapFeature>>(`${this.API_URL}/newest/${amount}`);
+        return data;
     }
 }

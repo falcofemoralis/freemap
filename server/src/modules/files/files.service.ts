@@ -11,6 +11,7 @@ export interface FileUploadOptions {
   subfolder?: string;
   maxWidth?: number;
   previewMaxWidth?: number;
+  smallMaxWidth?: number;
 }
 
 export interface FileDownloadOptions {
@@ -19,7 +20,9 @@ export interface FileDownloadOptions {
 }
 
 export enum FileType {
+  ORIGINAL = '',
   THUMBNAIL = 'thumbnail',
+  SMALL = 'small',
 }
 
 @Injectable()
@@ -31,18 +34,43 @@ export class FilesService {
     for (const file of files) {
       try {
         const fileName = v4();
-        await this.uploadFile(file.buffer, fileName, options);
-        await this.uploadPreview(file.buffer, fileName, options);
+        await this.uploadFile(file.buffer, fileName, FileType.ORIGINAL, options);
+        await this.uploadFile(file.buffer, fileName, FileType.THUMBNAIL, options);
+        //  await this.uploadFile(file.buffer, fileName, FileType.SMALL, options);
 
         uploadedFiles.push(fileName);
       } catch (e: any) {
-        // delete uploaded files;
+        // TODO delete uploaded files;
         throw e;
         // console.log(e);
       }
     }
 
     return uploadedFiles;
+  }
+
+  private async uploadFile(data: Buffer, fileName: string, fileType: FileType, options?: FileUploadOptions): Promise<number> {
+    let width = 100;
+
+    switch (fileType) {
+      case FileType.ORIGINAL:
+        width = options.maxWidth;
+      case FileType.THUMBNAIL:
+        width = options.previewMaxWidth;
+      case FileType.SMALL:
+        width = options.smallMaxWidth;
+    }
+
+    const image = await sharp(data)
+      .jpeg({ mozjpeg: true, quality: fileType == FileType.ORIGINAL ? 90 : 50 })
+      .resize({ width: width, withoutEnlargement: true })
+      .toBuffer();
+    const res = await this.dbx.filesUpload({
+      path: `/${options?.subfolder ? `${options.subfolder}/` : ''}${fileName}${fileType == FileType.ORIGINAL ? '' : `_${fileType}`}${EXT}`,
+      contents: image.buffer,
+    });
+
+    return res.status;
   }
 
   async downloadFiles(filenames: string[], options?: FileDownloadOptions): Promise<Array<IFile>> {
@@ -59,31 +87,5 @@ export class FilesService {
       }
     }
     return files;
-  }
-
-  private async uploadFile(data: Buffer, fileName: string, options?: FileUploadOptions): Promise<number> {
-    const image = await sharp(data)
-      .jpeg({ mozjpeg: true, quality: 90 })
-      .resize({ width: options.maxWidth ?? 1000, withoutEnlargement: true })
-      .toBuffer();
-    const res = await this.dbx.filesUpload({
-      path: `/${options?.subfolder ? `${options.subfolder}/` : ''}${fileName}${EXT}`,
-      contents: image.buffer,
-    });
-
-    return res.status;
-  }
-
-  private async uploadPreview(data: Buffer, fileName: string, options?: FileUploadOptions): Promise<number> {
-    const thumbnail = await sharp(data)
-      .jpeg({ mozjpeg: true, quality: 80 })
-      .resize({ width: options.previewMaxWidth ?? 100, withoutEnlargement: true })
-      .toBuffer();
-    const res = await this.dbx.filesUpload({
-      path: `/${options?.subfolder ? `${options.subfolder}/` : ''}${fileName}_${FileType.THUMBNAIL}${EXT}`,
-      contents: thumbnail.buffer,
-    });
-
-    return res.status;
   }
 }

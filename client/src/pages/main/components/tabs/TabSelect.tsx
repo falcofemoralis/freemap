@@ -102,7 +102,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
         const images: ImageDecorator[] = [];
         if (files) {
             for (const file of files) {
-                images.push({ src: MapService.getMedia(file) });
+                images.push({ src: MapService.getMedia(file, FileType.ORIGINAL) });
             }
         }
         console.log(images);

@@ -1,4 +1,20 @@
-import { BadRequestException, Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, Query, Request, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  Request,
+  Res,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
@@ -157,40 +173,14 @@ export class MapController {
     }
   }
 
-  // /**
-  //  * Получение списка последних добавленных объектов на карту
-  //  * @param amount - количество объектов которые можно получить
-  //  */
-  // @Get('feature/newest/:amount')
-  // async getNewestFeatures(@Param('amount') amount: number): Promise<Array<MapFeatureDto<NewestFeatureDataDto>>> {
-  //   if (amount > 100) {
-  //     throw new ForbiddenException();
-  //   }
+  @ApiOperation({ summary: 'Получение списка последних добавленных объектов на карту' })
+  @ApiResponse({ status: 200, type: [MapFeature], description: 'Объекты карты' })
+  @Get('newest/:amount')
+  getNewestFeatures(@Param('amount') amount: number): Promise<Array<MapFeature>> {
+    if (amount > 100) {
+      throw new ForbiddenException();
+    }
 
-  //   const mapFeatures = await this.mapService.getNewestFeatures(amount);
-
-  //   const newestFeatures = new Array<MapFeatureDto<NewestFeatureDataDto>>();
-  //   for (const obj of mapFeatures) {
-  //     const user = await this.authService.findUserById(obj.userId);
-
-  //     const featureProperties: NewestFeatureDataDto = {
-  //       ...obj,
-  //       createdAt: obj.createdAt.toDateString(),
-  //       userId: user.id,
-  //       userLogin: user.login,
-  //       userAvatar: user.avatar,
-  //     };
-
-  //     newestFeatures.push({
-  //       type: 'Feature',
-  //       properties: featureProperties,
-  //       geometry: {
-  //         type: (await this.mapService.getGeometryTypeByTypeId(obj.typeId)).geometry,
-  //         coordinates: this.convertCoordinatesToArray(obj.coordinates),
-  //       },
-  //     });
-  //   }
-
-  //   return newestFeatures;
-  // }
+    return this.mapService.getNewestFeatures(amount);
+  }
 }

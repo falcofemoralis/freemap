@@ -36,6 +36,8 @@ export const LayerEdit: React.FC<LayerEditProps> = ({ onFinish }) => {
         },
         style: function (feature) {
             if (feature.getProperties().type) {
+                console.log(feature.getProperties().type);
+
                 const styles = createStyles((feature.getProperties().type as IMapFeatureType).styles);
                 const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), styles.length + 1, feature.getGeometry());
                 return [...styles, labelStyle];
