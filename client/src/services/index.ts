@@ -2,7 +2,7 @@ import axios from 'axios';
 import { authStore } from '../store/auth.store';
 
 export const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3001' + '/api'
+    baseURL: `${process.env.REACT_APP_SERVER_URL}/api`
 });
 
 export const headers = () => {
