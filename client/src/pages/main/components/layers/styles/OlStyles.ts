@@ -1,4 +1,4 @@
-import { Geometry, MultiPolygon, Polygon } from 'ol/geom';
+import { Circle, Geometry, MultiPolygon, Polygon } from 'ol/geom';
 import RenderFeature from 'ol/render/Feature';
 import { Fill, Icon, Stroke, Style, Text } from 'ol/style';
 import { GeometryType } from './../../../../../constants/geometry.type';
@@ -56,5 +56,31 @@ export const createLabelStyle = (name: string, icon: string, zIndex: number, geo
             anchor: [0.5, -1.5]
         }),
         zIndex: zIndex
+    });
+};
+
+export const createTextStyle = (name: string) => {
+    return new Style({
+        text: new Text({
+            text: name,
+            font: '14px Calibri,sans-serif',
+            fill: new Fill({ color: '#000' }),
+            stroke: new Stroke({
+                color: '#fff',
+                width: 2
+            })
+        })
+    });
+};
+
+export const createPolygonStyle = () => {
+    return new Style({
+        fill: new Fill({
+            color: 'rgba(255, 255, 255, 0.2)'
+        }),
+        stroke: new Stroke({
+            color: '#ffcc33',
+            width: 2
+        })
     });
 };

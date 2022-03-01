@@ -90,6 +90,9 @@ export const LayerData = () => {
      * @param {Feature<Geometry>} feature - объект на карты
      */
     function featureFilter(feature: Feature<Geometry>) {
+        if (!feature.getProperties().hover) {
+            return false;
+        }
         const featureExtent = feature.getGeometry()?.getExtent();
         const mapExtent = map?.getView().calculateExtent(map.getSize());
 

@@ -1,6 +1,6 @@
 import { observe } from 'mobx';
 import TileLayer from 'ol/layer/Tile';
-import Map from 'ol/Map';
+import OlMap from 'ol/Map';
 import { toLonLat } from 'ol/proj';
 import XYZ from 'ol/source/XYZ';
 import View from 'ol/View';
@@ -26,7 +26,7 @@ export const MainMap: React.FC = ({ children }) => {
         zoom: mapStore.zoom,
         projection: 'EPSG:3857'
     });
-    const map = new Map({
+    const map = new OlMap({
         layers: [baseLayer],
         view: mapView
     });
@@ -65,6 +65,7 @@ export const MainMap: React.FC = ({ children }) => {
 
         if (!pathChanged) {
             if (coordinates && zoom) {
+                //socket.emit('updateActiveUser', { data: { coordinates } });
                 const newCoordinates = toLonLat(coordinates, 'EPSG:3857');
                 mapStore.updateMapPosition(formatCoordinate(newCoordinates), formatZoom(zoom));
             }

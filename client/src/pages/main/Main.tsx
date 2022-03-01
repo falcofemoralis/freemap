@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ErrorBox } from '../../components/ErrorBox';
 import MapService from '../../services/map.service';
 import { mapStore } from '../../store/map.store';
 import { LayerData } from './components/layers/LayerData';
 import { LayerSelect } from './components/layers/LayerSelect';
+import { LayerUsers } from './components/layers/LayerUsers';
 import { MainMap } from './components/MainMap';
 import { WidgetAccountBox } from './components/widgets/WidgetAccountBox';
 import { WidgetEditorBox } from './components/widgets/WidgetEditorBox';
@@ -32,6 +33,7 @@ const Main = () => {
                 <ErrorBox />
                 <LayerData />
                 <LayerSelect />
+                <LayerUsers />
             </MainMap>
         </div>
     );

@@ -7,6 +7,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MapModule } from './modules/map/map.module';
 import { UsersModule } from './modules/users/users.module';
+import { MapGateway } from './modules/map/map.gateway';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,5 +28,6 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     CommentsModule,
   ],
+  providers: [MapGateway],
 })
 export class AppModule {}
