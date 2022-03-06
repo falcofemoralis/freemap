@@ -1,4 +1,22 @@
-import { Body, Controller, Get, HttpException, HttpStatus, InternalServerErrorException, NotFoundException, Param, Post, Put, Query, Req, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  Res,
+  UnauthorizedException,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CreateUserDto } from 'src/modules/auth/dto/create-user.dto';
@@ -55,7 +73,7 @@ export class AuthController {
       const avatar = (await this.filesService.downloadFiles([file], { subfolder: AVATAR_FOLDER, fileType: optionsQuery.type }))[0];
 
       res.writeHead(200, {
-        'Content-Disposition': `attachment; filename="${avatar.filename}"`,
+        'Content-Disposition': `attachment; filename="${avatar.filename}.jpg"`,
         'Content-Type': avatar.mimeType,
       });
 

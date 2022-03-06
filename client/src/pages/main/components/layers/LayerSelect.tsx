@@ -37,7 +37,7 @@ export const LayerSelect = () => {
      * @param {Feature<Geometry>} feature - объект на карты
      */
     function featureFilter(feature: Feature<Geometry>) {
-        if (!feature.getProperties().select) {
+        if (feature.getProperties().select == false) {
             return false;
         }
 

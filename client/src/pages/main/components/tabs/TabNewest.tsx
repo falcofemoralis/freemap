@@ -5,14 +5,13 @@ import CardMedia from '@mui/material/CardMedia';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import { DRAWER_WIDTH } from './index';
 import React from 'react';
-import MapService from '../../../../services/map.service';
-import { Coordinate, IMapFeature } from '../../../../types/IMapFeature';
 import { FileType } from '../../../../constants/file.type';
 import { MapContext } from '../../../../MapProvider';
-import { fromLonLat } from 'ol/proj';
-import { getCenter } from '../../../../utils/CoordinatesUtil';
+import MapService from '../../../../services/map.service';
+import { Coordinate, IMapFeature } from '../../../../types/IMapFeature';
+import { flyTo } from '../../../../utils/MapAnimation';
+import { DRAWER_WIDTH } from './index';
 
 interface TabNewestProps {
     open: boolean;
@@ -26,25 +25,8 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
         MapService.getNewestFeatures(20).then(features => setNewestFeatures(features));
     }
 
-    const flyTo = (coordinates: Coordinate[], zoom: number) => {
-        const location = getCenter(coordinates);
-        const duration = 2000;
-        const view = map?.getView();
-
-        view?.animate({
-            center: fromLonLat([location.lon, location.lat]),
-            duration: duration
-        });
-        view?.animate(
-            {
-                zoom: zoom - 1,
-                duration: duration / 2
-            },
-            {
-                zoom: zoom,
-                duration: duration / 2
-            }
-        );
+    const selectFeature = (coordinates: Coordinate[], zoom: number) => {
+        flyTo(coordinates, zoom, map);
     };
 
     return (
@@ -61,7 +43,7 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
             <List sx={{ width: '100%' }}>
                 {newestFeatures.map(feature => (
                     <ListItem key={feature.id}>
-                        <Card sx={{ width: '100%' }} onClick={() => flyTo(feature.coordinates, feature.zoom)}>
+                        <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.zoom)}>
                             <CardActionArea>
                                 {feature?.files && feature?.files?.length > 0 && (
                                     <CardMedia

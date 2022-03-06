@@ -13,6 +13,8 @@ interface ActiveUser {
   clientId: string;
   username?: string;
   coordinates?: number[][];
+  zoom?: number;
+  avatar?: string;
 }
 interface Payload {
   data: ActiveUser;
@@ -54,6 +56,8 @@ export class MapGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       if (user.clientId == client.id) {
         user.username = payload.data.username;
         user.coordinates = payload.data.coordinates;
+        user.zoom = payload.data.zoom;
+        user.avatar = payload.data.avatar;
       }
     }
     this.wss.emit('getActiveUsers', this.activeUsers); // send data to every client

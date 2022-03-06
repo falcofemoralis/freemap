@@ -10,3 +10,5 @@ export const headers = () => {
         Authorization: `Bearer ${authStore.token ?? ''}`
     };
 };
+
+export const MAP_SOCKET = `${process.env.REACT_APP_SERVER_URL}/map`;

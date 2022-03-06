@@ -1,33 +1,33 @@
 import { Feature } from 'ol';
-import { Polygon, Geometry } from 'ol/geom';
-import { toLonLat, transformExtent } from 'ol/proj';
-import { useEffect } from 'react';
-import { io, Socket } from 'socket.io-client';
-import { authStore } from '../../../../store/auth.store';
-import { mapStore } from '../../../../store/map.store';
-import { formatCoordinate, formatZoom } from '../../../../utils/CoordinatesUtil';
-import React from 'react';
-import { MapContext } from '../../../../MapProvider';
+import { Polygon } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
-import { IMapFeatureType } from '../../../../types/IMapFeatureType';
-import { createLabelStyle, createStyles, createTextStyle, createPolygonStyle } from './styles/OlStyles';
-import { getVectorContext } from 'ol/render';
-import { unByKey } from 'ol/Observable';
-import { json } from 'stream/consumers';
-
-interface ActiveUser {
-    clientId: string;
-    coordinates: number[][];
-    username: string;
-}
+import React, { useEffect } from 'react';
+import { io } from 'socket.io-client';
+import { MapContext } from '../../../../MapProvider';
+import { activeUsersStore } from '../../../../store/active-users.store';
+import { authStore } from '../../../../store/auth.store';
+import { IActiveUser } from '../../../../types/IActiveUser';
+import { createLabelStyle, createPolygonStyle } from './styles/OlStyles';
+import { MAP_SOCKET } from '../../../../services/index';
+import AuthService from '../../../../services/auth.service';
+import { FileType } from '../../../../constants/file.type';
 
 const SHOW_ON_ZOOM = 3;
+
+interface IActiveFeature {
+    clientId: string;
+    feature: Feature<Polygon>;
+}
 
 export const LayerUsers = () => {
     console.log('LayerUsers');
 
     const { map } = React.useContext(MapContext);
+    const activeFeatures: IActiveFeature[] = [];
+    let coordinatesTimeoutEnd = false;
+    let currentCoordinates: number[][];
+
     const source = new VectorSource();
     const baseLayer = new VectorLayer({
         source,
@@ -35,53 +35,62 @@ export const LayerUsers = () => {
             name: 'Users Layer'
         },
         style: function (feature) {
-            const labelStyle = createTextStyle(feature.get('username'));
+            const labelStyle = createLabelStyle(
+                feature.get('username'),
+                AuthService.getUserAvatar(feature.get('avatar'), FileType.THUMBNAIL),
+                1,
+                feature.getGeometry()
+            );
             return [labelStyle, createPolygonStyle()];
         },
         renderBuffer: 5000
     });
     map?.addLayer(baseLayer);
 
-    let socket: Socket;
-    const activeUserFeatures: Map<string, Feature<Polygon>> = new Map();
-    let pathChanged = false;
-    let currentCoordinates: number[][];
-
-    const handleCoordinatesChange = () => {
-        if (!pathChanged && map) {
-            const zoom = map.getView().getZoom();
-
+    const getCurrentCoordinates = (): number[][] => {
+        if (map) {
             const w = window,
                 d = document,
                 e = d.documentElement,
                 g = d.getElementsByTagName('body')[0],
                 x = w.innerWidth || e.clientWidth || g.clientWidth,
                 y = w.innerHeight || e.clientHeight || g.clientHeight;
-
             const topleft = map.getCoordinateFromPixel([0, 0]);
             const topright = map.getCoordinateFromPixel([x, 0]);
             const bottomleft = map.getCoordinateFromPixel([0, y]);
             const bottomright = map.getCoordinateFromPixel([x, y]);
             const coordinates = [topleft, topright, bottomright, bottomleft];
+            return coordinates;
+        }
 
-            if (coordinates && zoom && zoom > SHOW_ON_ZOOM) {
-                currentCoordinates = coordinates;
-                socket.emit('updateActiveUser', { data: { coordinates, username: authStore.user?.username } });
+        return [];
+    };
+
+    const handleCoordinatesChange = () => {
+        if (!coordinatesTimeoutEnd && map) {
+            const zoom = map.getView().getZoom();
+            currentCoordinates = getCurrentCoordinates();
+
+            if (currentCoordinates && zoom && zoom > SHOW_ON_ZOOM) {
+                activeUsersStore.socket?.emit('updateActiveUser', {
+                    data: {
+                        coordinates: currentCoordinates,
+                        zoom: zoom,
+                        username: authStore.user?.username,
+                        avatar: authStore.user?.userAvatar
+                    }
+                });
             }
 
-            pathChanged = true;
+            coordinatesTimeoutEnd = true;
 
             setTimeout(() => {
-                pathChanged = false;
+                coordinatesTimeoutEnd = false;
             }, 0.25 * 1000);
         }
     };
 
-    function featureFilter(coordinates: number[][]) {
-        console.log(coordinates);
-        console.log(currentCoordinates);
-        console.log('--------------------------');
-
+    const featureFilter = (coordinates: number[][]) => {
         if (!coordinates || !currentCoordinates) {
             return false;
         }
@@ -91,34 +100,65 @@ export const LayerUsers = () => {
         }
 
         return true;
-    }
+    };
 
     map?.getView()?.on('change:center', handleCoordinatesChange);
 
     useEffect(() => {
-        socket = io('http://localhost:3001/map');
-        socket.on('getActiveUsers', (data: ActiveUser[]) => {
+        currentCoordinates = getCurrentCoordinates();
+
+        activeUsersStore.socket = io(MAP_SOCKET);
+        activeUsersStore.socket.on('getActiveUsers', (data: IActiveUser[]) => {
+            activeUsersStore.updatesUsers(data);
+
+            console.log(data);
+
             for (const user of data) {
-                if (user.clientId == socket.id) {
+                if (user.clientId == activeUsersStore.currentClientId) {
                     continue;
                 }
 
                 if (!featureFilter(user.coordinates)) {
-                    activeUserFeatures
-                        .get(user.clientId)
-                        ?.getGeometry()
+                    activeFeatures
+                        .find(f => f.clientId == user.clientId)
+                        ?.feature?.getGeometry()
                         ?.setCoordinates([[[0, 0]]]);
                     continue;
                 }
 
                 if (user.coordinates.length > 1) {
-                    if (activeUserFeatures.has(user.clientId)) {
-                        activeUserFeatures.get(user.clientId)?.getGeometry()?.setCoordinates([user.coordinates]);
-                    } else {
+                    if (!activeFeatures.find(f => f.clientId == user.clientId)) {
+                        console.log('add ' + user.clientId);
+
                         const feature = new Feature(new Polygon([user.coordinates]));
-                        feature.setProperties({ hover: false, select: false, username: user.username ?? `user ${user.clientId}` });
+                        feature.setProperties({
+                            hover: false,
+                            select: false,
+                            username: user.username ?? 'Anonymous',
+                            avatar: user.avatar ?? ''
+                        });
                         source.addFeature(feature);
-                        activeUserFeatures.set(user.clientId, feature);
+                        activeFeatures.push({ clientId: user.clientId, feature });
+                    } else {
+                        console.log('update ' + user.clientId);
+
+                        activeFeatures
+                            .find(f => f.clientId == user.clientId)
+                            ?.feature?.getGeometry()
+                            ?.setCoordinates([user.coordinates]);
+                    }
+                }
+            }
+
+            for (const f of activeFeatures) {
+                if (!data.find(d => d.clientId == f.clientId)) {
+                    console.log('remove ' + f.clientId);
+
+                    const activeFeature = activeFeatures.find(ff => ff.clientId == f.clientId);
+                    if (activeFeature) {
+                        source.removeFeature(activeFeature.feature);
+
+                        activeFeatures.splice(activeFeatures.indexOf(activeFeature), 1);
                     }
                 }
             }

@@ -140,3 +140,13 @@ $mobile-screen: 700px;
         }
     }
 }
+
+.usersBox {
+    z-index: 1;
+    position: absolute;
+    display: flex;
+    top: 68px;
+    left: 15px;
+    width: 250px;
+    max-height: 500px;
+}

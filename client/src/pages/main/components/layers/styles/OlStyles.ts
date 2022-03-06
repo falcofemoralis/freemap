@@ -50,11 +50,11 @@ export const createLabelStyle = (name: string, icon: string, zIndex: number, geo
                 width: 2
             })
         }),
-        image: new Icon({
-            src: 'https://flagcdn.com/w20/aq.png',
-            crossOrigin: '',
-            anchor: [0.5, -1.5]
-        }),
+        // image: new Icon({
+        //     src: 'https://flagcdn.com/256x192/za.png' ?? 'https://flagcdn.com/w20/aq.png', //'https://flagcdn.com/w20/aq.png'
+        //     crossOrigin: '',
+        //     anchor: [0.5, -1.5]
+        // }),
         zIndex: zIndex
     });
 };

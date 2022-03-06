@@ -12,6 +12,7 @@ import { WidgetEditorBox } from './components/widgets/WidgetEditorBox';
 import { WidgetPreviewBox } from './components/widgets/WidgetPreviewBox';
 import { WidgetSearchBox } from './components/widgets/WidgetSearchBox';
 import { WidgetToolBox } from './components/widgets/WidgetToolBox';
+import { WidgetUsersBox } from './components/widgets/WidgetUsersBox';
 import './styles/Main.scss';
 
 const Main = () => {
@@ -26,6 +27,7 @@ const Main = () => {
         <div className='main'>
             <MainMap>
                 <WidgetSearchBox />
+                <WidgetUsersBox />
                 <WidgetAccountBox />
                 <WidgetToolBox />
                 <WidgetPreviewBox />
