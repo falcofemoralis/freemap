@@ -2,7 +2,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import LinkIcon from '@mui/icons-material/Link';
 import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled';
 import RoomIcon from '@mui/icons-material/Room';
-import { Button, CircularProgress, Divider, Drawer, Tooltip, Typography } from '@mui/material';
+import { Button, CircularProgress, Divider, Tooltip, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { observer } from 'mobx-react-lite';
@@ -11,15 +11,14 @@ import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import Viewer from 'react-viewer';
 import { ImageDecorator } from 'react-viewer/lib/ViewerProps';
-import { DRAWER_WIDTH } from '.';
+import { Comments } from '../../../../components/Comments';
+import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileUpload } from '../../../../components/FileUpload';
 import { FileType } from '../../../../constants/file.type';
 import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
 import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
-import { Comments } from '../../../../components/Comments';
-import { authStore } from '../../../../store/auth.store';
 
 interface TabSelectProps {
     onClose: () => void;
@@ -29,18 +28,9 @@ export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
     console.log('TabSelect');
 
     return (
-        <Drawer
-            sx={{
-                width: DRAWER_WIDTH,
-                flexShrink: 0,
-                '& .MuiDrawer-paper': { width: DRAWER_WIDTH }
-            }}
-            anchor='left'
-            open={Boolean(mapStore.selectedFeatureId)}
-            onClose={onClose}
-        >
+        <CustomDrawer open={Boolean(mapStore.selectedFeatureId)} onClose={onClose} padding={0}>
             {mapStore.selectedFeatureId && <TabSelectDrawer featureId={mapStore.selectedFeatureId} />}
-        </Drawer>
+        </CustomDrawer>
     );
 });
 

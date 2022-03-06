@@ -3,8 +3,9 @@ import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import React from 'react';
+import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { TabAdmin } from './TabAdmin';
 import { TabNewest } from './TabNewest';
 
@@ -25,16 +26,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
 
     return (
         <>
-            <Drawer
-                sx={{
-                    width: 320,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': { width: 320, p: 3 }
-                }}
-                anchor='left'
-                open={open}
-                onClose={onClose}
-            >
+            <CustomDrawer width={320} open={open} onClose={onClose}>
                 <List>
                     <ListItem button onClick={() => handleOpen(MenuItem.NEWEST)}>
                         <ListItemIcon>{<FeedOutlinedIcon />}</ListItemIcon>
@@ -58,7 +50,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
                     <ListItemIcon>{<SettingsOutlinedIcon />}</ListItemIcon>
                     <ListItemText primary={'Настройки'} />
                 </ListItem>
-            </Drawer>
+            </CustomDrawer>
             <TabAdmin />
             <TabNewest open={menuItem == MenuItem.NEWEST} onClose={handleClose} />
         </>

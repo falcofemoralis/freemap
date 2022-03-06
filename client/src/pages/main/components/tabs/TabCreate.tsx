@@ -1,6 +1,6 @@
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Divider, Drawer, Typography } from '@mui/material';
+import { Alert, Divider, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -10,14 +10,13 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { AutocompleteType } from '../../../../components/AutocompleteType';
+import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileUpload } from '../../../../components/FileUpload';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { errorStore } from '../../../../store/error.store';
-import { mapStore } from '../../../../store/map.store';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
-import { DRAWER_WIDTH } from './index';
 
 type FormData = {
     name: string;
@@ -110,16 +109,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     const handleLinksChange = (links: string[]) => setLinks(links);
 
     return (
-        <Drawer
-            sx={{
-                width: DRAWER_WIDTH,
-                flexShrink: 0,
-                '& .MuiDrawer-paper': { width: DRAWER_WIDTH, p: 3 }
-            }}
-            anchor='left'
-            open={editorStore.isEditorTabOpen}
-            onClose={handleClose}
-        >
+        <CustomDrawer open={editorStore.isEditorTabOpen} onClose={handleClose}>
             <Box component='form' onSubmit={handleOnSubmit} noValidate>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -250,7 +240,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
 
                 {errorStore.message && <Alert severity='error'>{errorStore.message}</Alert>}
             </Box>
-        </Drawer>
+        </CustomDrawer>
     );
 });
 

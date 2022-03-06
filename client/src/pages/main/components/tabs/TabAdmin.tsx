@@ -1,15 +1,13 @@
-import { Box, Drawer } from '@mui/material';
+import { Box } from '@mui/material';
 import { Feature } from 'ol';
-import GeoJSON from 'ol/format/GeoJSON';
-import { LineString, Point, Polygon, MultiPolygon } from 'ol/geom';
+import { LineString, Polygon } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import Map from 'ol/Map';
 import { fromLonLat } from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
-import { Fill, Stroke, Style, Text } from 'ol/style';
+import { Fill, Stroke, Style } from 'ol/style';
 import View from 'ol/View';
-import { editorStore } from '../../../../store/editor.store';
-import { DRAWER_WIDTH } from './index';
+import { CustomDrawer } from '../../../../components/CustomDrawer';
 import './styles/TabAdmin.scss';
 
 export const TabAdmin = () => {
@@ -94,19 +92,11 @@ export const TabAdmin = () => {
         map.addLayer(vectorLayer);
 
         return (
-            <Drawer
-                sx={{
-                    width: DRAWER_WIDTH,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': { width: DRAWER_WIDTH, p: 3 }
-                }}
-                anchor='left'
-                open={false}
-            >
+            <CustomDrawer open={false} onClose={() => console.log('close')}>
                 <Box>
                     <div ref={mapTarget} id='example-map' className='example-map'></div>
                 </Box>
-            </Drawer>
+            </CustomDrawer>
         );
     } else {
         return <></>;

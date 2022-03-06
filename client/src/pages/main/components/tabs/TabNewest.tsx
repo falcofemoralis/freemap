@@ -1,4 +1,4 @@
-import { CardActionArea, Drawer } from '@mui/material';
+import { CardActionArea } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -6,12 +6,12 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import React from 'react';
+import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileType } from '../../../../constants/file.type';
 import { MapContext } from '../../../../MapProvider';
 import MapService from '../../../../services/map.service';
 import { Coordinate, IMapFeature } from '../../../../types/IMapFeature';
 import { flyTo } from '../../../../utils/MapAnimation';
-import { DRAWER_WIDTH } from './index';
 
 interface TabNewestProps {
     open: boolean;
@@ -30,16 +30,7 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
     };
 
     return (
-        <Drawer
-            sx={{
-                width: DRAWER_WIDTH,
-                flexShrink: 0,
-                '& .MuiDrawer-paper': { width: DRAWER_WIDTH, p: 3 }
-            }}
-            anchor='left'
-            open={open}
-            onClose={onClose}
-        >
+        <CustomDrawer open={open} onClose={onClose}>
             <List sx={{ width: '100%' }}>
                 {newestFeatures.map(feature => (
                     <ListItem key={feature.id}>
@@ -66,6 +57,6 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
                     </ListItem>
                 ))}
             </List>
-        </Drawer>
+        </CustomDrawer>
     );
 };
