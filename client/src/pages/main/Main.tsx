@@ -17,30 +17,30 @@ import { WidgetCategoriesBox } from './components/widgets/WidgetCategoriesBox';
 import './styles/Main.scss';
 
 const Main = () => {
-    console.log('Main');
+  console.log('Main');
 
-    /**
-     * Получение данных карты из url
-     */
-    mapStore.parseUrl(useLocation().search);
+  /**
+   * Получение данных карты из url
+   */
+  mapStore.parseUrl(useLocation().search);
 
-    return (
-        <div className='main'>
-            <MainMap>
-                <WidgetSearchBox />
-                <WidgetUsersBox />
-                <WidgetCategoriesBox />
-                <WidgetAccountBox />
-                <WidgetToolBox />
-                <WidgetPreviewBox />
-                <WidgetEditorBox />
-                <ErrorBox />
-                <LayerData />
-                <LayerSelect />
-                <LayerUsers />
-            </MainMap>
-        </div>
-    );
+  return (
+    <div className='main'>
+      <MainMap>
+        <WidgetSearchBox />
+        <WidgetUsersBox />
+        <WidgetCategoriesBox />
+        <WidgetAccountBox />
+        <WidgetToolBox />
+        <WidgetPreviewBox />
+        <WidgetEditorBox />
+        <ErrorBox />
+        <LayerData />
+        <LayerSelect />
+        <LayerUsers />
+      </MainMap>
+    </div>
+  );
 };
 
 export default Main;

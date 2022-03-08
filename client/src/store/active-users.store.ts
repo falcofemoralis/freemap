@@ -3,20 +3,20 @@ import { makeAutoObservable } from 'mobx';
 import { Socket } from 'socket.io-client';
 
 class ActiveUsersStore {
-    users: IActiveUser[] = [];
-    socket: Socket | null = null;
+  users: IActiveUser[] = [];
+  socket: Socket | null = null;
 
-    constructor() {
-        makeAutoObservable(this);
-    }
+  constructor() {
+    makeAutoObservable(this);
+  }
 
-    get currentClientId(): string | undefined {
-        return this.socket?.id;
-    }
+  get currentClientId(): string | undefined {
+    return this.socket?.id;
+  }
 
-    updatesUsers(u: IActiveUser[]) {
-        this.users = u;
-    }
+  updatesUsers(u: IActiveUser[]) {
+    this.users = u;
+  }
 }
 
 export const activeUsersStore = new ActiveUsersStore();

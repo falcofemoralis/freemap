@@ -8,17 +8,17 @@ import './styles/App.scss';
 import './styles/position.css';
 
 const App = observer(() => {
-    return (
-        <Box sx={{ display: 'flex' }}>
-            <CssBaseline />
-            <Box component='main' sx={{ flexGrow: 1 }}>
-                <Routes>
-                    <Route path='*' element={<Navigate to='/' />} />
-                    <Route path='/' element={<Main />} />
-                </Routes>
-            </Box>
-        </Box>
-    );
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <Box component='main' sx={{ flexGrow: 1 }}>
+        <Routes>
+          <Route path='*' element={<Navigate to='/' />} />
+          <Route path='/' element={<Main />} />
+        </Routes>
+      </Box>
+    </Box>
+  );
 });
 
 export default App;

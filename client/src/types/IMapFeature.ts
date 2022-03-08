@@ -2,22 +2,22 @@ import { IComment } from './IComment';
 import { IMapFeatureType } from './IMapFeatureType';
 
 export interface Coordinate {
-    lon: number;
-    lat: number;
+  lon: number;
+  lat: number;
 }
 
 export interface IMapFeature {
-    id: string;
-    type: IMapFeatureType;
-    coordinates: Coordinate[];
-    zoom: number;
-    name: string;
-    description: string;
-    address?: string;
-    links?: string[];
-    files?: string[];
-    createdAt: number;
-    wiki?: string;
-    phone?: string;
-    comments: IComment[];
+  id: string;
+  type: IMapFeatureType;
+  coordinates: Coordinate[];
+  zoom: number;
+  name: string;
+  description: string;
+  address?: string;
+  links?: string[];
+  files?: string[];
+  createdAt: number;
+  wiki?: string;
+  phone?: string;
+  comments: IComment[];
 }

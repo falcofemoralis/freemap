@@ -10,28 +10,26 @@ import { flyTo } from '../../../../utils/MapAnimation';
 import '../../styles/Widget.scss';
 
 export const WidgetUsersBox = observer(() => {
-    const { map } = React.useContext(MapContext);
+  const { map } = React.useContext(MapContext);
 
-    const selectUser = (coords: number[][], zoom: number) => {
-        flyTo(toTuple([coords], GeometryType.POLYGON), zoom, map);
-    };
+  const selectUser = (coords: number[][], zoom: number) => {
+    flyTo(toTuple([coords], GeometryType.POLYGON), zoom, map);
+  };
 
-    const getUsers = (users: IActiveUser[]): IActiveUser[] => {
-        return users.filter(user => user.clientId != activeUsersStore.currentClientId);
-    };
+  const getUsers = (users: IActiveUser[]): IActiveUser[] => {
+    return users.filter(user => user.clientId != activeUsersStore.currentClientId);
+  };
 
-    return (
-        <Paper className='usersBox'>
-            <List sx={{ width: '100%' }}>
-                {getUsers(activeUsersStore.users).map(user => (
-                    <ListItemButton divider key={user.clientId} onClick={() => selectUser(user.coordinates, user.zoom)}>
-                        {user.username ?? 'Anonymous'}
-                    </ListItemButton>
-                ))}
-                <ListSubheader sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 25 }}>
-                    {getUsers(activeUsersStore.users).length} users online
-                </ListSubheader>
-            </List>
-        </Paper>
-    );
+  return (
+    <Paper className='usersBox'>
+      <List sx={{ width: '100%' }}>
+        {getUsers(activeUsersStore.users).map(user => (
+          <ListItemButton divider key={user.clientId} onClick={() => selectUser(user.coordinates, user.zoom)}>
+            {user.username ?? 'Anonymous'}
+          </ListItemButton>
+        ))}
+        <ListSubheader sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 25 }}>{getUsers(activeUsersStore.users).length} users online</ListSubheader>
+      </List>
+    </Paper>
+  );
 });

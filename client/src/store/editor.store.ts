@@ -7,28 +7,28 @@ import { IMapFeatureType } from '../types/IMapFeatureType';
 import MapService from '../services/map.service';
 
 class EditorStore {
-    isDrawing = false;
-    selectedEditType: GeometryType | null;
-    selectedFeatureType: IMapFeatureType | null;
-    isEditorTabOpen = false;
+  isDrawing = false;
+  selectedEditType: GeometryType | null;
+  selectedFeatureType: IMapFeatureType | null;
+  isEditorTabOpen = false;
 
-    newFeatureCoordinates: Coordinate[];
-    newFeatureZoom: number;
-    newFeature: Feature<Geometry> | null = null; // объект геометрии на карте, который создается
+  newFeatureCoordinates: Coordinate[];
+  newFeatureZoom: number;
+  newFeature: Feature<Geometry> | null = null; // объект геометрии на карте, который создается
 
-    featureTypes: IMapFeatureType[] | null = null;
+  featureTypes: IMapFeatureType[] | null = null;
 
-    constructor() {
-        makeAutoObservable(this);
-    }
+  constructor() {
+    makeAutoObservable(this);
+  }
 
-    async getFeatureTypes() {
-        this.featureTypes = await MapService.getFeatureTypes();
-    }
+  async getFeatureTypes() {
+    this.featureTypes = await MapService.getFeatureTypes();
+  }
 
-    toggleEdit() {
-        this.isDrawing = !this.isDrawing;
-    }
+  toggleEdit() {
+    this.isDrawing = !this.isDrawing;
+  }
 }
 
 export const editorStore = new EditorStore();

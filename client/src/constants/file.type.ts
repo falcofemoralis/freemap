@@ -1,5 +1,5 @@
 export enum FileType {
-    ORIGINAL = '',
-    THUMBNAIL = 'thumbnail',
-    SMALL = 'small'
+  ORIGINAL = '',
+  THUMBNAIL = 'thumbnail',
+  SMALL = 'small'
 }

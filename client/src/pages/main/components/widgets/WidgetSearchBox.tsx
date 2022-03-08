@@ -11,30 +11,30 @@ import '../../styles/Widget.scss';
 import { TabMenu } from '../tabs/TabMenu';
 
 export const WidgetSearchBox = () => {
-    console.log('WidgetSearchBox');
+  console.log('WidgetSearchBox');
 
-    const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
 
-    const toggleTab = () => {
-        setOpen(!open);
-    };
+  const toggleTab = () => {
+    setOpen(!open);
+  };
 
-    return (
-        <Box className='searchBox'>
-            <Paper className='searchBox__paper' component='form' sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
-                <IconButton sx={{ p: '10px' }} aria-label='menu' onClick={toggleTab}>
-                    <MenuIcon />
-                </IconButton>
-                <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Search Open Free Map' inputProps={{ 'aria-label': 'search google maps' }} />
-                <IconButton type='submit' sx={{ p: '10px' }} aria-label='search'>
-                    <SearchIcon />
-                </IconButton>
-                <Divider sx={{ height: 28, m: 0.5 }} orientation='vertical' />
-                <IconButton color='primary' sx={{ p: '10px' }} aria-label='directions'>
-                    <DirectionsIcon />
-                </IconButton>
-            </Paper>
-            <TabMenu open={open} onClose={toggleTab} />
-        </Box>
-    );
+  return (
+    <Box className='searchBox'>
+      <Paper className='searchBox__paper' component='form' sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
+        <IconButton sx={{ p: '10px' }} aria-label='menu' onClick={toggleTab}>
+          <MenuIcon />
+        </IconButton>
+        <InputBase sx={{ ml: 1, flex: 1 }} placeholder='Search Open Free Map' inputProps={{ 'aria-label': 'search google maps' }} />
+        <IconButton type='submit' sx={{ p: '10px' }} aria-label='search'>
+          <SearchIcon />
+        </IconButton>
+        <Divider sx={{ height: 28, m: 0.5 }} orientation='vertical' />
+        <IconButton color='primary' sx={{ p: '10px' }} aria-label='directions'>
+          <DirectionsIcon />
+        </IconButton>
+      </Paper>
+      <TabMenu open={open} onClose={toggleTab} />
+    </Box>
+  );
 };

@@ -10,49 +10,49 @@ import { TabAdmin } from './TabAdmin';
 import { TabNewest } from './TabNewest';
 
 interface TabMenuProps {
-    open: boolean;
-    onClose: () => void;
+  open: boolean;
+  onClose: () => void;
 }
 
 enum MenuItem {
-    NEWEST
+  NEWEST
 }
 
 export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
-    console.log('TabMenu');
-    const [menuItem, setMenuItem] = React.useState<MenuItem | null>(null);
-    const handleOpen = (item: MenuItem) => setMenuItem(item);
-    const handleClose = () => setMenuItem(null);
+  console.log('TabMenu');
+  const [menuItem, setMenuItem] = React.useState<MenuItem | null>(null);
+  const handleOpen = (item: MenuItem) => setMenuItem(item);
+  const handleClose = () => setMenuItem(null);
 
-    return (
-        <>
-            <CustomDrawer width={320} open={open} onClose={onClose}>
-                <List>
-                    <ListItem button onClick={() => handleOpen(MenuItem.NEWEST)}>
-                        <ListItemIcon>{<FeedOutlinedIcon />}</ListItemIcon>
-                        <ListItemText primary={'Новинки'} />
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>{<HomeOutlinedIcon />}</ListItemIcon>
-                        <ListItemText primary={'Главная'} />
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>{<CategoryOutlinedIcon />}</ListItemIcon>
-                        <ListItemText primary={'Категории'} />
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>{<AssignmentTurnedInOutlinedIcon />}</ListItemIcon>
-                        <ListItemText primary={'Проверка'} />
-                    </ListItem>
-                </List>
-                <Divider />
-                <ListItem button>
-                    <ListItemIcon>{<SettingsOutlinedIcon />}</ListItemIcon>
-                    <ListItemText primary={'Настройки'} />
-                </ListItem>
-            </CustomDrawer>
-            <TabAdmin />
-            <TabNewest open={menuItem == MenuItem.NEWEST} onClose={handleClose} />
-        </>
-    );
+  return (
+    <>
+      <CustomDrawer width={320} open={open} onClose={onClose}>
+        <List>
+          <ListItem button onClick={() => handleOpen(MenuItem.NEWEST)}>
+            <ListItemIcon>{<FeedOutlinedIcon />}</ListItemIcon>
+            <ListItemText primary={'Новинки'} />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>{<HomeOutlinedIcon />}</ListItemIcon>
+            <ListItemText primary={'Главная'} />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>{<CategoryOutlinedIcon />}</ListItemIcon>
+            <ListItemText primary={'Категории'} />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>{<AssignmentTurnedInOutlinedIcon />}</ListItemIcon>
+            <ListItemText primary={'Проверка'} />
+          </ListItem>
+        </List>
+        <Divider />
+        <ListItem button>
+          <ListItemIcon>{<SettingsOutlinedIcon />}</ListItemIcon>
+          <ListItemText primary={'Настройки'} />
+        </ListItem>
+      </CustomDrawer>
+      <TabAdmin />
+      <TabNewest open={menuItem == MenuItem.NEWEST} onClose={handleClose} />
+    </>
+  );
 };

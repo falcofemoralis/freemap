@@ -8,56 +8,56 @@ import React from 'react';
 import './styles/file-upload.scss';
 
 interface FileUploadProps {
-    onUpload: (files: File[]) => void;
+  onUpload: (files: File[]) => void;
 }
 
 interface ILocalStore {
-    files: File[];
+  files: File[];
 }
 
 const Input = styled('input')({
-    display: 'none'
+  display: 'none'
 });
 
 export const FileUpload: React.FC<FileUploadProps> = observer(({ onUpload }) => {
-    const localStore = useLocalObservable<ILocalStore>(() => ({
-        files: []
-    }));
+  const localStore = useLocalObservable<ILocalStore>(() => ({
+    files: []
+  }));
 
-    const addFiles = (files: File[]) => {
-        localStore.files.push(...files);
-        onUpload(localStore.files);
-    };
+  const addFiles = (files: File[]) => {
+    localStore.files.push(...files);
+    onUpload(localStore.files);
+  };
 
-    const uploadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files != null) {
-            addFiles(Array.from(e.target.files));
-        }
-    };
+  const uploadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files != null) {
+      addFiles(Array.from(e.target.files));
+    }
+  };
 
-    const getFileSrc = (file: File): string => {
-        return URL.createObjectURL(file);
-    };
+  const getFileSrc = (file: File): string => {
+    return URL.createObjectURL(file);
+  };
 
-    return (
-        <Box sx={{ display: 'flex', overflowX: localStore.files.length > 0 ? 'scroll' : 'hidden' }}>
-            <label htmlFor='contained-button-file'>
-                <Input accept='image/*' id='contained-button-file' multiple type='file' onChange={uploadFiles} />
-                {localStore.files.length == 0 ? (
-                    <Button variant='outlined' component='span' startIcon={<PhotoCamera />}>
-                        Add photos
-                    </Button>
-                ) : (
-                    <IconButton className='file-upload-btn' color='primary' aria-label='upload picture' component='span'>
-                        <PhotoCamera />
-                    </IconButton>
-                )}
-            </label>
-            <Box sx={{ display: 'flex' }}>
-                {localStore.files.map((file: File, index: number) => (
-                    <img className='file-upload-img' key={index} src={getFileSrc(file)}></img>
-                ))}
-            </Box>
-        </Box>
-    );
+  return (
+    <Box sx={{ display: 'flex', overflowX: localStore.files.length > 0 ? 'scroll' : 'hidden' }}>
+      <label htmlFor='contained-button-file'>
+        <Input accept='image/*' id='contained-button-file' multiple type='file' onChange={uploadFiles} />
+        {localStore.files.length == 0 ? (
+          <Button variant='outlined' component='span' startIcon={<PhotoCamera />}>
+            Add photos
+          </Button>
+        ) : (
+          <IconButton className='file-upload-btn' color='primary' aria-label='upload picture' component='span'>
+            <PhotoCamera />
+          </IconButton>
+        )}
+      </label>
+      <Box sx={{ display: 'flex' }}>
+        {localStore.files.map((file: File, index: number) => (
+          <img className='file-upload-img' key={index} src={getFileSrc(file)}></img>
+        ))}
+      </Box>
+    </Box>
+  );
 });

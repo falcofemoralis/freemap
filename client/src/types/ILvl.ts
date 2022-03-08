@@ -1,4 +1,4 @@
 export interface ILvl {
-    lvl: number;
-    experience: number;
+  lvl: number;
+  experience: number;
 }

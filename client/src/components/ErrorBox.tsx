@@ -5,16 +5,16 @@ import * as React from 'react';
 import { errorStore } from '../store/error.store';
 
 export const ErrorBox = observer(() => {
-    console.log('ErrorBox');
+  console.log('ErrorBox');
 
-    const handleClose = () => (errorStore.message = null);
+  const handleClose = () => (errorStore.message = null);
 
-    // autoHideDuration={6000}
-    return (
-        <Snackbar open={Boolean(errorStore.message)} onClose={handleClose}>
-            <MuiAlert elevation={6} onClose={handleClose} severity='error' sx={{ width: '100%' }} variant='filled'>
-                {errorStore.message}
-            </MuiAlert>
-        </Snackbar>
-    );
+  // autoHideDuration={6000}
+  return (
+    <Snackbar open={Boolean(errorStore.message)} onClose={handleClose}>
+      <MuiAlert elevation={6} onClose={handleClose} severity='error' sx={{ width: '100%' }} variant='filled'>
+        {errorStore.message}
+      </MuiAlert>
+    </Snackbar>
+  );
 });
