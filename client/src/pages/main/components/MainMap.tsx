@@ -9,6 +9,7 @@ import MapConstant from '../../../constants/map.constant';
 import { MapProvider } from '../../../MapProvider';
 import { mapStore } from '../../../store/map.store';
 import { formatCoordinate, formatZoom } from '../../../utils/CoordinatesUtil';
+import { CoordinatesFilter } from './layers/filters/CoordinatesFilter';
 
 const COORDINATES_CHANGE_TIME = 0.25; // Изменение url каждые 250 мс
 
@@ -50,17 +51,13 @@ export const MainMap: React.FC = ({ children }) => {
      * Отображение курсора на объектах
      */
     map.on('pointermove', event => {
-        // const pixel = map.getEventPixel(event.originalEvent);
-        // const hit = map.hasFeatureAtPixel(pixel);
-        // map.getViewport().style.cursor = hit ? 'pointer' : '';
-
         const pixel = map.getEventPixel(event.originalEvent);
         let hit = false;
+
         map.forEachFeatureAtPixel(pixel, feature => {
-            if (feature.getProperties().select == true) {
-                hit = true;
-                return;
-            }
+            if (hit) return true;
+            const coordinatesFilter = new CoordinatesFilter(map).filter;
+            hit = coordinatesFilter(feature);
         });
 
         map.getViewport().style.cursor = hit ? 'pointer' : '';

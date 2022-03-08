@@ -6,15 +6,17 @@ import { Geometry } from 'ol/geom';
 import { Select } from 'ol/interaction';
 import { Vector as VectorLayer } from 'ol/layer';
 import { transformExtent } from 'ol/proj';
+import RenderFeature from 'ol/render/Feature';
 import { Vector } from 'ol/source';
-import { Fill, Stroke, Style } from 'ol/style';
 import React from 'react';
 import { MapContext } from '../../../../MapProvider';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import { toArray } from '../../../../utils/CoordinatesUtil';
-import { createLabelStyle, createStyles } from './styles/OlStyles';
+import { CoordinatesFilter } from './filters/CoordinatesFilter';
+import { HoverStyle } from './styles/HoverStyle';
+import { OlStyles } from './styles/OlStyles';
 
 export const LayerData = () => {
     console.log('LayerData');
@@ -37,11 +39,7 @@ export const LayerData = () => {
         properties: {
             name: 'Data Layer'
         },
-        style: function (feature) {
-            const styles = createStyles((feature.getProperties().type as IMapFeatureType).styles);
-            const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), styles.length + 1, feature.getGeometry());
-            return [...styles, labelStyle];
-        },
+        style: new OlStyles().getFeatureStyle(),
         renderBuffer: 5000
     });
 
@@ -69,7 +67,6 @@ export const LayerData = () => {
 
             featureCollection.features.map((feature: any) => {
                 feature.geometry.coordinates = toArray(feature.geometry.coordinates, feature.geometry.type);
-                feature.properties.hover = true;
                 feature.properties.select = true;
                 return feature;
             });
@@ -84,49 +81,13 @@ export const LayerData = () => {
             }
         }
     });
-
     map?.addLayer(baseLayer);
 
-    /**
-     * Фильтр объектов на карте
-     * @param {Feature<Geometry>} feature - объект на карты
-     */
-    function featureFilter(feature: Feature<Geometry>) {
-        if (!feature.getProperties().hover) {
-            return false;
-        }
-        const featureExtent = feature.getGeometry()?.getExtent();
-        const mapExtent = map?.getView().calculateExtent(map.getSize());
-
-        if (featureExtent && mapExtent) {
-            return featureExtent[0] - mapExtent[0] > 0 && featureExtent[1] - mapExtent[1] > 0;
-        }
-    }
-
-    /* Hover init */
-    /**
-     * Стиль наведенного объекта
-     */
-    const hoveredStyle = new Style({
-        zIndex: 0,
-        fill: new Fill({
-            color: 'rgba(229,229,229,0.35)'
-        }),
-        stroke: new Stroke({
-            color: '#26bae8',
-            width: 5
-        })
+    const hoverEvent = new Select({
+        condition: pointerMove,
+        style: new OlStyles().getStyleFunction([HoverStyle]),
+        filter: new CoordinatesFilter(map).filter
     });
-
-    function hoverStyle(feature: Feature<Geometry>) {
-        const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), 1, feature.getGeometry());
-        return [hoveredStyle, labelStyle];
-    }
-
-    /**
-     * Событие наведение на объект
-     */
-    const hoverEvent = new Select({ condition: pointerMove, style: hoverStyle as any, filter: featureFilter as any }); // any fixes bug
     map?.addInteraction(hoverEvent);
 
     /**

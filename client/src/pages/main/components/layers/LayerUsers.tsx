@@ -11,7 +11,8 @@ import { MAP_SOCKET } from '../../../../services/index';
 import { activeUsersStore } from '../../../../store/active-users.store';
 import { authStore } from '../../../../store/auth.store';
 import { IActiveUser } from '../../../../types/IActiveUser';
-import { createLabelStyle, createPolygonStyle } from './styles/OlStyles';
+import { OlStyles } from './styles/OlStyles';
+import { PolygonStyle } from './styles/PolygonStyle';
 
 const SHOW_ON_ZOOM = 3;
 
@@ -35,13 +36,14 @@ export const LayerUsers = () => {
             name: 'Users Layer'
         },
         style: function (feature) {
-            const labelStyle = createLabelStyle(
+            const olStyles = new OlStyles();
+            const labelStyle = olStyles.createLabelStyle(
                 feature.get('username'),
                 AuthService.getUserAvatar(feature.get('avatar'), FileType.THUMBNAIL),
                 1,
                 feature.getGeometry()
             );
-            return [labelStyle, createPolygonStyle()];
+            return [PolygonStyle, labelStyle];
         },
         renderBuffer: 5000
     });

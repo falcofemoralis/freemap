@@ -3,20 +3,18 @@ import RedoIcon from '@mui/icons-material/Redo';
 import UndoIcon from '@mui/icons-material/Undo';
 import { Box, IconButton } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { Geometry, LineString, MultiLineString, MultiPolygon, Polygon } from 'ol/geom';
+import { Geometry, LineString, MultiLineString, Polygon } from 'ol/geom';
 import { Draw } from 'ol/interaction';
 import { DrawEvent } from 'ol/interaction/Draw';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
-import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
 import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
-import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import { toTuple } from '../../../../utils/CoordinatesUtil';
+import { OlStyles } from './styles/OlStyles';
 import '../../styles/Widget.scss';
-import { createLabelStyle, createStyles } from './styles/OlStyles';
 
 interface LayerEditProps {
     onFinish: () => void;
@@ -31,20 +29,8 @@ export const LayerEdit: React.FC<LayerEditProps> = ({ onFinish }) => {
     const source = new VectorSource();
     const baseLayer = new VectorLayer({
         source,
-        properties: {
-            name: 'Edit Layer'
-        },
-        style: function (feature) {
-            if (feature.getProperties().type) {
-                console.log(feature.getProperties().type);
-
-                const styles = createStyles((feature.getProperties().type as IMapFeatureType).styles);
-                const labelStyle = createLabelStyle(feature.get('name'), feature.get('icon'), styles.length + 1, feature.getGeometry());
-                return [...styles, labelStyle];
-            } else {
-                return [];
-            }
-        },
+        properties: { name: 'Edit Layer' },
+        style: new OlStyles().getFeatureStyle(),
         renderBuffer: 5000
     });
     map?.addLayer(baseLayer);
@@ -151,7 +137,7 @@ const Editor: React.FC<EditorProps> = observer(({ source, baseLayer, onFinish })
 
                 let style;
                 if (editorStore.selectedFeatureType.geometry == GeometryType.LINE_STRING) {
-                    style = createStyles(editorStore.selectedFeatureType.styles);
+                    style = new OlStyles().createStyles(editorStore.selectedFeatureType.styles);
                 }
 
                 const draw = new Draw({
