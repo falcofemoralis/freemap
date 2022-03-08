@@ -69,6 +69,8 @@ export const LayerData = () => {
 
             featureCollection.features.map((feature: any) => {
                 feature.geometry.coordinates = toArray(feature.geometry.coordinates, feature.geometry.type);
+                feature.properties.hover = true;
+                feature.properties.select = true;
                 return feature;
             });
 
@@ -90,7 +92,7 @@ export const LayerData = () => {
      * @param {Feature<Geometry>} feature - объект на карты
      */
     function featureFilter(feature: Feature<Geometry>) {
-        if (feature.getProperties().hover == false) {
+        if (!feature.getProperties().hover) {
             return false;
         }
         const featureExtent = feature.getGeometry()?.getExtent();

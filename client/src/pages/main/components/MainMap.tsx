@@ -50,8 +50,19 @@ export const MainMap: React.FC = ({ children }) => {
      * Отображение курсора на объектах
      */
     map.on('pointermove', event => {
+        // const pixel = map.getEventPixel(event.originalEvent);
+        // const hit = map.hasFeatureAtPixel(pixel);
+        // map.getViewport().style.cursor = hit ? 'pointer' : '';
+
         const pixel = map.getEventPixel(event.originalEvent);
-        const hit = map.hasFeatureAtPixel(pixel);
+        let hit = false;
+        map.forEachFeatureAtPixel(pixel, feature => {
+            if (feature.getProperties().select == true) {
+                hit = true;
+                return;
+            }
+        });
+
         map.getViewport().style.cursor = hit ? 'pointer' : '';
     });
 

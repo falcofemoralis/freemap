@@ -4,14 +4,14 @@ import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import React, { useEffect } from 'react';
 import { io } from 'socket.io-client';
+import { FileType } from '../../../../constants/file.type';
 import { MapContext } from '../../../../MapProvider';
+import AuthService from '../../../../services/auth.service';
+import { MAP_SOCKET } from '../../../../services/index';
 import { activeUsersStore } from '../../../../store/active-users.store';
 import { authStore } from '../../../../store/auth.store';
 import { IActiveUser } from '../../../../types/IActiveUser';
 import { createLabelStyle, createPolygonStyle } from './styles/OlStyles';
-import { MAP_SOCKET } from '../../../../services/index';
-import AuthService from '../../../../services/auth.service';
-import { FileType } from '../../../../constants/file.type';
 
 const SHOW_ON_ZOOM = 3;
 
@@ -128,20 +128,14 @@ export const LayerUsers = () => {
 
                 if (user.coordinates.length > 1) {
                     if (!activeFeatures.find(f => f.clientId == user.clientId)) {
-                        console.log('add ' + user.clientId);
-
                         const feature = new Feature(new Polygon([user.coordinates]));
                         feature.setProperties({
-                            hover: false,
-                            select: false,
                             username: user.username ?? 'Anonymous',
                             avatar: user.avatar ?? ''
                         });
                         source.addFeature(feature);
                         activeFeatures.push({ clientId: user.clientId, feature });
                     } else {
-                        console.log('update ' + user.clientId);
-
                         activeFeatures
                             .find(f => f.clientId == user.clientId)
                             ?.feature?.getGeometry()
@@ -152,8 +146,6 @@ export const LayerUsers = () => {
 
             for (const f of activeFeatures) {
                 if (!data.find(d => d.clientId == f.clientId)) {
-                    console.log('remove ' + f.clientId);
-
                     const activeFeature = activeFeatures.find(ff => ff.clientId == f.clientId);
                     if (activeFeature) {
                         source.removeFeature(activeFeature.feature);
