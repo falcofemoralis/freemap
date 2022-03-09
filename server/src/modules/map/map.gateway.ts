@@ -1,6 +1,12 @@
-import { Logger, Query } from '@nestjs/common';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
+import { AuthService } from './../auth/auth.service';
+import { Logger, Query, UseGuards } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ActiveUser } from './types/active-user';
+import { FilesService } from '../files/files.service';
+import { UsersService } from '../users/users.service';
+import { MapService } from './map.service';
 
 /**
  *	Important URIs:
@@ -9,15 +15,8 @@ import { Server, Socket } from 'socket.io';
  *	https://socket.io/docs/client-api/
  */
 
-interface ActiveUser {
-  clientId: string;
-  username?: string;
-  coordinates?: number[][];
-  zoom?: number;
-  avatar?: string;
-}
 interface Payload {
-  data: ActiveUser;
+  data: Pick<ActiveUser, 'coordinates' | 'zoom'>;
 }
 
 // @WebSocketGateway({serveClient: true})
@@ -33,8 +32,11 @@ export class MapGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   handleConnection(client: Socket) {
+    console.log('query is');
+    console.log(client.handshake.query);
+
     this.logger.log(`Client connected: ${client.id}`);
-    this.activeUsers.push({ clientId: client.id });
+    this.activeUsers.push({ ...(client.handshake.query as any), clientId: client.id });
   }
 
   handleDisconnect(client: Socket) {
@@ -43,7 +45,6 @@ export class MapGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.activeUsers.forEach((user, i) => {
       if (user.clientId == client.id) {
         this.activeUsers.splice(i, 1);
-        console.log('remove user ' + user.clientId);
         this.wss.emit('getActiveUsers', this.activeUsers); // send data to every client
         return;
       }
@@ -54,10 +55,8 @@ export class MapGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   handleMessage(client: Socket, payload: Payload) {
     for (const user of this.activeUsers) {
       if (user.clientId == client.id) {
-        user.username = payload.data.username;
         user.coordinates = payload.data.coordinates;
         user.zoom = payload.data.zoom;
-        user.avatar = payload.data.avatar;
       }
     }
     this.wss.emit('getActiveUsers', this.activeUsers); // send data to every client

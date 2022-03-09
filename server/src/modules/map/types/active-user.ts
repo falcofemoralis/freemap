@@ -1,4 +1,4 @@
-export interface IActiveUser {
+export interface ActiveUser {
   clientId: string;
   coordinates: number[][];
   zoom: number;

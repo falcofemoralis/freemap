@@ -10,7 +10,9 @@ import { mapStore } from '../../../../store/map.store';
 import '../../styles/Widget.scss';
 
 const PreviewMapLabel = observer(() => {
-  return <>{mapStore.mapType === MapConstant.GOOGLE ? <Typography variant='subtitle2'>Земля</Typography> : <Typography variant='subtitle2'>Карта</Typography>}</>;
+  return (
+    <>{mapStore.mapType === MapConstant.GOOGLE ? <Typography variant='subtitle2'>Земля</Typography> : <Typography variant='subtitle2'>Карта</Typography>}</>
+  );
 });
 
 export const WidgetPreviewBox = () => {

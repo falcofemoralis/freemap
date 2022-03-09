@@ -14,6 +14,8 @@ import { IActiveUser } from '../../../../types/IActiveUser';
 import { getCurrentCoordinates } from '../../../../utils/CoordinatesUtil';
 import { OlStyles } from './styles/OlStyles';
 import { PolygonStyle } from './styles/PolygonStyle';
+import { observe } from 'mobx';
+import { mapStore } from '../../../../store/map.store';
 
 const SHOW_ON_ZOOM = 3;
 
@@ -29,6 +31,7 @@ export const LayerUsers = () => {
   const activeFeatures: IActiveFeature[] = [];
   let coordinatesTimeoutEnd = false;
   let currentCoordinates: number[][];
+  let currentZoom: number;
 
   const source = new VectorSource();
   const baseLayer = new VectorLayer({
@@ -38,28 +41,31 @@ export const LayerUsers = () => {
     },
     style: function (feature) {
       const olStyles = new OlStyles();
-      const labelStyle = olStyles.createLabelStyle(feature.get('username'), AuthService.getUserAvatar(feature.get('avatar'), FileType.THUMBNAIL), 1, feature.getGeometry());
+      const labelStyle = olStyles.createLabelStyle(
+        feature.get('username'),
+        AuthService.getUserAvatar(feature.get('avatar'), FileType.THUMBNAIL),
+        1,
+        feature.getGeometry()
+      );
       return [PolygonStyle, labelStyle];
     },
     renderBuffer: 5000
   });
   map?.addLayer(baseLayer);
 
-  const handleCoordinatesChange = () => {
+  // listener for map coordinates change
+  map?.getView()?.on('change:center', () => {
     if (!coordinatesTimeoutEnd && map) {
-      const zoom = map.getView().getZoom();
+      currentZoom = map.getView().getZoom() ?? 1;
       currentCoordinates = getCurrentCoordinates(window, document, map);
 
-      if (currentCoordinates && zoom && zoom > SHOW_ON_ZOOM) {
+      if (currentCoordinates && currentZoom && currentZoom > SHOW_ON_ZOOM) {
         // update active users on server
-        activeUsersStore.socket?.emit('updateActiveUser', {
-          data: {
-            coordinates: currentCoordinates,
-            zoom: zoom,
-            username: authStore.user?.username,
-            avatar: authStore.user?.userAvatar
-          }
-        });
+        const data = {
+          coordinates: currentCoordinates,
+          zoom: currentZoom
+        };
+        activeUsersStore.socket?.emit('updateActiveUser', { data });
       }
 
       coordinatesTimeoutEnd = true;
@@ -68,7 +74,7 @@ export const LayerUsers = () => {
         coordinatesTimeoutEnd = false;
       }, 0.25 * 1000);
     }
-  };
+  });
 
   const featureFilter = (coordinates: number[][]) => {
     if (!coordinates || !currentCoordinates) {
@@ -82,13 +88,24 @@ export const LayerUsers = () => {
     return true;
   };
 
-  map?.getView()?.on('change:center', handleCoordinatesChange);
-
-  useEffect(() => {
+  const initSocket = () => {
     // init start coordinates
     currentCoordinates = getCurrentCoordinates(window, document, map);
+    currentZoom = map?.getView().getZoom() ?? 1;
 
-    activeUsersStore.socket = io(MAP_SOCKET);
+    console.log(authStore.user);
+
+    // socket connect
+    activeUsersStore.socket = io(MAP_SOCKET, {
+      query: {
+        coordinates: currentCoordinates,
+        zoom: currentZoom,
+        username: authStore.user?.username ?? 'Anonymous',
+        userAvatar: authStore.user?.userAvatar,
+        userColor: authStore.user?.userColor
+      }
+    });
+    // subscribe on getActiveUsers
     activeUsersStore.socket.on('getActiveUsers', (data: IActiveUser[]) => {
       activeUsersStore.updatesUsers(data);
 
@@ -109,8 +126,9 @@ export const LayerUsers = () => {
             // if user feature not exists - create new
             const feature = new Feature(new Polygon([user.coordinates]));
             feature.setProperties({
-              username: user.username ?? 'Anonymous',
-              avatar: user.avatar ?? ''
+              username: user.username,
+              userAvatar: user.userAvatar,
+              userColor: user.userColor
             });
 
             source.addFeature(feature);
@@ -135,6 +153,16 @@ export const LayerUsers = () => {
         }
       }
     });
+  };
+
+  useEffect(() => {
+    if (authStore.isAuth) {
+      observe(authStore, 'user', change => {
+        initSocket();
+      });
+    } else {
+      initSocket();
+    }
   });
 
   return <></>;

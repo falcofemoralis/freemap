@@ -36,7 +36,14 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
           <ListItem key={feature.id}>
             <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.zoom)}>
               <CardActionArea>
-                {feature?.files && feature?.files?.length > 0 && <CardMedia component='img' height='140' image={MapService.getMedia(feature?.files ? feature?.files[0] : '', FileType.THUMBNAIL)} alt={feature.name} />}
+                {feature?.files && feature?.files?.length > 0 && (
+                  <CardMedia
+                    component='img'
+                    height='140'
+                    image={MapService.getMedia(feature?.files ? feature?.files[0] : '', FileType.THUMBNAIL)}
+                    alt={feature.name}
+                  />
+                )}
                 <CardContent>
                   <Typography gutterBottom variant='h5' component='div'>
                     {feature.name} • {new Date(feature.createdAt).toLocaleDateString()}

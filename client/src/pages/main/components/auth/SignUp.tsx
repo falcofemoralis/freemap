@@ -138,7 +138,10 @@ export const SignUp: React.FC<SignUpProps> = ({ onSwitch, onClose }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel control={<Checkbox value='allowExtraEmails' color='primary' {...register('isMailing')} />} label='Я хочу получать вдохновение, маркетинговые акции и обновления по электронной почте.' />
+              <FormControlLabel
+                control={<Checkbox value='allowExtraEmails' color='primary' {...register('isMailing')} />}
+                label='Я хочу получать вдохновение, маркетинговые акции и обновления по электронной почте.'
+              />
             </Grid>
           </Grid>
           <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>

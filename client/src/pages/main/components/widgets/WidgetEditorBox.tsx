@@ -95,7 +95,12 @@ const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, 
     <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
       <DialogTitle>Выбрать тип</DialogTitle>
       <DialogContent>
-        <AutocompleteType sx={{ mt: 3, width: 300 }} onChange={onChange} featureTypes={editorStore.featureTypes ?? []} selectedGeometry={editorStore.selectedEditType} />
+        <AutocompleteType
+          sx={{ mt: 3, width: 300 }}
+          onChange={onChange}
+          featureTypes={editorStore.featureTypes ?? []}
+          selectedGeometry={editorStore.selectedEditType}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>Отменить</Button>

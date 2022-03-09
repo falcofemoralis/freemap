@@ -125,7 +125,15 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
             </Box>
           </Grid>
           <Grid item xs={12}>
-            <TextField error={!!errors.name} helperText={errors.name?.message ?? ''} fullWidth required id='name' label='Имя' {...register('name', { required: 'Необходимо указать имя' })} />
+            <TextField
+              error={!!errors.name}
+              helperText={errors.name?.message ?? ''}
+              fullWidth
+              required
+              id='name'
+              label='Имя'
+              {...register('name', { required: 'Необходимо указать имя' })}
+            />
           </Grid>
           <Grid item xs={12}>
             <TextField

@@ -28,7 +28,9 @@ export const WidgetUsersBox = observer(() => {
             {user.username ?? 'Anonymous'}
           </ListItemButton>
         ))}
-        <ListSubheader sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 25 }}>{getUsers(activeUsersStore.users).length} users online</ListSubheader>
+        <ListSubheader sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 25 }}>
+          {getUsers(activeUsersStore.users).length} users online
+        </ListSubheader>
       </List>
     </Paper>
   );
