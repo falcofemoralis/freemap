@@ -17,6 +17,7 @@ import { FileUpload } from '../../../../components/FileUpload';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
 import MapService from '../../../../services/map.service';
+import { authStore } from '../../../../store/auth.store';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
 import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
@@ -130,7 +131,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
                 2,517 комментариев
               </Typography> */}
               <Box sx={{ display: 'flex' }}>
-                <UserAvatar user={mapFeature.user} sx={{ mr: 1 }} />
+                <UserAvatar user={mapFeature.user} sx={{ mr: 1 }} type={FileType.THUMBNAIL} />
                 <Typography variant='h6' gutterBottom>
                   {mapFeature.user.username}
                 </Typography>
@@ -163,9 +164,11 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
               <IconifiedField icon={<LinkIcon />} text={link} />
             </Grid>
           ))}
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-            <FileUpload onUpload={files => console.log(files)} />
-          </Grid>
+          {authStore.isAuth && (
+            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+              <FileUpload onUpload={files => console.log(files)} />
+            </Grid>
+          )}
         </Grid>
         <Divider />
         <Grid container spacing={2} sx={{ p: 3 }}>

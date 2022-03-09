@@ -1,6 +1,7 @@
 import { List, ListItemButton, ListSubheader, Paper } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import { UserAvatar } from '../../../../components/UserAvatar';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { activeUsersStore } from '../../../../store/active-users.store';
@@ -25,6 +26,7 @@ export const WidgetUsersBox = observer(() => {
       <List sx={{ width: '100%' }}>
         {getUsers(activeUsersStore.users).map(user => (
           <ListItemButton divider key={user.clientId} onClick={() => selectUser(user.coordinates, user.zoom)}>
+            <UserAvatar user={{ username: user.username, userColor: user.userColor, userAvatar: user.userAvatar }} sx={{ mr: 1 }} />
             {user.username ?? 'Anonymous'}
           </ListItemButton>
         ))}

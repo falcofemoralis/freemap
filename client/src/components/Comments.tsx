@@ -10,6 +10,7 @@ import CommentsService from '../services/comments.service';
 import { authStore } from '../store/auth.store';
 import { IComment } from '../types/IComment';
 import { UserAvatar } from './UserAvatar';
+import { FileType } from '../constants/file.type';
 
 interface CommentsProps {
   comments: IComment[];
@@ -81,15 +82,17 @@ const Comment: React.FC<CommentProps> = ({ featureId, comment, indent, onReply, 
   return (
     <>
       <Box sx={{ display: 'flex', mt: 2, ml: 2 * (indent ?? 0) }}>
-        <UserAvatar user={comment.user} sx={{ mr: 1 }} />
+        <UserAvatar user={comment.user} sx={{ mr: 1 }} type={FileType.THUMBNAIL} />
         <Box>
           <Typography variant='subtitle2'>
             {comment.user.username} • {new Date(comment.createdAt).toLocaleString()}
           </Typography>
           <Typography variant='body1'>{comment.text}</Typography>
-          <Button variant='text' onClick={handleOpen}>
-            Reply
-          </Button>
+          {authStore.isAuth && (
+            <Button variant='text' onClick={handleOpen}>
+              Reply
+            </Button>
+          )}
         </Box>
       </Box>
       {open && <CommentForm featureId={featureId} parentId={comment.id} onSubmit={onSubmit} />}
