@@ -36,7 +36,7 @@ const Main = () => {
         <ErrorBox />
         <LayerData />
         <LayerSelect />
-        <LayerUsers />
+        {/* <LayerUsers /> */}
       </MainMap>
     </div>
   );

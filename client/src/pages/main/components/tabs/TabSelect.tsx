@@ -30,7 +30,7 @@ export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
   console.log('TabSelect');
 
   return (
-    <CustomDrawer open={Boolean(mapStore.selectedFeatureId)} onClose={onClose} padding={0}>
+    <CustomDrawer open={Boolean(mapStore.selectedFeatureId)} onClose={onClose} padding={0} fullHeight>
       {mapStore.selectedFeatureId && <TabSelectDrawer featureId={mapStore.selectedFeatureId} />}
     </CustomDrawer>
   );

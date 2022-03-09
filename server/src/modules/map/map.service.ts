@@ -24,9 +24,9 @@ export class MapService {
     const filter = {
       'coordinates.lon': { $gte: areaQuery.lonL, $lte: areaQuery.lonR },
       'coordinates.lat': { $gte: areaQuery.latB, $lte: areaQuery.latT },
-      zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
     };
 
+    //      zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
     return this.mapFeatureModel.find(filter);
   }
 

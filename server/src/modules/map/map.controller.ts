@@ -23,7 +23,7 @@ import { UserPayload } from './../auth/guards/jwt-auth.guard';
 import { FilesService } from './../files/files.service';
 import { FileOptionsQuery } from './../files/query/media.query';
 import { UsersService } from './../users/users.service';
-import { CreateFeatureDataDto } from './dto/create-feature.dto';
+import { CreateFeatureDataDto, Coordinate } from './dto/create-feature.dto';
 import { FeatureType } from './entities/feature-type.entity';
 import { MapFeature } from './entities/map-feature.entity';
 import { MapFeatureGuard } from './guards/map-feature.guard';
@@ -42,7 +42,87 @@ export class MapController {
   @ApiResponse({ status: 200, type: FeatureCollectionDto, description: 'Пак объектов FeatureCollection' })
   @Get()
   async getMapData(@Query() areaQuery: AreaQuery): Promise<FeatureCollectionDto> {
-    const mapFeatures = await this.mapService.getAllMapFeatures(areaQuery);
+    const calcSq = (coordinates: Coordinate[]): number => {
+      const sides: number[] = [];
+
+      console.log('calc sides');
+
+      console.log('len ' + coordinates.length);
+
+      for (let i = 0; i < coordinates.length; ++i) {
+        console.log(i);
+
+        // lon = x, lat = y
+        const A = coordinates[i];
+        const B = i == coordinates.length - 1 ? coordinates[0] : coordinates[i + 1];
+        console.log('calc AB between: ');
+        console.log(A);
+        console.log(B);
+
+        const AB = Math.sqrt(Math.pow(B.lon - A.lon, 2) + Math.pow(B.lat - A.lat, 2));
+        console.log('AB=' + AB);
+
+        sides.push(AB);
+      }
+
+      console.log('SIDES=');
+      console.log(sides);
+
+      console.log('calc p2');
+
+      let p2 = 0;
+      for (const side of sides) {
+        p2 += side;
+      }
+      p2 /= 2;
+      console.log('p2=' + p2);
+
+      console.log('calc sq');
+      // фор­му­ла Брах­ма­гуп­ты
+      let sq = 1;
+      for (const side of sides) {
+        const n = p2 - side;
+        sq *= n;
+      }
+
+      sq = Math.sqrt(sq);
+
+      return sq;
+    };
+
+    const mapFeatures = (await this.mapService.getAllMapFeatures(areaQuery)).filter((feature) => {
+      let featureLonL = 999999;
+      let featureLonR = 0;
+      let featureLatB = 999999;
+      let featureLatT = 0;
+      for (const coordinate of feature.coordinates) {
+        if (coordinate.lon < featureLonL) {
+          featureLonL = coordinate.lon;
+        }
+
+        if (coordinate.lon > featureLonR) {
+          featureLonR = coordinate.lon;
+        }
+
+        if (coordinate.lat < featureLatB) {
+          featureLatB = coordinate.lat;
+        }
+
+        if (coordinate.lat > featureLatT) {
+          featureLatT = coordinate.lat;
+        }
+      }
+
+      const x0 = areaQuery.lonR - areaQuery.lonL;
+      const y0 = areaQuery.latT - areaQuery.latB;
+      const x1 = featureLonR - featureLonL;
+      const y1 = featureLatT - featureLatB;
+
+      const fx = (x1 * 100) / x0;
+      const fy = (y1 * 100) / y0;
+
+      return (fx > 2 && fx < 95) || (fy > 2 && fy < 95);
+    });
 
     const features = [];
     for (const mapFeature of mapFeatures) {

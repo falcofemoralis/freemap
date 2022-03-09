@@ -8,6 +8,7 @@ interface CustomDrawerProps {
   onClose: () => void;
   width?: number;
   padding?: number;
+  fullHeight?: boolean;
 }
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -22,7 +23,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   right: 5
 }));
 
-export const CustomDrawer: React.FC<CustomDrawerProps> = ({ onClose, open, width, children, padding }) => {
+export const CustomDrawer: React.FC<CustomDrawerProps> = ({ onClose, open, width, children, padding, fullHeight }) => {
   const DRAWER_WIDTH = 420;
 
   return (
@@ -41,7 +42,7 @@ export const CustomDrawer: React.FC<CustomDrawerProps> = ({ onClose, open, width
           <ChevronLeftIcon />
         </IconButton>
       </DrawerHeader>
-      <Box sx={{ p: padding ?? 3, height: '100%' }}>{children}</Box>
+      <Box sx={{ p: padding ?? 3, height: fullHeight ? '100%' : 'unset' }}>{children}</Box>
     </Drawer>
   );
 };
