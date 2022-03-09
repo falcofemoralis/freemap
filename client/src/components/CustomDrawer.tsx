@@ -1,8 +1,8 @@
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { Drawer, styled, Box } from '@mui/material';
+import { Box, Drawer, styled } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import React from 'react';
-
+import './styles/drawer.scss';
 interface CustomDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -37,11 +37,11 @@ export const CustomDrawer: React.FC<CustomDrawerProps> = ({ onClose, open, width
       onClose={onClose}
     >
       <DrawerHeader>
-        <IconButton sx={{ background: '#ffffff45' }} onClick={onClose}>
+        <IconButton className='closeBtn' onClick={onClose}>
           <ChevronLeftIcon />
         </IconButton>
       </DrawerHeader>
-      <Box sx={{ p: padding ?? 3 }}>{children}</Box>
+      <Box sx={{ p: padding ?? 3, height: '100%' }}>{children}</Box>
     </Drawer>
   );
 };

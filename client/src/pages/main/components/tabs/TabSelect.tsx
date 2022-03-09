@@ -6,7 +6,7 @@ import { Button, CircularProgress, Divider, Tooltip, Typography } from '@mui/mat
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import Viewer from 'react-viewer';
@@ -14,6 +14,7 @@ import { ImageDecorator } from 'react-viewer/lib/ViewerProps';
 import { Comments } from '../../../../components/Comments';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileUpload } from '../../../../components/FileUpload';
+import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
 import MapService from '../../../../services/map.service';
 import { mapStore } from '../../../../store/map.store';
@@ -105,10 +106,10 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
   if (mapFeature) {
     return (
       <Box>
-        <Carousel showThumbs={false} swipeable={true}>
+        <Carousel showThumbs={false} swipeable emulateTouch infiniteLoop showStatus={false}>
           {mapFeature.files?.map(file => (
             <div key={file} onClick={() => openFullImage(file)} style={{ cursor: 'pointer' }}>
-              <img src={MapService.getMedia(file, FileType.THUMBNAIL)} style={{ height: '240px', objectFit: 'cover' }} />
+              <Image src={MapService.getMedia(file, FileType.THUMBNAIL)} style={{ height: '240px', objectFit: 'cover' }} />
             </div>
           ))}
         </Carousel>
@@ -118,18 +119,22 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
               <Typography variant='caption' gutterBottom>
                 {mapFeature.type.name}
               </Typography>
-              <Typography variant='h5' gutterBottom>
-                {mapFeature.name}
+              <Typography variant='h5'>{mapFeature.name}</Typography>
+              <Typography variant='body2' gutterBottom>
+                {new Date(mapFeature.createdAt).toLocaleDateString()}
               </Typography>
               <Typography variant='body1' gutterBottom>
                 {mapFeature.description}
               </Typography>
               {/* <Typography variant='caption' gutterBottom>
-                                2,517 комментариев
-                            </Typography> */}
-              <Typography variant='caption' gutterBottom>
-                {new Date(mapFeature.createdAt).toLocaleDateString()}
-              </Typography>
+                2,517 комментариев
+              </Typography> */}
+              <Box sx={{ display: 'flex' }}>
+                <UserAvatar user={mapFeature.user} sx={{ mr: 1 }} />
+                <Typography variant='h6' gutterBottom>
+                  {mapFeature.user.username}
+                </Typography>
+              </Box>
             </Box>
           </Grid>
         </Grid>
@@ -179,4 +184,40 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
       </Box>
     );
   }
+};
+
+const useImageLoaded = () => {
+  const [loaded, setLoaded] = useState(false);
+  const ref = useRef();
+
+  const onLoad = () => {
+    setLoaded(true);
+  };
+
+  useEffect(() => {
+    if (ref.current && (ref as any).current.complete) {
+      onLoad();
+    }
+  });
+
+  return [ref, loaded, onLoad];
+};
+
+interface ImageProps {
+  src: string;
+  style: any;
+}
+const Image: React.FC<ImageProps> = ({ src, style }) => {
+  const [ref, loaded, onLoad] = useImageLoaded();
+
+  return (
+    <div>
+      <img ref={ref as any} onLoad={onLoad as any} src={src} alt='' style={{ ...style, display: loaded ? 'block' : 'none' }} />
+      {!loaded && (
+        <div style={{ height: style.height, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <CircularProgress />
+        </div>
+      )}
+    </div>
+  );
 };

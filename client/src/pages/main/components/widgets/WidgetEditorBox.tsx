@@ -10,12 +10,10 @@ import { AutocompleteType } from '../../../../components/AutocompleteType';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { authStore } from '../../../../store/auth.store';
 import { editorStore } from '../../../../store/editor.store';
-import { mapStore } from '../../../../store/map.store';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
 import { LayerEdit } from '../layers/LayerEdit';
 import { TabCreate } from '../tabs/TabCreate';
-import MapService from '../../../../services/map.service';
 
 export const WidgetEditorBox = () => {
   console.log('WidgetEditorBox');

@@ -1,9 +1,8 @@
-import { Box, Button, CircularProgress, Dialog, IconButton, Paper, styled, Typography, Divider, LinearProgress } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, Divider, IconButton, LinearProgress, Paper, styled, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
-import UsersService from '../../../../services/users.serivce';
 import { authStore } from '../../../../store/auth.store';
 import '../../styles/Widget.scss';
 import { SignIn } from '../auth/SignIn';

@@ -1,3 +1,4 @@
+import { IUser } from './IUser';
 import { IComment } from './IComment';
 import { IMapFeatureType } from './IMapFeatureType';
 
@@ -20,4 +21,18 @@ export interface IMapFeature {
   wiki?: string;
   phone?: string;
   comments: IComment[];
+  user: IUser;
+}
+
+export interface ICreateMapFeature {
+  type: IMapFeatureType;
+  coordinates: Coordinate[];
+  zoom: number;
+  name: string;
+  description: string;
+  address?: string;
+  links?: string[];
+  files?: string[];
+  wiki?: string;
+  phone?: string;
 }

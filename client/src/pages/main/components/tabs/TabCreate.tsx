@@ -67,13 +67,10 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
       try {
         const addedFeature = await MapService.addFeature(
           {
-            id: '',
-            createdAt: -1,
             type: selectedType ? selectedType : editorStore.selectedFeatureType,
             coordinates: editorStore.newFeatureCoordinates,
             zoom: editorStore.newFeatureZoom,
             links,
-            comments: [],
             ...data
           },
           files

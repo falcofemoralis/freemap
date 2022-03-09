@@ -11,6 +11,7 @@ import { MAP_SOCKET } from '../../../../services/index';
 import { activeUsersStore } from '../../../../store/active-users.store';
 import { authStore } from '../../../../store/auth.store';
 import { IActiveUser } from '../../../../types/IActiveUser';
+import { getCurrentCoordinates } from '../../../../utils/CoordinatesUtil';
 import { OlStyles } from './styles/OlStyles';
 import { PolygonStyle } from './styles/PolygonStyle';
 
@@ -44,31 +45,13 @@ export const LayerUsers = () => {
   });
   map?.addLayer(baseLayer);
 
-  const getCurrentCoordinates = (): number[][] => {
-    if (map) {
-      const w = window,
-        d = document,
-        e = d.documentElement,
-        g = d.getElementsByTagName('body')[0],
-        x = w.innerWidth || e.clientWidth || g.clientWidth,
-        y = w.innerHeight || e.clientHeight || g.clientHeight;
-      const topleft = map.getCoordinateFromPixel([0, 0]);
-      const topright = map.getCoordinateFromPixel([x, 0]);
-      const bottomleft = map.getCoordinateFromPixel([0, y]);
-      const bottomright = map.getCoordinateFromPixel([x, y]);
-      const coordinates = [topleft, topright, bottomright, bottomleft];
-      return coordinates;
-    }
-
-    return [];
-  };
-
   const handleCoordinatesChange = () => {
     if (!coordinatesTimeoutEnd && map) {
       const zoom = map.getView().getZoom();
-      currentCoordinates = getCurrentCoordinates();
+      currentCoordinates = getCurrentCoordinates(window, document, map);
 
       if (currentCoordinates && zoom && zoom > SHOW_ON_ZOOM) {
+        // update active users on server
         activeUsersStore.socket?.emit('updateActiveUser', {
           data: {
             coordinates: currentCoordinates,
@@ -102,43 +85,45 @@ export const LayerUsers = () => {
   map?.getView()?.on('change:center', handleCoordinatesChange);
 
   useEffect(() => {
-    currentCoordinates = getCurrentCoordinates();
+    // init start coordinates
+    currentCoordinates = getCurrentCoordinates(window, document, map);
 
     activeUsersStore.socket = io(MAP_SOCKET);
     activeUsersStore.socket.on('getActiveUsers', (data: IActiveUser[]) => {
       activeUsersStore.updatesUsers(data);
 
       for (const user of data) {
+        // if owner - skip
         if (user.clientId == activeUsersStore.currentClientId) {
           continue;
         }
 
         if (!featureFilter(user.coordinates)) {
-          activeFeatures
-            .find(f => f.clientId == user.clientId)
-            ?.feature?.getGeometry()
-            ?.setCoordinates([[[0, 0]]]);
+          const feature = activeFeatures.find(f => f.clientId == user.clientId)?.feature;
+          feature?.getGeometry()?.setCoordinates([[[0, 0]]]);
           continue;
         }
 
         if (user.coordinates.length > 1) {
           if (!activeFeatures.find(f => f.clientId == user.clientId)) {
+            // if user feature not exists - create new
             const feature = new Feature(new Polygon([user.coordinates]));
             feature.setProperties({
               username: user.username ?? 'Anonymous',
               avatar: user.avatar ?? ''
             });
+
             source.addFeature(feature);
             activeFeatures.push({ clientId: user.clientId, feature });
           } else {
-            activeFeatures
-              .find(f => f.clientId == user.clientId)
-              ?.feature?.getGeometry()
-              ?.setCoordinates([user.coordinates]);
+            // update exist feature coordinates
+            const feature = activeFeatures.find(f => f.clientId == user.clientId)?.feature;
+            feature?.getGeometry()?.setCoordinates([user.coordinates]);
           }
         }
       }
 
+      // if client was removed - delete feature
       for (const f of activeFeatures) {
         if (!data.find(d => d.clientId == f.clientId)) {
           const activeFeature = activeFeatures.find(ff => ff.clientId == f.clientId);

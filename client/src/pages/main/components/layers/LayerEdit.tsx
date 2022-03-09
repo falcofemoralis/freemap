@@ -13,8 +13,8 @@ import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { editorStore } from '../../../../store/editor.store';
 import { toTuple } from '../../../../utils/CoordinatesUtil';
-import { OlStyles } from './styles/OlStyles';
 import '../../styles/Widget.scss';
+import { OlStyles } from './styles/OlStyles';
 
 interface LayerEditProps {
   onFinish: () => void;

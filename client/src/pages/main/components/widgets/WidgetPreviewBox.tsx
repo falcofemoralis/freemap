@@ -26,29 +26,30 @@ export const WidgetPreviewBox = () => {
     collapsible: false,
     rotateWithView: false
   });
-  if (map) {
-    mapPreview.getOverviewMap().addLayer(baseLayer);
-    mapPreview.setMap(map); // attach main map
-    setPreviewMapLayer(mapStore.mapType as string);
-  }
 
   /**
    * Установка нового слоя превью карты
-   * @param {MapConstant} type - тип карты (Земля\OSM)
+   * @param {MapConstant} type - тип карты
    */
-  function setPreviewMapLayer(type: MapConstant) {
+  const setPreviewMapLayer = (type: MapConstant) => {
     baseLayer.setSource(
       new XYZ({
         url: type as string
       })
     );
-  }
+  };
 
   /**
    * Изменение типа текущей карты (Земля\OSM\etc)
    */
-  async function changeMapType() {
+  const changeMapType = async () => {
     setPreviewMapLayer((await mapStore.toggleMapType()) as string);
+  };
+
+  if (map) {
+    mapPreview.getOverviewMap().addLayer(baseLayer);
+    mapPreview.setMap(map); // attach main map
+    setPreviewMapLayer(mapStore.mapType as string);
   }
 
   return (

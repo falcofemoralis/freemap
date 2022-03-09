@@ -1,5 +1,5 @@
-import { errorStore } from './../store/error.store';
 import { AxiosError } from 'axios';
+import { errorStore } from './../store/error.store';
 import { IComment } from './../types/IComment';
 import { axiosInstance, headers } from './index';
 

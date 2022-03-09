@@ -1,8 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { makeAutoObservable } from 'mobx';
 import AuthService from '../services/auth.service';
-import { IUser } from './../types/IUser';
 import UsersService from '../services/users.serivce';
+import { IUser } from './../types/IUser';
 
 const TOKEN_ITEM = 'token';
 

@@ -183,7 +183,7 @@ export const WidgetToolBox = () => {
 
   const segmentStyles = [segmentStyle];
 
-  const formatLength = function (line: LineString) {
+  const formatLength = (line: LineString) => {
     const length = getLength(line);
     let output;
     if (length > 100) {
@@ -196,7 +196,7 @@ export const WidgetToolBox = () => {
 
   let tipPoint: Geometry | RenderFeature | undefined;
 
-  function styleFunction(feature: Feature<Geometry> | RenderFeature, tip?: string) {
+  const styleFunction = (feature: Feature<Geometry> | RenderFeature, tip?: string) => {
     const styles = [style];
     const type = feature?.getGeometry()?.getType();
 
@@ -232,7 +232,7 @@ export const WidgetToolBox = () => {
     }
 
     return styles;
-  }
+  };
 
   const source = new VectorSource();
   const modify = new Modify({ source, style: modifyStyle });
@@ -249,7 +249,7 @@ export const WidgetToolBox = () => {
   map?.addInteraction(modify);
 
   let draw: Draw | null = null; // global so we can remove it later
-  function addInteraction() {
+  const addInteraction = () => {
     const activeTip = 'Click to continue drawing the line';
     const idleTip = 'Click to start measuring';
     let tip = idleTip;
@@ -279,7 +279,7 @@ export const WidgetToolBox = () => {
     });
     modify.setActive(true);
     map?.addInteraction(draw);
-  }
+  };
 
   const measure = () => {
     if (draw) map?.removeInteraction(draw);

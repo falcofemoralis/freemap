@@ -3,9 +3,9 @@ import { Geometry, MultiPolygon, Polygon } from 'ol/geom';
 import RenderFeature from 'ol/render/Feature';
 import { Fill, Stroke, Style, Text } from 'ol/style';
 import { StyleType } from '../../../../../constants/style.type';
+import { IMapFeatureType } from '../../../../../types/IMapFeatureType';
 import { ITypeStyle } from '../../../../../types/ITypeStyle';
 import { GeometryType } from './../../../../../constants/geometry.type';
-import { IMapFeatureType } from '../../../../../types/IMapFeatureType';
 
 export class OlStyles {
   getStyleFunction(styles: Style[]) {

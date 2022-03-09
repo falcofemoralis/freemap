@@ -3,7 +3,6 @@ import { fromLonLat } from 'ol/proj';
 import MapConstant from '../constants/map.constant';
 import { Coordinate } from '../types/IMapFeature';
 import { getQueryParams, updateQuery } from '../utils/QueryUtil';
-import { IMapFeatureType } from './../types/IMapFeatureType';
 
 class MapStore {
   mapType: MapConstant = MapConstant.OSM;

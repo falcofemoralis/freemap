@@ -1,6 +1,6 @@
-import { IActiveUser } from '../types/IActiveUser';
 import { makeAutoObservable } from 'mobx';
 import { Socket } from 'socket.io-client';
+import { IActiveUser } from '../types/IActiveUser';
 
 class ActiveUsersStore {
   users: IActiveUser[] = [];

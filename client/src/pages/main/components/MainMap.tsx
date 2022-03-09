@@ -39,13 +39,13 @@ export const MainMap: React.FC = ({ children }) => {
    * Установка нового слоя карты
    * @param {MapConstant} type - тип карты (Земля\OSM)
    */
-  function setMapLayer(type: MapConstant) {
+  const setMapLayer = (type: MapConstant) => {
     baseLayer.setSource(
       new XYZ({
         url: type as string
       })
     );
-  }
+  };
 
   /**
    * Отображение курсора на объектах

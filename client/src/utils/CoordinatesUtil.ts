@@ -1,3 +1,4 @@
+import { Map } from 'ol';
 import { toLonLat } from 'ol/proj';
 import { GeometryType } from './../constants/geometry.type';
 import { Coordinate } from './../types/IMapFeature';
@@ -82,4 +83,23 @@ export function toTuple(coordinates: unknown, type: GeometryType): Coordinate[] 
 
 export const toText = (coordinate: Coordinate): string => {
   return `${coordinate.lon}, ${coordinate.lat}`;
+};
+
+export const getCurrentCoordinates = (window: Window & typeof globalThis, document: Document, map?: Map): number[][] => {
+  if (map) {
+    const w = window,
+      d = document,
+      e = d.documentElement,
+      g = d.getElementsByTagName('body')[0],
+      x = w.innerWidth || e.clientWidth || g.clientWidth,
+      y = w.innerHeight || e.clientHeight || g.clientHeight;
+    const topleft = map.getCoordinateFromPixel([0, 0]);
+    const topright = map.getCoordinateFromPixel([x, 0]);
+    const bottomleft = map.getCoordinateFromPixel([0, y]);
+    const bottomright = map.getCoordinateFromPixel([x, y]);
+    const coordinates = [topleft, topright, bottomright, bottomleft];
+    return coordinates;
+  }
+
+  return [];
 };

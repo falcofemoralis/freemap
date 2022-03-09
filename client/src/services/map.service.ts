@@ -1,10 +1,10 @@
-import { authStore } from './../store/auth.store';
 import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
 import { FileType } from '../constants/file.type';
 import { errorStore } from '../store/error.store';
-import { IMapFeature } from '../types/IMapFeature';
+import { ICreateMapFeature, IMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
+import { authStore } from './../store/auth.store';
 import { axiosInstance, headers } from './index';
 export default class MapService {
   private static API_URL = '/map';
@@ -29,7 +29,7 @@ export default class MapService {
     }
   }
 
-  static async addFeature(feature: IMapFeature, files: File[]): Promise<IMapFeature> {
+  static async addFeature(feature: ICreateMapFeature, files: File[]): Promise<IMapFeature> {
     const body = { ...feature, type: feature.type.id, coordinates: toJS(feature.coordinates) };
 
     try {
