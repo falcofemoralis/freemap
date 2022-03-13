@@ -1,87 +1,65 @@
-import { Feature } from 'ol';
-import { Polygon } from 'ol/geom';
-import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
+import { Feature, GeoJsonProperties, Geometry, Polygon, Position } from 'geojson';
+import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
+import { observe } from 'mobx';
+import { stringify } from 'querystring';
 import React, { useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { FileType } from '../../../../constants/file.type';
+import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
+import { MAP_SOCKET } from '../../../../services';
 import AuthService from '../../../../services/auth.service';
-import { MAP_SOCKET } from '../../../../services/index';
+import UsersService from '../../../../services/users.serivce';
 import { activeUsersStore } from '../../../../store/active-users.store';
 import { authStore } from '../../../../store/auth.store';
 import { IActiveUser } from '../../../../types/IActiveUser';
-import { getCurrentCoordinates } from '../../../../utils/CoordinatesUtil';
-import { OlStyles } from './styles/OlStyles';
-import { PolygonStyle } from './styles/PolygonStyle';
-import { observe } from 'mobx';
-import { mapStore } from '../../../../store/map.store';
 
 const SHOW_ON_ZOOM = 3;
-
-interface IActiveFeature {
+interface IActiveFeatureProps {
+  name: string;
   clientId: string;
-  feature: Feature<Polygon>;
+  userAvatar?: string;
+  userColor?: string;
 }
 
 export const LayerUsers = () => {
   console.log('LayerUsers');
 
-  const { map } = React.useContext(MapContext);
-  const activeFeatures: IActiveFeature[] = [];
-  let coordinatesTimeoutEnd = false;
+  const { mainMap } = React.useContext(MapContext);
+  const featureCollection: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+    type: 'FeatureCollection',
+    features: []
+  };
   let currentCoordinates: number[][];
   let currentZoom: number;
 
-  const source = new VectorSource();
-  const baseLayer = new VectorLayer({
-    source,
-    properties: {
-      name: 'Users Layer'
-    },
-    style: function (feature) {
-      const olStyles = new OlStyles();
-      const labelStyle = olStyles.createLabelStyle(
-        feature.get('username'),
-        AuthService.getUserAvatar(feature.get('avatar'), FileType.THUMBNAIL),
-        1,
-        feature.getGeometry()
-      );
-      return [PolygonStyle, labelStyle];
-    },
-    renderBuffer: 5000
-  });
-  map?.addLayer(baseLayer);
-
-  // listener for map coordinates change
-  map?.getView()?.on('change:center', () => {
-    if (!coordinatesTimeoutEnd && map) {
-      currentZoom = map.getView().getZoom() ?? 1;
-      currentCoordinates = getCurrentCoordinates(window, document, map);
-
-      if (currentCoordinates && currentZoom && currentZoom > SHOW_ON_ZOOM) {
-        // update active users on server
-        const data = {
-          coordinates: currentCoordinates,
-          zoom: currentZoom
-        };
-        activeUsersStore.socket?.emit('updateActiveUser', { data });
-      }
-
-      coordinatesTimeoutEnd = true;
-
-      setTimeout(() => {
-        coordinatesTimeoutEnd = false;
-      }, 0.25 * 1000);
+  const updatePosition = () => {
+    const bounds = mainMap?.getBounds();
+    if (bounds) {
+      currentCoordinates = [
+        bounds.getSouthEast().toArray(),
+        bounds.getNorthEast().toArray(),
+        bounds.getNorthWest().toArray(),
+        bounds.getSouthWest().toArray(),
+        bounds.getSouthEast().toArray()
+      ];
     }
-  });
 
+    currentZoom = mainMap?.getZoom() ?? 1;
+  };
+
+  /**
+   * Если клиент находится "внутри" другого клиента - фича будет удалена
+   * @param coordinates - координаты фичи
+   * @returns true - оставить, false - удалить
+   */
   const featureFilter = (coordinates: number[][]) => {
     if (!coordinates || !currentCoordinates) {
       return false;
     }
 
-    if (currentCoordinates[3][0] > coordinates[3][0] && currentCoordinates[2][0] < coordinates[2][0]) {
+    // check if this user inside - SE lon && NW lat
+    if (currentCoordinates[0][0] < coordinates[0][0] && currentCoordinates[2][1] < coordinates[2][1]) {
       return false;
     }
 
@@ -89,13 +67,8 @@ export const LayerUsers = () => {
   };
 
   const initSocket = () => {
-    // init start coordinates
-    currentCoordinates = getCurrentCoordinates(window, document, map);
-    currentZoom = map?.getView().getZoom() ?? 1;
+    updatePosition();
 
-    console.log(authStore.user);
-
-    // socket connect
     activeUsersStore.socket = io(MAP_SOCKET, {
       query: {
         coordinates: currentCoordinates,
@@ -105,7 +78,7 @@ export const LayerUsers = () => {
         userColor: authStore.user?.userColor
       }
     });
-    // subscribe on getActiveUsers
+
     activeUsersStore.socket.on('getActiveUsers', (data: IActiveUser[]) => {
       activeUsersStore.updatesUsers(data);
 
@@ -115,53 +88,111 @@ export const LayerUsers = () => {
           continue;
         }
 
+        // remove bigger feature
         if (!featureFilter(user.coordinates)) {
-          const feature = activeFeatures.find(f => f.clientId == user.clientId)?.feature;
-          feature?.getGeometry()?.setCoordinates([[[0, 0]]]);
+          console.log('remove');
+
+          (featureCollection.features.find(f => f?.properties?.clientId == user.clientId)?.geometry as Polygon).coordinates = [[[0, 0]]];
+          (mainMap?.getSource('users') as GeoJSONSource).setData(featureCollection);
           continue;
         }
 
         if (user.coordinates.length > 1) {
-          if (!activeFeatures.find(f => f.clientId == user.clientId)) {
-            // if user feature not exists - create new
-            const feature = new Feature(new Polygon([user.coordinates]));
-            feature.setProperties({
-              username: user.username,
-              userAvatar: user.userAvatar,
-              userColor: user.userColor
-            });
-
-            source.addFeature(feature);
-            activeFeatures.push({ clientId: user.clientId, feature });
+          if (!featureCollection.features.find(f => f?.properties?.clientId == user.clientId)) {
+            /**
+             * if user feature not exists - create new
+             */
+            const feature: Feature<Geometry, IActiveFeatureProps> = {
+              type: 'Feature',
+              geometry: {
+                type: GeometryType.POLYGON,
+                coordinates: [currentCoordinates as Position[]]
+              },
+              properties: {
+                name: user.username,
+                clientId: user.clientId,
+                userAvatar: user.userAvatar,
+                userColor: user.userColor
+              }
+            };
+            featureCollection.features.push(feature);
+            (mainMap?.getSource('users') as GeoJSONSource).setData(featureCollection);
           } else {
-            // update exist feature coordinates
-            const feature = activeFeatures.find(f => f.clientId == user.clientId)?.feature;
-            feature?.getGeometry()?.setCoordinates([user.coordinates]);
+            /**
+             * update exist feature coordinates
+             */
+            (featureCollection.features.find(f => f?.properties?.clientId == user.clientId)?.geometry as Polygon).coordinates = [user.coordinates];
+            (mainMap?.getSource('users') as GeoJSONSource).setData(featureCollection);
           }
         }
       }
 
       // if client was removed - delete feature
-      for (const f of activeFeatures) {
-        if (!data.find(d => d.clientId == f.clientId)) {
-          const activeFeature = activeFeatures.find(ff => ff.clientId == f.clientId);
-          if (activeFeature) {
-            source.removeFeature(activeFeature.feature);
-
-            activeFeatures.splice(activeFeatures.indexOf(activeFeature), 1);
-          }
+      for (const f of featureCollection.features) {
+        if (!data.find(d => d.clientId == f.properties?.clientId)) {
+          featureCollection.features = featureCollection.features.filter(ff => ff.properties?.clientId != f.properties?.clientId);
+          (mainMap?.getSource('users') as GeoJSONSource).setData(featureCollection);
         }
       }
     });
   };
 
   useEffect(() => {
-    if (authStore.isAuth) {
-      observe(authStore, 'user', change => {
-        initSocket();
-      });
-    } else {
+    console.log('useEffect');
+    console.log(mainMap);
+    if (mainMap) {
       initSocket();
+
+      mainMap?.addSource('users', { type: 'geojson', data: featureCollection });
+
+      // Add a new layer to visualize the polygon.
+      mainMap?.addLayer({
+        id: 'maine',
+        type: 'fill',
+        source: 'users', // reference the data source
+        layout: {},
+        paint: {
+          'fill-color': '#0080ff', // blue color fill
+          'fill-opacity': 0.5
+        }
+      });
+      // Add a black outline around the polygon.
+      mainMap?.addLayer({
+        id: 'outline',
+        type: 'line',
+        source: 'users',
+        layout: {},
+        paint: {
+          'line-color': '#000',
+          'line-width': 3
+        }
+      });
+
+      mainMap?.addLayer({
+        id: `maine-username`,
+        type: 'symbol',
+        source: `users`,
+        layout: {
+          'text-field': ['get', 'name'],
+          'icon-image': ['get', 'userAvatar']
+        }
+      });
+
+      // listener for map coordinates change
+      mainMap?.on('moveend', () => {
+        if (mainMap) {
+          updatePosition();
+
+          if (currentCoordinates && currentZoom && currentZoom > SHOW_ON_ZOOM) {
+            // update active users on server
+            const data = {
+              coordinates: currentCoordinates,
+              zoom: currentZoom
+            };
+            activeUsersStore.socket?.emit('updateActiveUser', { data });
+          }
+        }
+      });
     }
   });
 

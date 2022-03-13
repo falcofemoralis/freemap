@@ -1,60 +1,60 @@
 $box-corner: 25px;
 $mobile-screen: 700px;
 
-%olmap {
-    border-radius: $box-corner !important;
-    position: absolute !important;
-
-    .ol-overviewmap-map {
-        height: 100% !important;
-        width: 100% !important;
-        margin: unset !important;
-        border: unset !important;
-    }
-
-    .ol-layer canvas {
-        height: 100% !important;
-        width: 100% !important;
-        border-radius: $box-corner !important;
-    }
-
-    button {
-        display: none !important;
-    }
-}
-
-.previewMap {
-    @extend %olmap;
-    z-index: 2;
-    bottom: 25px !important;
-    left: 15px !important;
-    width: 80px !important;
-    height: 80px !important;
-    right: unset !important;
-    background-color: rgba(255, 255, 255, 0) !important;
-    padding: unset !important;
-}
-
 .previewMapBox {
-    z-index: 1;
+    z-index: 2;
     position: absolute;
     border-radius: $box-corner !important;
     bottom: 25px;
     left: 15px;
     width: 80px;
     height: 80px;
-    cursor: pointer;
-    background: rgba($color: #000000, $alpha: 0.2) !important;
     border: #fff solid 2px;
 
+
+    &__map{
+        border-radius: $box-corner;
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+    
+        .mapboxgl-control-container{
+            display: none !important;
+        }
+    }
+
     &__label {
+        z-index: 3;
         width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-        position: relative;
-        top: 70%;
+        position: absolute;
         color: #fff;
+        bottom: 0;
+     
+    }
+
+    &__cover {
+        z-index: 2;
+        position: absolute;
+        top: 0;
+        border-radius: $box-corner;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        background: rgba($color: #000000, $alpha: 0.2) !important;
+    }
+
+    &__plate {
+        z-index: 4;
+        position: absolute;
+        top: 0;
+        border-radius: $box-corner;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
     }
 }
 
@@ -155,4 +155,8 @@ $mobile-screen: 700px;
     &__box{
         
     }
+}
+
+.mapboxgl-ctrl-top-right {
+    display: none !important;
 }

@@ -1,20 +1,21 @@
 import { List, ListItemButton, ListSubheader, Paper } from '@mui/material';
+import { Position } from 'geojson';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
+import { getCenter } from '../../../../misc/CoordinatesUtils';
 import { activeUsersStore } from '../../../../store/active-users.store';
 import { IActiveUser } from '../../../../types/IActiveUser';
-import { toTuple } from '../../../../utils/CoordinatesUtil';
-import { flyTo } from '../../../../utils/MapAnimation';
 import '../../styles/Widget.scss';
+import { LayerUsers } from '../layers/LayerUsers';
 
 export const WidgetUsersBox = observer(() => {
-  const { map } = React.useContext(MapContext);
+  const { mainMap } = React.useContext(MapContext);
 
-  const selectUser = (coords: number[][], zoom: number) => {
-    flyTo(toTuple([coords], GeometryType.POLYGON), zoom, map);
+  const selectUser = (coordinates: Position[], zoom: number) => {
+    mainMap?.flyTo({ center: getCenter([coordinates], GeometryType.POLYGON), zoom });
   };
 
   const getUsers = (users: IActiveUser[]): IActiveUser[] => {

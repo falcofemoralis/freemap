@@ -1,22 +1,12 @@
+import { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { makeAutoObservable } from 'mobx';
-import { Feature } from 'ol';
-import { Geometry } from 'ol/geom';
-import { GeometryType } from '../constants/geometry.type';
 import MapService from '../services/map.service';
-import { Coordinate } from '../types/IMapFeature';
+import { ICreatedMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
-
 class EditorStore {
-  isDrawing = false;
-  selectedEditType: GeometryType | null;
-  selectedFeatureType: IMapFeatureType | null;
-  isEditorTabOpen = false;
-
-  newFeatureCoordinates: Coordinate[];
-  newFeatureZoom: number;
-  newFeature: Feature<Geometry> | null = null; // объект геометрии на карте, который создается
-
   featureTypes: IMapFeatureType[] | null = null;
+  createdFeature: Partial<ICreatedMapFeature> | null = null; // created feature
+  isDrawing = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -26,8 +16,16 @@ class EditorStore {
     this.featureTypes = await MapService.getFeatureTypes();
   }
 
-  toggleEdit() {
+  setFeature(feature: Partial<ICreatedMapFeature> | null) {
+    this.createdFeature = feature;
+  }
+
+  toggleDrawing() {
     this.isDrawing = !this.isDrawing;
+  }
+
+  get isFeature() {
+    return this.createdFeature != null;
   }
 }
 

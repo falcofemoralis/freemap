@@ -40,7 +40,9 @@ export const FileUpload: React.FC<FileUploadProps> = observer(({ onUpload }) => 
   };
 
   return (
-    <Box sx={{ display: 'flex', overflowX: localStore.files.length > 0 ? 'scroll' : 'hidden' }}>
+    <Box
+      sx={{ display: 'flex', justifyContent: localStore.files.length == 0 ? 'center' : 'unset', overflowX: localStore.files.length > 0 ? 'scroll' : 'hidden' }}
+    >
       <label htmlFor='contained-button-file'>
         <Input accept='image/*' id='contained-button-file' multiple type='file' onChange={uploadFiles} />
         {localStore.files.length == 0 ? (

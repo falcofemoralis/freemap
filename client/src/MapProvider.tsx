@@ -1,12 +1,12 @@
-import Map from 'ol/Map';
+import mapboxgl from 'mapbox-gl';
 import React from 'react';
 
 export interface IMapContext {
-  map: Map;
+  mainMap?: mapboxgl.Map;
 }
 
 export const MapContext = React.createContext<Partial<IMapContext>>({});
 
-export const MapProvider: React.FC<IMapContext> = ({ map, children }) => {
-  return <MapContext.Provider value={{ map }}>{children}</MapContext.Provider>;
+export const MapProvider: React.FC<IMapContext> = ({ mainMap, children }) => {
+  return <MapContext.Provider value={{ mainMap }}>{children}</MapContext.Provider>;
 };

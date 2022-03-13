@@ -1,17 +1,15 @@
-import { IUser } from './IUser';
+import { Position } from 'geojson';
+import { ICategory } from './ICategory';
 import { IComment } from './IComment';
 import { IMapFeatureType } from './IMapFeatureType';
+import { IUser } from './IUser';
 
-export interface Coordinate {
-  lon: number;
-  lat: number;
-}
+export type Coordinates = Position[][] | Position[][][];
 
 export interface IMapFeature {
   id: string;
   type: IMapFeatureType;
-  coordinates: Coordinate[];
-  zoom: number;
+  coordinates: Coordinates;
   name: string;
   description: string;
   address?: string;
@@ -22,12 +20,12 @@ export interface IMapFeature {
   phone?: string;
   comments: IComment[];
   user: IUser;
+  category?: ICategory;
 }
 
-export interface ICreateMapFeature {
+export interface ICreatedMapFeature {
   type: IMapFeatureType;
-  coordinates: Coordinate[];
-  zoom: number;
+  coordinates: Coordinates;
   name: string;
   description: string;
   address?: string;
@@ -35,4 +33,5 @@ export interface ICreateMapFeature {
   files?: string[];
   wiki?: string;
   phone?: string;
+  category?: ICategory;
 }

@@ -1,100 +1,121 @@
-import { observe } from 'mobx';
-import TileLayer from 'ol/layer/Tile';
-import OlMap from 'ol/Map';
-import { toLonLat } from 'ol/proj';
-import XYZ from 'ol/source/XYZ';
-import View from 'ol/View';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import * as React from 'react';
-import MapConstant from '../../../constants/map.constant';
-import { MapProvider } from '../../../MapProvider';
+import { useLocation } from 'react-router-dom';
 import { mapStore } from '../../../store/map.store';
-import { formatCoordinate, formatZoom } from '../../../utils/CoordinatesUtil';
-import { CoordinatesFilter } from './layers/filters/CoordinatesFilter';
+import { FeatureProps } from '../../../types/IMapData';
+import length from '@turf/length';
 
-const COORDINATES_CHANGE_TIME = 0.25; // Изменение url каждые 250 мс
+interface MainMapProps {
+  onLoaded?: (map: mapboxgl.Map) => void;
+}
+export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
+  const [mainMap, setMap] = React.useState<mapboxgl.Map>();
+  const mapNode = React.useRef(null);
+  let hoveredStateId: string | number | undefined | null = null;
 
-export const MainMap: React.FC = ({ children }) => {
-  console.log('MainMap');
+  React.useEffect(() => {
+    const node = mapNode.current;
+    if (typeof window === 'undefined' || node === null) return;
 
-  /* Init map */
-  const baseLayer = new TileLayer({
-    properties: {
-      name: 'Main Map'
-    }
-  });
-  const mapView = new View({
-    center: [mapStore.lonLat.lon, mapStore.lonLat.lat],
-    zoom: mapStore.zoom,
-    projection: 'EPSG:3857'
-  });
-  const map = new OlMap({
-    layers: [baseLayer],
-    view: mapView
-  });
-  const mapTarget = (element: any) => {
-    map.setTarget(element);
-  };
-
-  /**
-   * Установка нового слоя карты
-   * @param {MapConstant} type - тип карты (Земля\OSM)
-   */
-  const setMapLayer = (type: MapConstant) => {
-    baseLayer.setSource(
-      new XYZ({
-        url: type as string
-      })
-    );
-  };
-
-  /**
-   * Отображение курсора на объектах
-   */
-  map.on('pointermove', event => {
-    const pixel = map.getEventPixel(event.originalEvent);
-    let hit = false;
-
-    map.forEachFeatureAtPixel(pixel, feature => {
-      if (hit) return true;
-      const coordinatesFilter = new CoordinatesFilter(map).filter;
-      hit = coordinatesFilter(feature);
+    /**
+     * Инициализация главной карты
+     */
+    mapboxgl.accessToken = process.env.REACT_APP_MAP_TOKEN ?? '';
+    const mapboxMap = new mapboxgl.Map({
+      container: node,
+      style: mapStore.mapType as string,
+      center: [mapStore.lonLat[0], mapStore.lonLat[1]],
+      zoom: mapStore.zoom
     });
 
-    map.getViewport().style.cursor = hit ? 'pointer' : '';
-  });
+    setMap(mapboxMap);
+
+    /**
+     * Загрузка данных карты
+     */
+    if (onLoaded)
+      mapboxMap.once('load', async () => {
+        console.info('Main map loaded.');
+
+        onLoaded(mapboxMap);
+
+        const mapData = await mapStore.initMapData(mapboxMap.getBounds().toArray());
+
+        for (const source of mapData.sources) {
+          mapboxMap.addSource(source.id, {
+            type: 'geojson',
+            data: source.featureCollection
+          });
+        }
+
+        for (const layer of mapData.layers) {
+          mapboxMap.addLayer(layer as any);
+
+          if (layer.id.includes('label')) {
+            continue;
+          }
+
+          mapboxMap.on('mousemove', layer.id, e => {
+            if (e && e.features && e.features.length > 0) {
+              //mapboxMap.getCanvas().style.cursor = 'pointer';
+
+              if (hoveredStateId) {
+                mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
+              }
+
+              hoveredStateId = e.features[0].id;
+              if (hoveredStateId) {
+                mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: true });
+              }
+            }
+          });
+
+          mapboxMap.on('mouseleave', layer.id, () => {
+            if (hoveredStateId) {
+              mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
+            }
+            hoveredStateId = null;
+          });
+
+          mapboxMap.on('click', layer.id, e => {
+            if (e && e.features && e.features.length > 0) {
+              mapStore.setSelectedFeatureId((e.features[0].properties as FeatureProps).id);
+            }
+          });
+        }
+      });
+
+    return () => {
+      mapboxMap.remove();
+      setMap(undefined);
+    };
+  }, []);
 
   /**
-   * Листенер изменения координат. Меняется текущий url с добавление координат и текущего зума
+   * Получение данных карты из url
    */
-  let pathChanged = false;
-  mapView.on('change:center', () => {
-    const coordinates = mapView.getCenter();
-    const zoom = mapView.getZoom();
+  mapStore.initMapCoordinates(useLocation().search);
 
-    if (!pathChanged) {
-      if (coordinates && zoom) {
-        //socket.emit('updateActiveUser', { data: { coordinates } });
-        const newCoordinates = toLonLat(coordinates, 'EPSG:3857');
-        mapStore.updateMapPosition(formatCoordinate(newCoordinates), formatZoom(zoom));
+  /**
+   * Листенер изменения координат. Меняется текущий url с добавлением координат и текущего зума
+   */
+  mainMap?.on('moveend', () => {
+    try {
+      const zoom = mainMap.getZoom();
+      const center = mainMap.getCenter();
+
+      if (center && zoom) {
+        mapStore.updateMapPosition(center.lng, center.lat, zoom);
       }
-
-      pathChanged = true;
-
-      setTimeout(() => {
-        pathChanged = false;
-      }, COORDINATES_CHANGE_TIME * 1000);
+    } catch (e) {
+      console.error(e);
     }
-  });
-
-  setMapLayer(mapStore.mapType);
-  observe(mapStore, 'mapType', change => {
-    setMapLayer(change.newValue as string);
   });
 
   return (
     <>
-      <div ref={mapTarget} className='map' />
-      <MapProvider map={map}>{children}</MapProvider>
+      <div ref={mapNode} className='map' />
     </>
   );
 };

@@ -2,7 +2,8 @@ import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
 import { FileType } from '../constants/file.type';
 import { errorStore } from '../store/error.store';
-import { ICreateMapFeature, IMapFeature } from '../types/IMapFeature';
+import { IMapData } from '../types/IMapData';
+import { ICreatedMapFeature, IMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
 import { authStore } from './../store/auth.store';
 import { axiosInstance, headers } from './index';
@@ -19,9 +20,9 @@ export default class MapService {
     }
   }
 
-  static async getMapData(ext: number[], zoom: number) {
+  static async getMapData(ext: number[][]): Promise<IMapData> {
     try {
-      const { data } = await axiosInstance.get(`${this.API_URL}?latT=${ext[3]}&lonR=${ext[2]}&latB=${ext[1]}&lonL=${ext[0]}&zoom=${zoom}`);
+      const { data } = await axiosInstance.get<IMapData>(`${this.API_URL}?latT=${ext[1][1]}&lonR=${ext[1][0]}&latB=${ext[0][1]}&lonL=${ext[0][0]}&zoom=${0}`);
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);
@@ -29,7 +30,7 @@ export default class MapService {
     }
   }
 
-  static async addFeature(feature: ICreateMapFeature, files: File[]): Promise<IMapFeature> {
+  static async addFeature(feature: ICreatedMapFeature, files: File[]): Promise<IMapFeature> {
     const body = { ...feature, type: feature.type.id, coordinates: toJS(feature.coordinates) };
 
     try {

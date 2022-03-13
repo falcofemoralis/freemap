@@ -16,8 +16,6 @@ enum DialogType {
 const SETTINGS_WIDTH = 372;
 
 export const WidgetAccountBox = observer(() => {
-  console.log('WidgetAccountBox');
-
   if (authStore.isAuth && !authStore.user) {
     authStore.getUserProfile();
   }

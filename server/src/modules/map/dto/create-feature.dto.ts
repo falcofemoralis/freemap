@@ -1,16 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
-
-export interface Coordinate {
-  lon: number;
-  lat: number;
-}
+import { ArrayMinSize, IsArray, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { Position } from '../entities/map-feature.entity';
 
 export class CreateFeatureDataDto {
-  @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'id типа объекта' })
+  @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'id типа' })
   @IsNotEmpty()
   @IsString()
   type: string;
+
+  @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'id категории' })
+  category?: string;
 
   @ApiProperty({ example: 'qwerty', description: 'Название' })
   @IsNotEmpty()
@@ -22,17 +21,12 @@ export class CreateFeatureDataDto {
   @MaxLength(1200)
   description: string;
 
-  @ApiProperty({ example: '[{"lon": 1, "lat": 35}, {"lon": 2, "lat": 36}]', description: 'координаты объекта' })
+  @ApiProperty({ example: '[]', description: 'Координаты объекта' })
   @IsNotEmpty()
-  @ArrayMinSize(2)
-  coordinates: Coordinate[];
+  @ArrayMinSize(1)
+  coordinates: Position[][] | Position[][][];
 
-  @ApiProperty({ example: '15', description: 'Приближение' })
-  @IsNumber()
-  @IsNotEmpty()
-  zoom: number;
-
-  @ApiProperty({ example: 'qwerty', description: 'Адресс' })
+  @ApiProperty({ example: 'qwerty', description: 'Адрес' })
   @IsString()
   address?: string;
 

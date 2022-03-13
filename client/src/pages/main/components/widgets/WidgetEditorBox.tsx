@@ -10,65 +10,54 @@ import { AutocompleteType } from '../../../../components/AutocompleteType';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { authStore } from '../../../../store/auth.store';
 import { editorStore } from '../../../../store/editor.store';
+import { ICreatedMapFeature } from '../../../../types/IMapFeature';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
-import { LayerEdit } from '../layers/LayerEdit';
+import { LayerDraw } from '../layers/LayerDraw';
 import { TabCreate } from '../tabs/TabCreate';
 
 export const WidgetEditorBox = () => {
-  console.log('WidgetEditorBox');
   const [alert, setAlert] = React.useState(false);
+  const [selectedEditType, setSelectedEditType] = React.useState<GeometryType | null>(null);
+  const [selectedFeatureType, setSelectedFeatureType] = React.useState<IMapFeatureType | null>(null);
 
-  const handleEditSelect = (type: GeometryType | null) => {
+  const handleEditTypeSelect = (type: GeometryType | null) => {
     if (!authStore.isAuth) {
       setAlert(true);
       return;
     }
-    editorStore.selectedEditType = type;
-  };
 
-  const handleFeatureTypeSelect = (type: IMapFeatureType | null) => {
-    editorStore.selectedFeatureType = type;
+    setSelectedEditType(type);
   };
 
   const onFeatureTypeApply = () => {
-    if (editorStore.selectedFeatureType) {
-      editorStore.toggleEdit();
-      editorStore.selectedEditType = null;
+    if (selectedFeatureType) {
+      setSelectedEditType(null);
+      editorStore.toggleDrawing();
     }
   };
 
-  const handleDrawFinish = () => {
-    editorStore.isEditorTabOpen = true;
-  };
-
-  const handleCreateFeature = () => {
-    editorStore.newFeature = null;
-    handleCloseTab();
-  };
-
+  const handleDrawFinish = (feature: Partial<ICreatedMapFeature>) => editorStore.setFeature(feature);
+  const handleDrawCancel = () => editorStore.toggleDrawing();
   const handleCloseTab = () => {
-    editorStore.isEditorTabOpen = false;
-    editorStore.toggleEdit();
+    editorStore.setFeature(null);
+    handleDrawCancel();
   };
 
   return (
     <Box>
       <Paper className='editorBox' elevation={5}>
-        <IconButton className='editorBtn' size='large' onClick={() => handleEditSelect(GeometryType.POLYGON)}>
-          <HomeWorkOutlinedIcon />
-        </IconButton>
-        <IconButton className='editorBtn' size='large' onClick={() => handleEditSelect(GeometryType.LINE_STRING)}>
-          <LinearScaleOutlinedIcon />
-        </IconButton>
-        <IconButton className='editorBtn' size='large' onClick={() => handleEditSelect(GeometryType.MULTI_POLYGON)}>
-          <HighlightAltOutlinedIcon />
-        </IconButton>
-        <TypesDialog onChange={handleFeatureTypeSelect} onApply={onFeatureTypeApply} onCancel={() => handleEditSelect(null)} />
-        <TabCreate onSubmit={handleCreateFeature} onClose={handleCloseTab} />
+        <EditorPanel onSelect={handleEditTypeSelect} />
+        <TypesDialog
+          selectedEditType={selectedEditType}
+          onChange={setSelectedFeatureType}
+          onApply={onFeatureTypeApply}
+          onCancel={() => handleEditTypeSelect(null)}
+        />
+        <TabCreate onSubmit={handleCloseTab} onClose={handleCloseTab} />
       </Paper>
       <Paper className='editorCtrlBox' elevation={5}>
-        <LayerEdit onFinish={handleDrawFinish} />
+        <LayerDraw selectedFeatureType={selectedFeatureType} onFinish={handleDrawFinish} onCancel={handleDrawCancel} />
       </Paper>
       <Snackbar open={alert} onClose={() => setAlert(false)} autoHideDuration={2000}>
         <MuiAlert elevation={5} onClose={() => setAlert(false)} severity='info' sx={{ width: '100%' }} variant='filled'>
@@ -79,28 +68,41 @@ export const WidgetEditorBox = () => {
   );
 };
 
+interface EditorPanelProps {
+  onSelect: (type: GeometryType) => void;
+}
+const EditorPanel: React.FC<EditorPanelProps> = observer(({ onSelect }) => {
+  return (
+    <>
+      <IconButton className='editorBtn' size='large' onClick={() => onSelect(GeometryType.POLYGON)} disabled={editorStore.isDrawing}>
+        <HomeWorkOutlinedIcon />
+      </IconButton>
+      <IconButton className='editorBtn' size='large' onClick={() => onSelect(GeometryType.MULTI_LINE_STRING)} disabled={editorStore.isDrawing}>
+        <LinearScaleOutlinedIcon />
+      </IconButton>
+      <IconButton className='editorBtn' size='large' onClick={() => onSelect(GeometryType.MULTI_POLYGON)} disabled={editorStore.isDrawing}>
+        <HighlightAltOutlinedIcon />
+      </IconButton>
+    </>
+  );
+});
+
 interface TypesDialogProps {
+  selectedEditType: GeometryType | null;
   onChange: (type: IMapFeatureType | null) => void;
   onApply: () => void;
   onCancel: () => void;
 }
-const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, onApply }) => {
-  console.log('TypesDialog');
-
-  if (!editorStore.featureTypes && Boolean(editorStore.selectedEditType)) {
+const TypesDialog: React.FC<TypesDialogProps> = observer(({ selectedEditType, onChange, onCancel, onApply }) => {
+  if (!editorStore.featureTypes && Boolean(selectedEditType)) {
     editorStore.getFeatureTypes();
   }
 
   return (
-    <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
+    <Dialog open={Boolean(selectedEditType)} onClose={onCancel}>
       <DialogTitle>Выбрать тип</DialogTitle>
       <DialogContent>
-        <AutocompleteType
-          sx={{ mt: 3, width: 300 }}
-          onChange={onChange}
-          featureTypes={editorStore.featureTypes ?? []}
-          selectedGeometry={editorStore.selectedEditType}
-        />
+        <AutocompleteType sx={{ mt: 3, width: 300 }} onChange={onChange} featureTypes={editorStore.featureTypes ?? []} selectedGeometry={selectedEditType} />
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>Отменить</Button>

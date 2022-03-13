@@ -1,11 +1,9 @@
+import mapboxgl from 'mapbox-gl';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import { ErrorBox } from '../../components/ErrorBox';
-import { mapStore } from '../../store/map.store';
-import { LayerData } from './components/layers/LayerData';
-import { LayerSelect } from './components/layers/LayerSelect';
-import { LayerUsers } from './components/layers/LayerUsers';
+import { MapProvider } from '../../MapProvider';
 import { MainMap } from './components/MainMap';
+import { TabSelect } from './components/tabs/TabSelect';
 import { WidgetAccountBox } from './components/widgets/WidgetAccountBox';
 import { WidgetCategoriesBox } from './components/widgets/WidgetCategoriesBox';
 import { WidgetEditorBox } from './components/widgets/WidgetEditorBox';
@@ -13,19 +11,16 @@ import { WidgetPreviewBox } from './components/widgets/WidgetPreviewBox';
 import { WidgetSearchBox } from './components/widgets/WidgetSearchBox';
 import { WidgetToolBox } from './components/widgets/WidgetToolBox';
 import { WidgetUsersBox } from './components/widgets/WidgetUsersBox';
+import { LayerUsers } from './components/layers/LayerUsers';
 import './styles/Main.scss';
 
 const Main = () => {
-  console.log('Main');
-
-  /**
-   * Получение данных карты из url
-   */
-  mapStore.parseUrl(useLocation().search);
+  const [map, setMap] = React.useState<mapboxgl.Map>();
 
   return (
     <div className='main'>
-      <MainMap>
+      <MainMap onLoaded={setMap} />
+      <MapProvider mainMap={map}>
         <WidgetSearchBox />
         <WidgetUsersBox />
         <WidgetCategoriesBox />
@@ -33,11 +28,10 @@ const Main = () => {
         <WidgetToolBox />
         <WidgetPreviewBox />
         <WidgetEditorBox />
+        <TabSelect />
         <ErrorBox />
-        <LayerData />
-        <LayerSelect />
-        {/* <LayerUsers /> */}
-      </MainMap>
+        <LayerUsers />
+      </MapProvider>
     </div>
   );
 };

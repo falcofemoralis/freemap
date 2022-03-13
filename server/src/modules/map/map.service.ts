@@ -1,3 +1,5 @@
+import { CategoryDto } from './dto/category.dto';
+import { Category, CategoryDocument } from './entities/category.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,6 +16,8 @@ export class MapService {
     private mapFeatureModel: Model<MapFeatureDocument>,
     @InjectModel(FeatureType.name)
     private featureTypeModel: Model<FeatureTypeDocument>,
+    @InjectModel(Category.name)
+    private categoryModel: Model<CategoryDocument>,
   ) {}
 
   /**
@@ -21,13 +25,14 @@ export class MapService {
    * @returns {Array<MapFeature>} - массив объектов
    */
   async getAllMapFeatures(areaQuery: AreaQuery): Promise<Array<MapFeature>> {
-    const filter = {
-      'coordinates.lon': { $gte: areaQuery.lonL, $lte: areaQuery.lonR },
-      'coordinates.lat': { $gte: areaQuery.latB, $lte: areaQuery.latT },
-    };
+    // const filter = {
+    //   'coordinates.lon': { $gte: areaQuery.lonL, $lte: areaQuery.lonR },
+    //   'coordinates.lat': { $gte: areaQuery.latB, $lte: areaQuery.latT },
+    // };
 
-    //      zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
-    return this.mapFeatureModel.find(filter);
+    // //      zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
+    // return this.mapFeatureModel.find(filter);
+    return this.mapFeatureModel.find();
   }
 
   /**
@@ -68,11 +73,25 @@ export class MapService {
 
   /**
    * Создание нового типа объекта
-   * @param featureType
    */
   async createFeatureType(dto: FeatureTypeDto): Promise<FeatureType> {
     const featureType = new this.featureTypeModel({ ...dto });
     return featureType.save();
+  }
+
+  /**
+   * Получение всех категорий
+   */
+  async getCategories(): Promise<Array<Category>> {
+    return this.categoryModel.find();
+  }
+
+  /**
+   * Создание новой категории
+   */
+  async createCategory(dto: CategoryDto): Promise<Category> {
+    const category = new this.categoryModel({ ...dto });
+    return category.save();
   }
 
   /**

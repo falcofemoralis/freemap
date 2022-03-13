@@ -16,21 +16,17 @@ import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileUpload } from '../../../../components/FileUpload';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
+import { getCenter, toText } from '../../../../misc/CoordinatesUtils';
 import MapService from '../../../../services/map.service';
 import { authStore } from '../../../../store/auth.store';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
-import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
 
-interface TabSelectProps {
-  onClose: () => void;
-}
-
-export const TabSelect: React.FC<TabSelectProps> = observer(({ onClose }) => {
-  console.log('TabSelect');
+export const TabSelect = observer(() => {
+  const handleTabClose = () => mapStore.setSelectedFeatureId(null);
 
   return (
-    <CustomDrawer open={Boolean(mapStore.selectedFeatureId)} onClose={onClose} padding={0} fullHeight>
+    <CustomDrawer open={Boolean(mapStore.selectedFeatureId)} onClose={handleTabClose} padding={0} fullHeight>
       {mapStore.selectedFeatureId && <TabSelectDrawer featureId={mapStore.selectedFeatureId} />}
     </CustomDrawer>
   );
@@ -70,8 +66,6 @@ interface DrawerTabProps {
   featureId: string;
 }
 const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
-  console.log('TabSelectDrawer');
-
   const [mapFeature, setMapFeature] = React.useState<IMapFeature | null>(null);
   const [viewerOpen, setViewerOpen] = React.useState<boolean>(false);
   const [activeImage, setActiveImage] = React.useState<number | undefined>();
@@ -99,8 +93,6 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
   const openFullImage = (img: string) => {
     setViewerOpen(!viewerOpen);
     const ind = mapFeature?.files?.findIndex(el => el == img);
-    console.log(ind);
-
     setActiveImage(ind);
   };
 
@@ -157,7 +149,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
             </Grid>
           )}
           <Grid item xs={12}>
-            <IconifiedField icon={<RoomIcon />} text={toText(formatCoordinate(getCenter(mapFeature.coordinates)))} />
+            <IconifiedField icon={<RoomIcon />} text={toText(getCenter(mapFeature?.coordinates, mapFeature?.type.geometry))} />
           </Grid>
           {mapFeature.links?.map(link => (
             <Grid item xs={12} key={link}>

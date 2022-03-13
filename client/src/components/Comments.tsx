@@ -6,11 +6,11 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import React from 'react';
+import { FileType } from '../constants/file.type';
 import CommentsService from '../services/comments.service';
 import { authStore } from '../store/auth.store';
 import { IComment } from '../types/IComment';
 import { UserAvatar } from './UserAvatar';
-import { FileType } from '../constants/file.type';
 
 interface CommentsProps {
   comments: IComment[];

@@ -8,25 +8,37 @@ import Typography from '@mui/material/Typography';
 import React from 'react';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileType } from '../../../../constants/file.type';
+import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
+import { getCenter } from '../../../../misc/CoordinatesUtils';
 import MapService from '../../../../services/map.service';
-import { Coordinate, IMapFeature } from '../../../../types/IMapFeature';
-import { flyTo } from '../../../../utils/MapAnimation';
+import { Coordinates, IMapFeature } from '../../../../types/IMapFeature';
 
 interface TabNewestProps {
   open: boolean;
   onClose: () => void;
 }
 export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
-  const { map } = React.useContext(MapContext);
+  const { mainMap } = React.useContext(MapContext);
   const [newestFeatures, setNewestFeatures] = React.useState<Array<IMapFeature>>([]);
 
+  /**
+   * Если вкладка была открыта - получение последних {n} фич
+   */
   if (open) {
     MapService.getNewestFeatures(20).then(features => setNewestFeatures(features));
   }
 
-  const selectFeature = (coordinates: Coordinate[], zoom: number) => {
-    flyTo(coordinates, zoom, map);
+  // TODO Add zoom
+  /**
+   * Выбор фичи и перенаправление карты на нее
+   * @param coordinates - координаты выбранной фичи
+   * @param type - тип выбранной фичи
+   */
+  const selectFeature = (coordinates: Coordinates, type: GeometryType) => {
+    mainMap?.flyTo({
+      center: getCenter(coordinates, type)
+    });
   };
 
   return (
@@ -34,7 +46,7 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
       <List sx={{ width: '100%' }}>
         {newestFeatures.map(feature => (
           <ListItem key={feature.id}>
-            <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.zoom)}>
+            <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.type.geometry)}>
               <CardActionArea>
                 {feature?.files && feature?.files?.length > 0 && (
                   <CardMedia

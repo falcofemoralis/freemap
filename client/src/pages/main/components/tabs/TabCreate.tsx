@@ -6,17 +6,24 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
+import { Feature, Geometry, LineString, Polygon, Position } from 'geojson';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { AutocompleteType } from '../../../../components/AutocompleteType';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileUpload } from '../../../../components/FileUpload';
+import { GeometryType } from '../../../../constants/geometry.type';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { errorStore } from '../../../../store/error.store';
+import { Coordinates } from '../../../../types/IMapFeature';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
-import { formatCoordinate, getCenter, toText } from '../../../../utils/CoordinatesUtil';
+import { getCenter, toText } from '../../../../misc/CoordinatesUtils';
+import { MapContext } from '../../../../MapProvider';
+import { GeoJSONSource } from 'mapbox-gl';
+import { FeatureProps } from '../../../../types/IMapData';
+import { mapStore } from '../../../../store/map.store';
 
 type FormData = {
   name: string;
@@ -37,6 +44,7 @@ interface TabCreateProps {
 }
 
 export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose }) => {
+  const { mainMap } = React.useContext(MapContext);
   const [isLoading, setLoading] = React.useState(false);
   const [files, setFiles] = React.useState<File[]>([]);
   const [links, setLinks] = React.useState<string[]>([]);
@@ -50,44 +58,61 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     reset
   } = useForm<FormData>();
 
+  /**
+   * Отправка созданного объекта на сервер
+   */
   const handleOnSubmit = handleSubmit(async data => {
-    if (!editorStore.selectedFeatureType && !selectedType) {
+    if (!editorStore.createdFeature?.type && !selectedType) {
       setErrorData({ ...errorData, type: 'Необходимо выбрать категорию' });
       return;
     }
 
-    if (!editorStore.newFeatureCoordinates || !editorStore.newFeatureZoom) {
+    if (!editorStore.createdFeature?.coordinates) {
       setErrorData({ ...errorData, coordinates: 'Отсутствуют координаты. Ошибка?' });
       return;
     }
 
-    if (editorStore.selectedFeatureType && editorStore.newFeatureCoordinates && editorStore.newFeatureZoom) {
-      setLoading(true);
+    setLoading(true);
 
-      try {
-        const addedFeature = await MapService.addFeature(
+    try {
+      if (editorStore.createdFeature?.coordinates && editorStore.createdFeature?.type) {
+        const { id, name, createdAt, category, type, coordinates } = await MapService.addFeature(
           {
-            type: selectedType ? selectedType : editorStore.selectedFeatureType,
-            coordinates: editorStore.newFeatureCoordinates,
-            zoom: editorStore.newFeatureZoom,
+            coordinates: editorStore.createdFeature?.coordinates,
+            type: editorStore.createdFeature?.type,
             links,
             ...data
           },
           files
         );
 
-        editorStore.newFeature?.setProperties(addedFeature);
+        const feature: Feature<Geometry, FeatureProps> = {
+          type: 'Feature',
+          properties: { id, name, createdAt, category },
+          geometry: {
+            type: type.geometry,
+            coordinates: coordinates as any
+          },
+          id: new Date().getTime()
+        };
+        const collection = mapStore.addFeature(type.id, feature);
+        if (data) {
+          (mainMap?.getSource(type.id) as GeoJSONSource).setData(collection as any);
+        }
 
         reset();
         resetData();
         onSubmit();
-      } catch (e) {
-        console.log(e);
-        resetData();
       }
+    } catch (e) {
+      console.error(e);
+      resetData();
     }
   });
 
+  /**
+   * Ресет веденных данных
+   */
   const resetData = () => {
     setFiles([]);
     setLinks([]);
@@ -95,6 +120,9 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     setLoading(false);
   };
 
+  /**
+   * Закрытия вкладки создания
+   */
   const handleClose = () => {
     reset();
     resetData();
@@ -106,7 +134,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   const handleLinksChange = (links: string[]) => setLinks(links);
 
   return (
-    <CustomDrawer open={editorStore.isEditorTabOpen} onClose={handleClose}>
+    <CustomDrawer open={editorStore.isFeature} onClose={handleClose}>
       <Box component='form' onSubmit={handleOnSubmit} noValidate>
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -152,8 +180,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
               helperText={errorData.type}
               onChange={handleFeatureTypeSelect}
               featureTypes={editorStore.featureTypes ?? []}
-              selectedGeometry={editorStore.selectedFeatureType?.geometry}
-              selectedType={editorStore.selectedFeatureType}
+              selectedGeometry={editorStore.isFeature ? editorStore.createdFeature?.type?.geometry : null}
+              selectedType={editorStore.isFeature ? editorStore.createdFeature?.type : null}
             />
           </Grid>
           <Grid item xs={12}>
@@ -165,7 +193,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
               fullWidth
               id='coordinates'
               label='Координаты'
-              defaultValue={editorStore.newFeatureCoordinates && toText(formatCoordinate(getCenter(editorStore.newFeatureCoordinates)))}
+              defaultValue={editorStore.isFeature && toText(getCenter(editorStore.createdFeature?.coordinates, editorStore.createdFeature?.type?.geometry))}
             />
           </Grid>
           <Grid item xs={12}>
@@ -232,12 +260,3 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     </CustomDrawer>
   );
 });
-
-// interface TypeFieldProps {
-//     onChange: (type: IMapFeatureType | null) => void;
-// }
-// const TypeField: React.FC<TypeFieldProps> = ({ onChange }) => {
-//     return (
-
-//     );
-// };

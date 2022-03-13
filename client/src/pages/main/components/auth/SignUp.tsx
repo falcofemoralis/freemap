@@ -12,7 +12,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { materialColor } from '../../../../utils/MaterialColorGenerator';
+import { materialColor } from '../../../../misc/MaterialColorGenerator';
 import { authStore } from './../../../../store/auth.store';
 import { errorStore } from './../../../../store/error.store';
 

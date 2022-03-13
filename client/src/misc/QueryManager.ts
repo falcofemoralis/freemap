@@ -1,5 +1,5 @@
+import { Position } from 'geojson';
 import MapConstant from '../constants/map.constant';
-import { Coordinate } from '../types/IMapFeature';
 
 export const getQueryParams = (s?: string): Map<string, string> => {
   if (!s || typeof s !== 'string' || s.length < 2) {
@@ -17,10 +17,10 @@ export const getQueryParams = (s?: string): Map<string, string> => {
   return new Map(a);
 };
 
-export const updateQuery = (lonLat: Coordinate, zoom: number, featureId: string | null, mapType: MapConstant) => {
+export const updateQuery = (lonLat: Position, zoom: number, featureId: string | null, mapType: MapConstant) => {
   const query = new Array<string>();
-  if (lonLat.lon) query.push(`lon=${lonLat.lon}`);
-  if (lonLat.lat) query.push(`lat=${lonLat.lat}`);
+  if (lonLat[0]) query.push(`lon=${lonLat[0].toFixed(5)}`);
+  if (lonLat[1]) query.push(`lat=${lonLat[1].toFixed(5)}`);
   if (zoom) query.push(`z=${zoom}`);
   if (mapType) query.push(`map=${MapConstant.getMapName(mapType)}`);
   if (featureId) query.push(`selected=${featureId}`);

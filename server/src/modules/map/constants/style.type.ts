@@ -1,4 +1,5 @@
 export enum StyleType {
-  STROKE = 'stroke',
+  LINE = 'line',
   FILL = 'fill',
+  SYMBOL = 'symbol',
 }

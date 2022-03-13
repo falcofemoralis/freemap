@@ -1,8 +1,6 @@
 import { Paper, Typography } from '@mui/material';
+import mapboxgl from 'mapbox-gl';
 import { observer } from 'mobx-react-lite';
-import { OverviewMap } from 'ol/control';
-import TileLayer from 'ol/layer/Tile';
-import XYZ from 'ol/source/XYZ';
 import React from 'react';
 import MapConstant from '../../../../constants/map.constant';
 import { MapContext } from '../../../../MapProvider';
@@ -16,49 +14,62 @@ const PreviewMapLabel = observer(() => {
 });
 
 export const WidgetPreviewBox = () => {
-  console.log('WidgetPreviewBox');
+  const { mainMap } = React.useContext(MapContext);
+  const [previewMap, setPreviewMap] = React.useState<mapboxgl.Map>();
+  const mapNode = React.useRef(null);
 
-  const { map } = React.useContext(MapContext);
+  React.useEffect(() => {
+    const node = mapNode.current;
+    if (typeof window === 'undefined' || node === null) return;
 
-  /* Map preview init */
-  const baseLayer = new TileLayer();
-  const mapPreview = new OverviewMap({
-    className: 'previewMap',
-    collapsed: false,
-    collapsible: false,
-    rotateWithView: false
+    const mapboxMap = new mapboxgl.Map({
+      container: node,
+      style: mapStore.mapType as string,
+      center: [mapStore.lonLat[0], mapStore.lonLat[1]],
+      zoom: mapStore.zoom
+    });
+
+    setPreviewMap(mapboxMap);
+
+    return () => {
+      mapboxMap.remove();
+      setPreviewMap(undefined);
+    };
+  }, []);
+
+  mainMap?.on('moveend', () => {
+    previewMap?.setCenter(mainMap.getCenter());
+    previewMap?.setZoom(mainMap.getZoom() - 4);
   });
 
-  /**
-   * Установка нового слоя превью карты
-   * @param {MapConstant} type - тип карты
-   */
-  const setPreviewMapLayer = (type: MapConstant) => {
-    baseLayer.setSource(
-      new XYZ({
-        url: type as string
-      })
-    );
-  };
-
-  /**
-   * Изменение типа текущей карты (Земля\OSM\etc)
-   */
   const changeMapType = async () => {
-    setPreviewMapLayer((await mapStore.toggleMapType()) as string);
-  };
+    const mapType = (await mapStore.toggleMapType()) as string;
 
-  if (map) {
-    mapPreview.getOverviewMap().addLayer(baseLayer);
-    mapPreview.setMap(map); // attach main map
-    setPreviewMapLayer(mapStore.mapType as string);
-  }
+    mainMap?.setStyle(mapType);
+    previewMap?.setStyle(mapType);
+
+    mainMap?.once('styledata', () => {
+      for (const source of mapStore.mapData.sources) {
+        mainMap?.addSource(source.id, {
+          type: 'geojson',
+          data: source.featureCollection
+        });
+      }
+
+      for (const layer of mapStore.mapData.layers) {
+        mainMap?.addLayer(layer as any);
+      }
+    });
+  };
 
   return (
     <Paper className='previewMapBox' elevation={5} onClick={changeMapType}>
+      <div ref={mapNode} className='previewMapBox__map' />
       <div className='previewMapBox__label'>
         <PreviewMapLabel />
       </div>
+      <div className='previewMapBox__cover'></div>
+      <div className='previewMapBox__plate'></div>
     </Paper>
   );
 };

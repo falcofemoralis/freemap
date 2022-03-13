@@ -1,14 +1,11 @@
-import { UserComment } from '../../comments/entities/user-comment';
+import { Category } from './category.entity';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { FeatureType } from './feature-type.entity';
 
-export interface Coordinate {
-  lon: number;
-  lat: number;
-}
+export type Position = number[];
 
 export type MapFeatureDocument = MapFeature & Document & { _id: mongoose.Types.ObjectId };
 
@@ -29,17 +26,17 @@ export class MapFeature {
   @Prop()
   description: string;
 
-  @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Тип объекта' })
+  @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Тип категории' })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'FeatureType', autopopulate: true })
   type: FeatureType;
 
-  @ApiProperty({ example: '15.23', description: 'Расположение объекта относительно приближения' })
-  @Prop()
-  zoom: number;
+  @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Категория объекта' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category', autopopulate: true })
+  category: Category;
 
-  @ApiProperty({ example: '[{35, 52}, {34, 43}]', description: 'Координаты объекта' })
+  @ApiProperty({ example: '[]', description: 'Координаты объекта' })
   @Prop()
-  coordinates: Coordinate[]; // [[lon, lat]]
+  coordinates: Position[][] | Position[][][];
 
   @ApiProperty({ example: 'qwerty', description: 'Адрес объекта' })
   @Prop()

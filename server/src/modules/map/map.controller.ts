@@ -23,14 +23,17 @@ import { UserPayload } from './../auth/guards/jwt-auth.guard';
 import { FilesService } from './../files/files.service';
 import { FileOptionsQuery } from './../files/query/media.query';
 import { UsersService } from './../users/users.service';
-import { CreateFeatureDataDto, Coordinate } from './dto/create-feature.dto';
+import { CategoryDto } from './dto/category.dto';
+import { CreateFeatureDataDto } from './dto/create-feature.dto';
+import { Category } from './entities/category.entity';
 import { FeatureType } from './entities/feature-type.entity';
 import { MapFeature } from './entities/map-feature.entity';
 import { MapFeatureGuard } from './guards/map-feature.guard';
-import MediaInterceptor from './interceptors/media.interceptor';
+import MediaInterceptor, { MediaType } from './interceptors/media.interceptor';
 import { MapService } from './map.service';
 import { AreaQuery } from './query/area.query';
-import { FeatureCollectionDto } from './types/feature-collection.dto';
+import { FeatureCollection } from './types/feature-collection';
+import { LayerSource, MapData, Source } from './types/map-data';
 
 const MEDIA_FOLDER = 'media';
 @ApiTags('map')
@@ -38,115 +41,48 @@ const MEDIA_FOLDER = 'media';
 export class MapController {
   constructor(private readonly mapService: MapService, private readonly usersService: UsersService, private readonly filesService: FilesService) {}
 
-  @ApiOperation({ summary: 'Получение данных объект на карте в определенной области' })
-  @ApiResponse({ status: 200, type: FeatureCollectionDto, description: 'Пак объектов FeatureCollection' })
+  @ApiOperation({ summary: 'Получение слоев с фичами' })
+  @ApiResponse({ status: 200, type: [MapData], description: 'Массив слоев' })
   @Get()
-  async getMapData(@Query() areaQuery: AreaQuery): Promise<FeatureCollectionDto> {
-    const calcSq = (coordinates: Coordinate[]): number => {
-      const sides: number[] = [];
+  async getMapData(@Query() areaQuery: AreaQuery): Promise<MapData> {
+    const mapFeatures = await this.mapService.getAllMapFeatures(areaQuery);
+    const types = await this.mapService.getFeatureTypes();
+    const layers: LayerSource[] = [];
+    const sources: Source[] = [];
 
-      console.log('calc sides');
-
-      console.log('len ' + coordinates.length);
-
-      for (let i = 0; i < coordinates.length; ++i) {
-        console.log(i);
-
-        // lon = x, lat = y
-        const A = coordinates[i];
-        const B = i == coordinates.length - 1 ? coordinates[0] : coordinates[i + 1];
-        console.log('calc AB between: ');
-        console.log(A);
-        console.log(B);
-
-        const AB = Math.sqrt(Math.pow(B.lon - A.lon, 2) + Math.pow(B.lat - A.lat, 2));
-        console.log('AB=' + AB);
-
-        sides.push(AB);
+    for (const type of types) {
+      for (const layer of type.layers) {
+        layers.push({ ...layer, id: type.id + layer.id, source: type.id });
       }
 
-      console.log('SIDES=');
-      console.log(sides);
+      const featureCollection: FeatureCollection = {
+        type: 'FeatureCollection',
+        features: [],
+      };
 
-      console.log('calc p2');
+      mapFeatures
+        .filter((feature) => feature.type.id == type.id)
+        .forEach((feature) => {
+          const { id, name, createdAt, category, type, coordinates } = feature;
 
-      let p2 = 0;
-      for (const side of sides) {
-        p2 += side;
-      }
-      p2 /= 2;
-      console.log('p2=' + p2);
+          featureCollection.features.push({
+            type: 'Feature',
+            properties: { id, name, createdAt, category },
+            geometry: {
+              type: type.geometry,
+              coordinates,
+            },
+            id: new Date().getTime(),
+          });
+        });
 
-      console.log('calc sq');
-      // фор­му­ла Брах­ма­гуп­ты
-      let sq = 1;
-      for (const side of sides) {
-        const n = p2 - side;
-        sq *= n;
-      }
-
-      sq = Math.sqrt(sq);
-
-      return sq;
-    };
-
-    const mapFeatures = (await this.mapService.getAllMapFeatures(areaQuery)).filter((feature) => {
-      let featureLonL = 999999;
-      let featureLonR = 0;
-      let featureLatB = 999999;
-      let featureLatT = 0;
-      for (const coordinate of feature.coordinates) {
-        if (coordinate.lon < featureLonL) {
-          featureLonL = coordinate.lon;
-        }
-
-        if (coordinate.lon > featureLonR) {
-          featureLonR = coordinate.lon;
-        }
-
-        if (coordinate.lat < featureLatB) {
-          featureLatB = coordinate.lat;
-        }
-
-        if (coordinate.lat > featureLatT) {
-          featureLatT = coordinate.lat;
-        }
-      }
-
-      const x0 = areaQuery.lonR - areaQuery.lonL;
-      const y0 = areaQuery.latT - areaQuery.latB;
-      const x1 = featureLonR - featureLonL;
-      const y1 = featureLatT - featureLatB;
-
-      const fx = (x1 * 100) / x0;
-      const fy = (y1 * 100) / y0;
-
-      return (fx > 2 && fx < 95) || (fy > 2 && fy < 95);
-    });
-
-    const features = [];
-    for (const mapFeature of mapFeatures) {
-      const { id, name, createdAt, type } = mapFeature;
-
-      features.push({
-        type: 'Feature',
-        properties: { id, name, createdAt, type },
-        geometry: {
-          type: mapFeature.type.geometry,
-          coordinates: mapFeature.coordinates,
-        },
-      });
+      sources.push({ id: type.id, featureCollection });
     }
 
     return {
-      type: 'FeatureCollection',
-      crs: {
-        type: 'name',
-        properties: {
-          name: 'EPSG:3857',
-        },
-      },
-      features,
+      version: 1,
+      sources,
+      layers,
     };
   }
 
@@ -169,17 +105,7 @@ export class MapController {
   @ApiOperation({ summary: 'Добавление медиа файлов к объекту' })
   @ApiHeader({ name: 'auth', description: 'Токен пользователя' })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        files: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
+  @ApiBody(MediaType)
   @ApiResponse({ status: 201, type: [String], description: 'Добавленные медиа файлы' })
   @UseGuards(JwtAuthGuard, MapFeatureGuard)
   @UseInterceptors(MediaInterceptor)
@@ -208,6 +134,22 @@ export class MapController {
   @Get('feature/types')
   async getFeatureTypes(): Promise<Array<FeatureType>> {
     return await this.mapService.getFeatureTypes();
+  }
+
+  @ApiOperation({ summary: 'Добавление нового типа объекта' })
+  //  @ApiHeader({ name: 'Authorization', description: 'Токен пользователя' })
+  @ApiResponse({ status: 201, type: Category, description: 'Тип объекта' })
+  // @UseGuards(JwtAuthGuard)
+  @Post('feature/category')
+  async createCategory(@Body() categoryDto: CategoryDto): Promise<Category> {
+    return await this.mapService.createCategory(categoryDto);
+  }
+
+  @ApiOperation({ summary: 'Получение всех категорий у определенного типа' })
+  @ApiResponse({ status: 200, type: [Category], description: 'Массив категорий' })
+  @Get('feature/categories')
+  async getCategories(): Promise<Array<Category>> {
+    return await this.mapService.getCategories();
   }
 
   @ApiOperation({ summary: 'Получение файла медиа с сервера' })

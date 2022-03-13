@@ -4,6 +4,18 @@ import { memoryStorage } from 'multer';
 
 export const MEDIA_PATH = './uploads/media';
 
+export const MediaType = {
+  schema: {
+    type: 'object',
+    properties: {
+      files: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+};
+
 export default FilesInterceptor('files', 20, {
   storage: memoryStorage(),
   fileFilter: (request, file, cb) => {

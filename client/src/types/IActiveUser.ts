@@ -1,6 +1,8 @@
+import { Position } from 'geojson';
+
 export interface IActiveUser {
   clientId: string;
-  coordinates: number[][];
+  coordinates: Position[];
   zoom: number;
   username: string;
   userColor?: string;

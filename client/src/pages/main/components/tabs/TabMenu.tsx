@@ -19,7 +19,6 @@ enum MenuItem {
 }
 
 export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
-  console.log('TabMenu');
   const [menuItem, setMenuItem] = React.useState<MenuItem | null>(null);
   const handleOpen = (item: MenuItem) => setMenuItem(item);
   const handleClose = () => setMenuItem(null);

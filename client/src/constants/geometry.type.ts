@@ -1,5 +1,5 @@
 export enum GeometryType {
-  LINE_STRING = 'LineString',
+  MULTI_LINE_STRING = 'MultiLineString',
   POLYGON = 'Polygon',
   MULTI_POLYGON = 'MultiPolygon',
   POINT = 'Point'

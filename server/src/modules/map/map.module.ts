@@ -1,3 +1,4 @@
+import { Category, CategorySchema } from './entities/category.entity';
 import { UsersModule } from './../users/users.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -14,6 +15,7 @@ import { MapService } from './map.service';
     MongooseModule.forFeature([
       { name: MapFeature.name, schema: MapFeatureSchema },
       { name: FeatureType.name, schema: FeatureTypeSchema },
+      { name: Category.name, schema: CategorySchema },
     ]),
     FilesModule,
     UsersModule,

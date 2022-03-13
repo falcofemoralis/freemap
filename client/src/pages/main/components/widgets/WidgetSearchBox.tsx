@@ -11,8 +11,6 @@ import '../../styles/Widget.scss';
 import { TabMenu } from '../tabs/TabMenu';
 
 export const WidgetSearchBox = () => {
-  console.log('WidgetSearchBox');
-
   const [open, setOpen] = React.useState(false);
 
   const toggleTab = () => {

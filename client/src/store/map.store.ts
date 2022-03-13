@@ -1,17 +1,25 @@
+import { Feature, FeatureCollection, Geometry, Position } from 'geojson';
+import { Source } from 'mapbox-gl';
 import { makeAutoObservable } from 'mobx';
-import { fromLonLat } from 'ol/proj';
 import MapConstant from '../constants/map.constant';
-import { Coordinate } from '../types/IMapFeature';
-import { getQueryParams, updateQuery } from '../utils/QueryUtil';
+import { getQueryParams, updateQuery } from '../misc/QueryManager';
+import MapService from '../services/map.service';
+import { FeatureProps, IMapData } from './../types/IMapData';
 
 class MapStore {
+  mapData: IMapData;
   mapType: MapConstant = MapConstant.OSM;
-  lonLat: Coordinate = { lon: 0, lat: 0 };
+  lonLat: Position = [0, 0];
   zoom = 2;
   selectedFeatureId: string | null = null;
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  async initMapData(bounds: number[][]): Promise<IMapData> {
+    this.mapData = await MapService.getMapData(bounds);
+    return this.mapData;
   }
 
   async toggleMapType(): Promise<MapConstant> {
@@ -32,18 +40,27 @@ class MapStore {
     this.updateUrl();
   }
 
-  async updateMapPosition(lonLat: Coordinate, zoom: number) {
-    this.lonLat = lonLat;
-    this.zoom = zoom;
+  addFeature(sourceId: string, feature: Feature<Geometry, FeatureProps>): FeatureCollection<Geometry, FeatureProps> | null {
+    const source = this.mapData.sources.find(source => source.id == sourceId);
+    if (source) {
+      source.featureCollection.features.push(feature);
+      return source.featureCollection;
+    }
+
+    return null;
+  }
+
+  async updateMapPosition(lon: number, lat: number, zoom: number) {
+    this.lonLat = [Number(lon.toFixed(5)), Number(lat.toFixed(5))];
+    this.zoom = Number(zoom.toFixed(3));
 
     this.updateUrl();
   }
 
-  parseUrl(url: string) {
+  initMapCoordinates(url: string) {
     const query = getQueryParams(url);
     if (query.get('lon') && query.get('lat')) {
-      const lonLat = fromLonLat([parseFloat(query.get('lon')!.toString()), parseFloat(query.get('lat')!.toString())], 'EPSG:3857');
-      this.lonLat = { lon: lonLat[0], lat: lonLat[1] };
+      this.lonLat = [parseFloat(query.get('lon')!.toString()), parseFloat(query.get('lat')!.toString())];
     }
     if (query.get('z')) this.zoom = parseFloat(query.get('z') as string);
     if (query.get('map')) this.mapType = MapConstant.getMapType(query.get('map') as string);

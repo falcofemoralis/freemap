@@ -1,6 +1,6 @@
 export default class MapConstant {
-  static OSM = 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  static GOOGLE = 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
+  static OSM = 'mapbox://styles/mapbox/streets-v11';
+  static GOOGLE = 'mapbox://styles/mapbox/satellite-v9';
 
   static getMapName(type: MapConstant): string {
     switch (type) {
