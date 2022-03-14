@@ -1,5 +1,5 @@
-import ArchitectureOutlinedIcon from '@mui/icons-material/ArchitectureOutlined';
-import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import GpsFixedOutlinedIcon from '@mui/icons-material/GpsFixedOutlined';
 import GpsNotFixedIcon from '@mui/icons-material/GpsNotFixed';
 import GpsOffIcon from '@mui/icons-material/GpsOff';
@@ -10,6 +10,7 @@ import { RulerControl } from 'mapbox-gl-controls';
 import * as React from 'react';
 import { MapContext } from '../../../../MapProvider';
 import '../../styles/Widget.scss';
+import ExploreIcon from '@mui/icons-material/Explore';
 
 export const WidgetToolBox = () => {
   const { mainMap } = React.useContext(MapContext);
@@ -28,15 +29,16 @@ export const WidgetToolBox = () => {
   const rulerControl = new RulerControl();
   mainMap?.addControl(rulerControl);
 
+  const fullscreenControl = new mapboxgl.FullscreenControl({ container: document.getElementById('main') });
+  mainMap?.addControl(fullscreenControl);
+
   return (
     <>
       <Paper className='toolBox__compass'>
         <CompassButton mainMap={mainMap} />
       </Paper>
-      <Paper className='toolBox__z'>
-        <IconButton>
-          <ArchitectureOutlinedIcon />
-        </IconButton>
+      <Paper className='toolBox__fullscreen'>
+        <FullscreenButton fullscreenControl={fullscreenControl} />
       </Paper>
       <Paper className='toolBox__ruler'>
         <RulerButton rulerControl={rulerControl} />
@@ -46,6 +48,20 @@ export const WidgetToolBox = () => {
       </Paper>
     </>
   );
+};
+
+interface FullscreenButtonProps {
+  fullscreenControl: mapboxgl.FullscreenControl;
+}
+
+const FullscreenButton: React.FC<FullscreenButtonProps> = ({ fullscreenControl }) => {
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const fullscreen = () => {
+    (fullscreenControl as any)._onClickFullscreen();
+    setIsFullscreen(!isFullscreen);
+  };
+
+  return <IconButton onClick={fullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>;
 };
 
 interface CompassButtonProps {
@@ -58,7 +74,7 @@ const CompassButton: React.FC<CompassButtonProps> = ({ mainMap }) => {
 
   return (
     <IconButton onClick={compass}>
-      <ExploreOutlinedIcon />
+      <ExploreIcon />
     </IconButton>
   );
 };

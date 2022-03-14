@@ -1,15 +1,10 @@
-import { Feature, GeoJsonProperties, Geometry, Polygon, Position } from 'geojson';
-import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
-import { observe } from 'mobx';
-import { stringify } from 'querystring';
-import React, { useEffect } from 'react';
+import { Feature, Geometry, Polygon, Position } from 'geojson';
+import { GeoJSONSource } from 'mapbox-gl';
+import React from 'react';
 import { io } from 'socket.io-client';
-import { FileType } from '../../../../constants/file.type';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { MAP_SOCKET } from '../../../../services';
-import AuthService from '../../../../services/auth.service';
-import UsersService from '../../../../services/users.serivce';
 import { activeUsersStore } from '../../../../store/active-users.store';
 import { authStore } from '../../../../store/auth.store';
 import { IActiveUser } from '../../../../types/IActiveUser';
@@ -137,11 +132,14 @@ export const LayerUsers = () => {
     });
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     console.log('useEffect');
     console.log(mainMap);
+
     if (mainMap) {
+      console.log('Инициализация сокета');
       initSocket();
+      console.log('Инициализация сокета окончена');
 
       mainMap?.addSource('users', { type: 'geojson', data: featureCollection });
 
@@ -194,7 +192,7 @@ export const LayerUsers = () => {
         }
       });
     }
-  });
+  }, []);
 
   return <></>;
 };

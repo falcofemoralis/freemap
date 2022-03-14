@@ -18,7 +18,7 @@ const Main = () => {
   const [map, setMap] = React.useState<mapboxgl.Map>();
 
   return (
-    <div className='main'>
+    <div className='main' id='main'>
       <MainMap onLoaded={setMap} />
       <MapProvider mainMap={map}>
         <WidgetSearchBox />

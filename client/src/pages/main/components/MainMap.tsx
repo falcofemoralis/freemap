@@ -4,19 +4,21 @@ import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import { mapStore } from '../../../store/map.store';
 import { FeatureProps } from '../../../types/IMapData';
-import length from '@turf/length';
 
 interface MainMapProps {
-  onLoaded?: (map: mapboxgl.Map) => void;
+  onLoaded: (map: mapboxgl.Map) => void;
 }
 export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
-  const [mainMap, setMap] = React.useState<mapboxgl.Map>();
+  console.log('MainMap');
+
   const mapNode = React.useRef(null);
   let hoveredStateId: string | number | undefined | null = null;
 
   React.useEffect(() => {
     const node = mapNode.current;
     if (typeof window === 'undefined' || node === null) return;
+
+    console.log('Инициализация главной карты');
 
     /**
      * Инициализация главной карты
@@ -29,89 +31,87 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
       zoom: mapStore.zoom
     });
 
-    setMap(mapboxMap);
-
     /**
      * Загрузка данных карты
      */
-    if (onLoaded)
-      mapboxMap.once('load', async () => {
-        console.info('Main map loaded.');
+    mapboxMap.once('load', async () => {
+      console.log('Инициализация окончена');
 
-        onLoaded(mapboxMap);
+      onLoaded(mapboxMap);
 
-        const mapData = await mapStore.initMapData(mapboxMap.getBounds().toArray());
+      const mapData = await mapStore.initMapData(mapboxMap.getBounds().toArray());
 
-        for (const source of mapData.sources) {
-          mapboxMap.addSource(source.id, {
-            type: 'geojson',
-            data: source.featureCollection
-          });
+      for (const source of mapData.sources) {
+        mapboxMap.addSource(source.id, {
+          type: 'geojson',
+          data: source.featureCollection
+        });
+      }
+
+      for (const layer of mapData.layers) {
+        mapboxMap.addLayer(layer as any);
+
+        if (layer.id.includes('label')) {
+          continue;
         }
 
-        for (const layer of mapData.layers) {
-          mapboxMap.addLayer(layer as any);
+        mapboxMap.on('mousemove', layer.id, e => {
+          if (e && e.features && e.features.length > 0) {
+            //mapboxMap.getCanvas().style.cursor = 'pointer';
 
-          if (layer.id.includes('label')) {
-            continue;
-          }
-
-          mapboxMap.on('mousemove', layer.id, e => {
-            if (e && e.features && e.features.length > 0) {
-              //mapboxMap.getCanvas().style.cursor = 'pointer';
-
-              if (hoveredStateId) {
-                mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
-              }
-
-              hoveredStateId = e.features[0].id;
-              if (hoveredStateId) {
-                mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: true });
-              }
-            }
-          });
-
-          mapboxMap.on('mouseleave', layer.id, () => {
             if (hoveredStateId) {
               mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
             }
-            hoveredStateId = null;
-          });
 
-          mapboxMap.on('click', layer.id, e => {
-            if (e && e.features && e.features.length > 0) {
-              mapStore.setSelectedFeatureId((e.features[0].properties as FeatureProps).id);
+            hoveredStateId = e.features[0].id;
+            if (hoveredStateId) {
+              mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: true });
             }
-          });
-        }
-      });
+          }
+        });
+
+        mapboxMap.on('mouseleave', layer.id, () => {
+          if (hoveredStateId) {
+            mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
+          }
+          hoveredStateId = null;
+        });
+
+        mapboxMap.on('click', layer.id, e => {
+          if (e && e.features && e.features.length > 0) {
+            mapStore.setSelectedFeatureId((e.features[0].properties as FeatureProps).id);
+          }
+        });
+
+        /**
+         * Листенер изменения координат. Меняется текущий url с добавлением координат и текущего зума
+         */
+        mapboxMap?.on('moveend', () => {
+          try {
+            const zoom = mapboxMap.getZoom();
+            const center = mapboxMap.getCenter();
+
+            if (center && zoom) {
+              mapStore.updateMapPosition(center.lng, center.lat, zoom);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        });
+      }
+    });
 
     return () => {
       mapboxMap.remove();
-      setMap(undefined);
     };
   }, []);
+
+  console.log('Получение данных карты из url');
 
   /**
    * Получение данных карты из url
    */
   mapStore.initMapCoordinates(useLocation().search);
-
-  /**
-   * Листенер изменения координат. Меняется текущий url с добавлением координат и текущего зума
-   */
-  mainMap?.on('moveend', () => {
-    try {
-      const zoom = mainMap.getZoom();
-      const center = mainMap.getCenter();
-
-      if (center && zoom) {
-        mapStore.updateMapPosition(center.lng, center.lat, zoom);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  });
 
   return (
     <>
