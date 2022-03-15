@@ -12,6 +12,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { Logger } from '../../../../misc/Logger';
 import { materialColor } from '../../../../misc/MaterialColorGenerator';
 import { authStore } from './../../../../store/auth.store';
 import { errorStore } from './../../../../store/error.store';
@@ -30,6 +31,8 @@ interface SignUpProps {
 }
 
 export const SignUp: React.FC<SignUpProps> = ({ onSwitch, onClose }) => {
+  Logger.info('SignUp');
+
   const USERNAME_MIN_LENGTH = 4;
   const USERNAME_MAX_LENGTH = 30;
   const PASSWORD_MIN_LENGTH = 6;

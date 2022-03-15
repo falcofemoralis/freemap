@@ -4,15 +4,18 @@ import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import { mapStore } from '../../../store/map.store';
 import { FeatureProps } from '../../../types/IMapData';
+import { Logger } from '../../../misc/Logger';
 
 interface MainMapProps {
   onLoaded: (map: mapboxgl.Map) => void;
 }
 export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
-  console.log('MainMap');
+  Logger.info('MainMap');
 
   const mapNode = React.useRef(null);
   let hoveredStateId: string | number | undefined | null = null;
+
+  mapStore.parseUrlData(useLocation().search);
 
   React.useEffect(() => {
     const node = mapNode.current;
@@ -35,7 +38,7 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
      * Загрузка данных карты
      */
     mapboxMap.once('load', async () => {
-      console.log('Инициализация окончена');
+      console.log('Инициализация главной карты окончена');
 
       onLoaded(mapboxMap);
 
@@ -105,13 +108,6 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
       mapboxMap.remove();
     };
   }, []);
-
-  console.log('Получение данных карты из url');
-
-  /**
-   * Получение данных карты из url
-   */
-  mapStore.initMapCoordinates(useLocation().search);
 
   return (
     <>

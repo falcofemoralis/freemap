@@ -1,13 +1,16 @@
 import { Feature, Geometry, Polygon, Position } from 'geojson';
 import { GeoJSONSource } from 'mapbox-gl';
+import { autorun, observe, reaction } from 'mobx';
 import React from 'react';
 import { io } from 'socket.io-client';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
+import { Logger } from '../../../../misc/Logger';
 import { MAP_SOCKET } from '../../../../services';
 import { activeUsersStore } from '../../../../store/active-users.store';
 import { authStore } from '../../../../store/auth.store';
 import { IActiveUser } from '../../../../types/IActiveUser';
+import { IUser } from '../../../../types/IUser';
 
 const SHOW_ON_ZOOM = 3;
 interface IActiveFeatureProps {
@@ -18,7 +21,7 @@ interface IActiveFeatureProps {
 }
 
 export const LayerUsers = () => {
-  console.log('LayerUsers');
+  Logger.info('LayerUsers');
 
   const { mainMap } = React.useContext(MapContext);
   const featureCollection: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
@@ -61,16 +64,18 @@ export const LayerUsers = () => {
     return true;
   };
 
-  const initSocket = () => {
+  const initSocket = (user?: IUser) => {
+    console.log('Инициализация сокета');
+
     updatePosition();
 
     activeUsersStore.socket = io(MAP_SOCKET, {
       query: {
         coordinates: currentCoordinates,
         zoom: currentZoom,
-        username: authStore.user?.username ?? 'Anonymous',
-        userAvatar: authStore.user?.userAvatar,
-        userColor: authStore.user?.userColor
+        username: user?.username ?? 'Anonymous',
+        userAvatar: user?.userAvatar,
+        userColor: user?.userColor
       }
     });
 
@@ -130,69 +135,70 @@ export const LayerUsers = () => {
         }
       }
     });
+
+    console.log('Инициализация сокета окончена');
   };
 
   React.useEffect(() => {
-    console.log('useEffect');
-    console.log(mainMap);
-
-    if (mainMap) {
-      console.log('Инициализация сокета');
+    if (authStore.isAuth) {
+      observe(authStore, 'user', change => {
+        initSocket(change.newValue as any);
+      });
+    } else {
       initSocket();
-      console.log('Инициализация сокета окончена');
-
-      mainMap?.addSource('users', { type: 'geojson', data: featureCollection });
-
-      // Add a new layer to visualize the polygon.
-      mainMap?.addLayer({
-        id: 'maine',
-        type: 'fill',
-        source: 'users', // reference the data source
-        layout: {},
-        paint: {
-          'fill-color': '#0080ff', // blue color fill
-          'fill-opacity': 0.5
-        }
-      });
-      // Add a black outline around the polygon.
-      mainMap?.addLayer({
-        id: 'outline',
-        type: 'line',
-        source: 'users',
-        layout: {},
-        paint: {
-          'line-color': '#000',
-          'line-width': 3
-        }
-      });
-
-      mainMap?.addLayer({
-        id: `maine-username`,
-        type: 'symbol',
-        source: `users`,
-        layout: {
-          'text-field': ['get', 'name'],
-          'icon-image': ['get', 'userAvatar']
-        }
-      });
-
-      // listener for map coordinates change
-      mainMap?.on('moveend', () => {
-        if (mainMap) {
-          updatePosition();
-
-          if (currentCoordinates && currentZoom && currentZoom > SHOW_ON_ZOOM) {
-            // update active users on server
-            const data = {
-              coordinates: currentCoordinates,
-              zoom: currentZoom
-            };
-            activeUsersStore.socket?.emit('updateActiveUser', { data });
-          }
-        }
-      });
     }
-  }, []);
+
+    mainMap?.addSource('users', { type: 'geojson', data: featureCollection });
+
+    // Add a new layer to visualize the polygon.
+    mainMap?.addLayer({
+      id: 'maine',
+      type: 'fill',
+      source: 'users', // reference the data source
+      layout: {},
+      paint: {
+        'fill-color': '#0080ff', // blue color fill
+        'fill-opacity': 0.5
+      }
+    });
+    // Add a black outline around the polygon.
+    mainMap?.addLayer({
+      id: 'outline',
+      type: 'line',
+      source: 'users',
+      layout: {},
+      paint: {
+        'line-color': '#000',
+        'line-width': 3
+      }
+    });
+
+    mainMap?.addLayer({
+      id: `maine-username`,
+      type: 'symbol',
+      source: `users`,
+      layout: {
+        'text-field': ['get', 'name'],
+        'icon-image': ['get', 'userAvatar']
+      }
+    });
+
+    // listener for map coordinates change
+    mainMap?.on('moveend', () => {
+      if (mainMap) {
+        updatePosition();
+
+        if (currentCoordinates && currentZoom && currentZoom > SHOW_ON_ZOOM) {
+          // update active users on server
+          const data = {
+            coordinates: currentCoordinates,
+            zoom: currentZoom
+          };
+          activeUsersStore.socket?.emit('updateActiveUser', { data });
+        }
+      }
+    });
+  }, [mainMap]);
 
   return <></>;
 };

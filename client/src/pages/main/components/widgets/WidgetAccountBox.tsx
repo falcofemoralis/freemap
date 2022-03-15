@@ -7,6 +7,7 @@ import { authStore } from '../../../../store/auth.store';
 import '../../styles/Widget.scss';
 import { SignIn } from '../auth/SignIn';
 import { SignUp } from '../auth/SignUp';
+import { Logger } from '../../../../misc/Logger';
 
 enum DialogType {
   SIGN_UP,
@@ -16,6 +17,8 @@ enum DialogType {
 const SETTINGS_WIDTH = 372;
 
 export const WidgetAccountBox = observer(() => {
+  Logger.info('WidgetAccountBox');
+
   if (authStore.isAuth && !authStore.user) {
     authStore.getUserProfile();
   }
@@ -59,7 +62,7 @@ interface AccountSettingsProps {
   onClose: () => void;
 }
 const AccountSettings: React.FC<AccountSettingsProps> = observer(({ onClose }) => {
-  console.log('AccountSettings');
+  Logger.info('AccountSettings');
 
   const [loading, setLoading] = useState(false);
   const Input = styled('input')({

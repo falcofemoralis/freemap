@@ -2,7 +2,7 @@ import mapboxgl from 'mapbox-gl';
 import React from 'react';
 
 export interface IMapContext {
-  mainMap?: mapboxgl.Map;
+  mainMap: mapboxgl.Map;
 }
 
 export const MapContext = React.createContext<Partial<IMapContext>>({});

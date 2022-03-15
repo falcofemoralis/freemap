@@ -11,8 +11,11 @@ import * as React from 'react';
 import { MapContext } from '../../../../MapProvider';
 import '../../styles/Widget.scss';
 import ExploreIcon from '@mui/icons-material/Explore';
+import { Logger } from '../../../../misc/Logger';
 
 export const WidgetToolBox = () => {
+  Logger.info('WidgetToolBox');
+
   const { mainMap } = React.useContext(MapContext);
 
   const geolocationControl = new mapboxgl.GeolocateControl({
@@ -55,6 +58,8 @@ interface FullscreenButtonProps {
 }
 
 const FullscreenButton: React.FC<FullscreenButtonProps> = ({ fullscreenControl }) => {
+  console.log('FullscreenButton');
+
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const fullscreen = () => {
     (fullscreenControl as any)._onClickFullscreen();
@@ -68,6 +73,8 @@ interface CompassButtonProps {
   mainMap?: mapboxgl.Map;
 }
 const CompassButton: React.FC<CompassButtonProps> = ({ mainMap }) => {
+  console.log('CompassButton');
+
   const compass = () => {
     mainMap?.easeTo({ bearing: 0, pitch: 0 });
   };
@@ -83,6 +90,8 @@ interface RulerButtonProps {
   rulerControl: RulerControl;
 }
 const RulerButton: React.FC<RulerButtonProps> = ({ rulerControl }) => {
+  console.log('RulerButton');
+
   const measure = () => {
     if (rulerControl.isMeasuring) {
       rulerControl.measuringOff();
@@ -110,6 +119,8 @@ interface GeolocationButtonProps {
   geolocationControl: mapboxgl.GeolocateControl;
 }
 const GeolocationButton: React.FC<GeolocationButtonProps> = ({ geolocationControl }) => {
+  console.log('GeolocationButton');
+
   const [locationstart, setLocationstart] = React.useState(false);
   const [locationend, setLocationend] = React.useState(false);
 

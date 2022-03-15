@@ -17,12 +17,15 @@ import { FileUpload } from '../../../../components/FileUpload';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
 import { getCenter, toText } from '../../../../misc/CoordinatesUtils';
+import { Logger } from '../../../../misc/Logger';
 import MapService from '../../../../services/map.service';
 import { authStore } from '../../../../store/auth.store';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
 
 export const TabSelect = observer(() => {
+  Logger.info('TabSelect');
+
   const handleTabClose = () => mapStore.setSelectedFeatureId(null);
 
   return (
@@ -37,6 +40,8 @@ interface IconFieldProps {
   text: string;
 }
 const IconifiedField: React.FC<IconFieldProps> = ({ icon, text }) => {
+  Logger.info('IconifiedField');
+
   const [open, setOpen] = React.useState(false);
 
   const copy = () => {
@@ -66,6 +71,8 @@ interface DrawerTabProps {
   featureId: string;
 }
 const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
+  Logger.info('TabSelectDrawer');
+
   const [mapFeature, setMapFeature] = React.useState<IMapFeature | null>(null);
   const [viewerOpen, setViewerOpen] = React.useState<boolean>(false);
   const [activeImage, setActiveImage] = React.useState<number | undefined>();

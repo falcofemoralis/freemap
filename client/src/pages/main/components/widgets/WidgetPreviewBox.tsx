@@ -5,6 +5,7 @@ import React from 'react';
 import MapConstant from '../../../../constants/map.constant';
 import { MapContext } from '../../../../MapProvider';
 import { mapStore } from '../../../../store/map.store';
+import { Logger } from '../../../../misc/Logger';
 import '../../styles/Widget.scss';
 
 const PreviewMapLabel = observer(() => {
@@ -14,6 +15,8 @@ const PreviewMapLabel = observer(() => {
 });
 
 export const WidgetPreviewBox = () => {
+  Logger.info('WidgetPreviewBox');
+
   const { mainMap } = React.useContext(MapContext);
   const [previewMap, setPreviewMap] = React.useState<mapboxgl.Map>();
   const mapNode = React.useRef(null);
@@ -22,17 +25,22 @@ export const WidgetPreviewBox = () => {
     const node = mapNode.current;
     if (typeof window === 'undefined' || node === null) return;
 
-    const mapboxMap = new mapboxgl.Map({
+    console.log('Инициализация превью карты');
+
+    const previewMapboxMap = new mapboxgl.Map({
       container: node,
       style: mapStore.mapType as string,
       center: [mapStore.lonLat[0], mapStore.lonLat[1]],
       zoom: mapStore.zoom
     });
 
-    setPreviewMap(mapboxMap);
+    previewMapboxMap.once('load', () => {
+      setPreviewMap(previewMapboxMap);
+      console.log('Инициализация превью карты окончена');
+    });
 
     return () => {
-      mapboxMap.remove();
+      previewMapboxMap.remove();
       setPreviewMap(undefined);
     };
   }, []);

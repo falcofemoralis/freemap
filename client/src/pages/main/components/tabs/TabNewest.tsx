@@ -13,12 +13,15 @@ import { MapContext } from '../../../../MapProvider';
 import { getCenter } from '../../../../misc/CoordinatesUtils';
 import MapService from '../../../../services/map.service';
 import { Coordinates, IMapFeature } from '../../../../types/IMapFeature';
+import { Logger } from '../../../../misc/Logger';
 
 interface TabNewestProps {
   open: boolean;
   onClose: () => void;
 }
 export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
+  Logger.info('TabNewest');
+
   const { mainMap } = React.useContext(MapContext);
   const [newestFeatures, setNewestFeatures] = React.useState<Array<IMapFeature>>([]);
 

@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { Logger } from '../../../../misc/Logger';
 import { authStore } from './../../../../store/auth.store';
 import { errorStore } from './../../../../store/error.store';
 
@@ -24,6 +25,8 @@ interface SignInProps {
 }
 
 export const SignIn: React.FC<SignInProps> = ({ onSwitch, onClose }) => {
+  Logger.info('SignIn');
+
   const {
     register,
     handleSubmit,

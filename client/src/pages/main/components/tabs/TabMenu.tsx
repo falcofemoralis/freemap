@@ -8,6 +8,7 @@ import React from 'react';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { TabAdmin } from './TabAdmin';
 import { TabNewest } from './TabNewest';
+import { Logger } from '../../../../misc/Logger';
 
 interface TabMenuProps {
   open: boolean;
@@ -19,6 +20,8 @@ enum MenuItem {
 }
 
 export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
+  Logger.info('TabMenu');
+
   const [menuItem, setMenuItem] = React.useState<MenuItem | null>(null);
   const handleOpen = (item: MenuItem) => setMenuItem(item);
   const handleClose = () => setMenuItem(null);

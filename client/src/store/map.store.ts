@@ -29,7 +29,7 @@ class MapStore {
       mapStore.mapType = MapConstant.OSM;
     }
 
-    this.updateUrl();
+    this.updateUrlData();
 
     return mapStore.mapType;
   }
@@ -37,7 +37,7 @@ class MapStore {
   async setSelectedFeatureId(featureId: string | null) {
     this.selectedFeatureId = featureId;
 
-    this.updateUrl();
+    this.updateUrlData();
   }
 
   addFeature(sourceId: string, feature: Feature<Geometry, FeatureProps>): FeatureCollection<Geometry, FeatureProps> | null {
@@ -54,10 +54,10 @@ class MapStore {
     this.lonLat = [Number(lon.toFixed(5)), Number(lat.toFixed(5))];
     this.zoom = Number(zoom.toFixed(3));
 
-    this.updateUrl();
+    this.updateUrlData();
   }
 
-  initMapCoordinates(url: string) {
+  parseUrlData(url: string) {
     const query = getQueryParams(url);
     if (query.get('lon') && query.get('lat')) {
       this.lonLat = [parseFloat(query.get('lon')!.toString()), parseFloat(query.get('lat')!.toString())];
@@ -67,7 +67,7 @@ class MapStore {
     if (query.get('selected')) this.selectedFeatureId = query.get('selected') as string;
   }
 
-  updateUrl() {
+  updateUrlData() {
     updateQuery(this.lonLat, this.zoom, this.selectedFeatureId, this.mapType);
   }
 }

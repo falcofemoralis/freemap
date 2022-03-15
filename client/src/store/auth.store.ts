@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import AuthService from '../services/auth.service';
 import UsersService from '../services/users.serivce';
 import { IUser } from './../types/IUser';
@@ -41,9 +41,12 @@ class AuthStore {
 
   public async getUserProfile() {
     const user = await AuthService.getUserProfile();
-    console.log(user);
+    runInAction(() => {
+      console.log('Данные пользователя получены');
+      console.log(user);
 
-    this.user = user;
+      this.user = user;
+    });
   }
 
   public async updateUserAvatar(file: File) {

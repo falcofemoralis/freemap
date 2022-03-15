@@ -10,7 +10,7 @@ import { Feature, Geometry, LineString, Polygon, Position } from 'geojson';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { AutocompleteType } from '../../../../components/AutocompleteType';
+import { FeatureTypesAutocomplete } from '../../../../components/AutocompleteType';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileUpload } from '../../../../components/FileUpload';
 import { GeometryType } from '../../../../constants/geometry.type';
@@ -25,6 +25,7 @@ import { GeoJSONSource } from 'mapbox-gl';
 import { FeatureProps } from '../../../../types/IMapData';
 import { mapStore } from '../../../../store/map.store';
 import { ICategory } from '../../../../types/ICategory';
+import { Logger } from '../../../../misc/Logger';
 
 type FormData = {
   name: string;
@@ -45,6 +46,8 @@ interface TabCreateProps {
 }
 
 export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose }) => {
+  Logger.info('TabCreate');
+
   const { mainMap } = React.useContext(MapContext);
   const [isLoading, setLoading] = React.useState(false);
   const [files, setFiles] = React.useState<File[]>([]);
@@ -181,10 +184,16 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
             />
           </Grid>
           <Grid item xs={12}>
-            <FeatureTypesField errorText={errorData.type} onChange={handleFeatureTypeSelect} />
+            <FeatureTypesAutocomplete
+              error={Boolean(errorData.type)}
+              helperText={errorData.type}
+              onChange={handleFeatureTypeSelect}
+              selectedGeometry={editorStore.isFeature ? editorStore.createdFeature?.type?.geometry : null}
+              selectedType={editorStore.isFeature ? editorStore.createdFeature?.type : null}
+            />
           </Grid>
           <Grid item xs={12}>
-            <CategoriesField errorText={errorData.type} onChange={handleCategorySelect} />
+            <CategoriesAutocomplete errorText={errorData.type} onChange={handleCategorySelect} />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -263,12 +272,14 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   );
 });
 
-interface CustomAutocompleteFieldProps<T> {
+interface CategoriesAutocompleteProps {
   errorText: string;
-  onChange: (type: T) => void;
+  onChange: (type: ICategory) => void;
 }
 
-const CategoriesField: React.FC<CustomAutocompleteFieldProps<ICategory>> = observer(({ errorText, onChange }) => {
+const CategoriesAutocomplete: React.FC<CategoriesAutocompleteProps> = observer(({ errorText, onChange }) => {
+  Logger.info('CategoriesAutocomplete');
+
   if (!editorStore.categories) {
     editorStore.getCategories();
   }
@@ -289,7 +300,6 @@ const CategoriesField: React.FC<CustomAutocompleteFieldProps<ICategory>> = obser
         <TextField
           error={Boolean(errorText)}
           helperText={errorText}
-          required
           {...params}
           label='Категория'
           inputProps={{
@@ -298,23 +308,6 @@ const CategoriesField: React.FC<CustomAutocompleteFieldProps<ICategory>> = obser
           }}
         />
       )}
-    />
-  );
-});
-
-const FeatureTypesField: React.FC<CustomAutocompleteFieldProps<IMapFeatureType | null>> = observer(({ errorText, onChange }) => {
-  if (!editorStore.featureTypes) {
-    editorStore.getFeatureTypes();
-  }
-
-  return (
-    <AutocompleteType
-      error={Boolean(errorText)}
-      helperText={errorText}
-      onChange={onChange}
-      featureTypes={editorStore.featureTypes ?? []}
-      selectedGeometry={editorStore.isFeature ? editorStore.createdFeature?.type?.geometry : null}
-      selectedType={editorStore.isFeature ? editorStore.createdFeature?.type : null}
     />
   );
 });

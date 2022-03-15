@@ -6,7 +6,7 @@ import MuiAlert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { AutocompleteType } from '../../../../components/AutocompleteType';
+import { FeatureTypesAutocomplete } from '../../../../components/AutocompleteType';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { authStore } from '../../../../store/auth.store';
 import { editorStore } from '../../../../store/editor.store';
@@ -15,11 +15,12 @@ import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
 import { LayerDraw } from '../layers/LayerDraw';
 import { TabCreate } from '../tabs/TabCreate';
+import { Logger } from '../../../../misc/Logger';
 
 export const WidgetEditorBox = () => {
+  Logger.info('WidgetEditorBox');
+
   const [alert, setAlert] = React.useState(false);
-  const [selectedEditType, setSelectedEditType] = React.useState<GeometryType | null>(null);
-  const [selectedFeatureType, setSelectedFeatureType] = React.useState<IMapFeatureType | null>(null);
 
   const handleEditTypeSelect = (type: GeometryType | null) => {
     if (!authStore.isAuth) {
@@ -27,18 +28,23 @@ export const WidgetEditorBox = () => {
       return;
     }
 
-    setSelectedEditType(type);
+    editorStore.setSelectedEditType(type);
   };
 
+  const handleFeatureTypeSelect = (type: IMapFeatureType | null) => {
+    editorStore.setSelectedFeatureType(type);
+  };
   const onFeatureTypeApply = () => {
-    if (selectedFeatureType) {
-      setSelectedEditType(null);
+    // check if featureType was select in onChange
+    if (editorStore.selectedFeatureType) {
+      editorStore.setSelectedEditType(null);
       editorStore.toggleDrawing();
     }
   };
 
   const handleDrawFinish = (feature: Partial<ICreatedMapFeature>) => editorStore.setFeature(feature);
   const handleDrawCancel = () => editorStore.toggleDrawing();
+
   const handleCloseTab = () => {
     editorStore.setFeature(null);
     handleDrawCancel();
@@ -48,16 +54,11 @@ export const WidgetEditorBox = () => {
     <Box>
       <Paper className='editorBox' elevation={5}>
         <EditorPanel onSelect={handleEditTypeSelect} />
-        <TypesDialog
-          selectedEditType={selectedEditType}
-          onChange={setSelectedFeatureType}
-          onApply={onFeatureTypeApply}
-          onCancel={() => handleEditTypeSelect(null)}
-        />
+        <TypesDialog onChange={handleFeatureTypeSelect} onApply={onFeatureTypeApply} onCancel={() => handleEditTypeSelect(null)} />
         <TabCreate onSubmit={handleCloseTab} onClose={handleCloseTab} />
       </Paper>
       <Paper className='editorCtrlBox' elevation={5}>
-        <LayerDraw selectedFeatureType={selectedFeatureType} onFinish={handleDrawFinish} onCancel={handleDrawCancel} />
+        <LayerDraw onFinish={handleDrawFinish} onCancel={handleDrawCancel} />
       </Paper>
       <Snackbar open={alert} onClose={() => setAlert(false)} autoHideDuration={2000}>
         <MuiAlert elevation={5} onClose={() => setAlert(false)} severity='info' sx={{ width: '100%' }} variant='filled'>
@@ -72,6 +73,8 @@ interface EditorPanelProps {
   onSelect: (type: GeometryType) => void;
 }
 const EditorPanel: React.FC<EditorPanelProps> = observer(({ onSelect }) => {
+  Logger.info('EditorPanel');
+
   return (
     <>
       <IconButton className='editorBtn' size='large' onClick={() => onSelect(GeometryType.POLYGON)} disabled={editorStore.isDrawing}>
@@ -88,21 +91,18 @@ const EditorPanel: React.FC<EditorPanelProps> = observer(({ onSelect }) => {
 });
 
 interface TypesDialogProps {
-  selectedEditType: GeometryType | null;
   onChange: (type: IMapFeatureType | null) => void;
   onApply: () => void;
   onCancel: () => void;
 }
-const TypesDialog: React.FC<TypesDialogProps> = observer(({ selectedEditType, onChange, onCancel, onApply }) => {
-  if (!editorStore.featureTypes && Boolean(selectedEditType)) {
-    editorStore.getFeatureTypes();
-  }
+const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, onApply }) => {
+  Logger.info('TypesDialog');
 
   return (
-    <Dialog open={Boolean(selectedEditType)} onClose={onCancel}>
+    <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
       <DialogTitle>Выбрать тип</DialogTitle>
       <DialogContent>
-        <AutocompleteType sx={{ mt: 3, width: 300 }} onChange={onChange} featureTypes={editorStore.featureTypes ?? []} selectedGeometry={selectedEditType} />
+        <FeatureTypesAutocomplete sx={{ mt: 3, width: 300 }} onChange={onChange} selectedGeometry={editorStore.selectedEditType} />
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>Отменить</Button>

@@ -9,8 +9,11 @@ import Paper from '@mui/material/Paper';
 import React from 'react';
 import '../../styles/Widget.scss';
 import { TabMenu } from '../tabs/TabMenu';
+import { Logger } from '../../../../misc/Logger';
 
 export const WidgetSearchBox = () => {
+  Logger.info('WidgetSearchBox');
+
   const [open, setOpen] = React.useState(false);
 
   const toggleTab = () => {

@@ -13,25 +13,30 @@ import { WidgetToolBox } from './components/widgets/WidgetToolBox';
 import { WidgetUsersBox } from './components/widgets/WidgetUsersBox';
 import { LayerUsers } from './components/layers/LayerUsers';
 import './styles/Main.scss';
+import { Logger } from '../../misc/Logger';
 
 const Main = () => {
+  Logger.info('Main');
+
   const [map, setMap] = React.useState<mapboxgl.Map>();
 
   return (
     <div className='main' id='main'>
       <MainMap onLoaded={setMap} />
-      <MapProvider mainMap={map}>
-        <WidgetSearchBox />
-        <WidgetUsersBox />
-        <WidgetCategoriesBox />
-        <WidgetAccountBox />
-        <WidgetToolBox />
-        <WidgetPreviewBox />
-        <WidgetEditorBox />
-        <TabSelect />
-        <ErrorBox />
-        <LayerUsers />
-      </MapProvider>
+      {map && (
+        <MapProvider mainMap={map}>
+          <WidgetSearchBox />
+          <WidgetUsersBox />
+          <WidgetCategoriesBox />
+          <WidgetAccountBox />
+          <WidgetToolBox />
+          <WidgetPreviewBox />
+          <WidgetEditorBox />
+          <TabSelect />
+          <ErrorBox />
+          <LayerUsers />
+        </MapProvider>
+      )}
     </div>
   );
 };

@@ -17,6 +17,10 @@ class ActiveUsersStore {
   updatesUsers(u: IActiveUser[]) {
     this.users = u;
   }
+
+  getUsers = (): IActiveUser[] => {
+    return this.users.filter(user => user.clientId != this.currentClientId);
+  };
 }
 
 export const activeUsersStore = new ActiveUsersStore();

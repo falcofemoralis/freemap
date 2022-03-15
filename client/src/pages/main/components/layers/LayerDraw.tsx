@@ -7,17 +7,19 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
+import { Logger } from '../../../../misc/Logger';
 import { editorStore } from '../../../../store/editor.store';
 import { Coordinates, ICreatedMapFeature } from '../../../../types/IMapFeature';
 import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
 
 interface LayerDrawProps {
-  selectedFeatureType: IMapFeatureType | null;
   onFinish: (feature: Partial<ICreatedMapFeature>) => void;
   onCancel: () => void;
 }
-export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, selectedFeatureType, onCancel }) => {
+export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCancel }) => {
+  Logger.info('LayerDraw');
+
   const { mainMap } = React.useContext(MapContext);
   const [draw, setDraw] = React.useState<MapboxDraw | null>(null);
 
@@ -33,7 +35,7 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, selecte
        * Преобразование координат с разных типов геометрии. Например преобразование координат нескольких фич Polygon в вид координат Multi_Polygon
        */
       for (const feature of features) {
-        const geometryType = selectedFeatureType?.geometry as GeometryType;
+        const geometryType = editorStore.selectedFeatureType?.geometry as GeometryType;
 
         switch (geometryType) {
           case GeometryType.POLYGON:
@@ -48,9 +50,9 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, selecte
         }
       }
 
-      if (selectedFeatureType) {
+      if (editorStore.selectedFeatureType) {
         const createdFeature: Partial<ICreatedMapFeature> = {
-          type: selectedFeatureType,
+          type: editorStore.selectedFeatureType,
           coordinates
         };
 
@@ -70,7 +72,7 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, selecte
     /**
      * Определение режима рисования по выбранной геометрии
      */
-    switch (selectedFeatureType?.geometry) {
+    switch (editorStore.selectedFeatureType?.geometry) {
       case GeometryType.POLYGON:
         mode = 'draw_polygon';
         break;
@@ -98,15 +100,22 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, selecte
     /**
      * Листенер на кнопку Esq для отмены создания объекта
      */
-    window.addEventListener('keyup', event => {
+    const escapeListener = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         if (mapboxDraw) {
           onCancel();
+          try {
+            mainMap?.removeControl(mapboxDraw);
+          } catch (e) {
+            // skip
+          }
           setDraw(null);
-          mainMap?.removeControl(mapboxDraw);
+
+          window.removeEventListener('keyup', escapeListener);
         }
       }
-    });
+    };
+    window.addEventListener('keyup', escapeListener);
 
     setDraw(mapboxDraw);
   } else if (!editorStore.isDrawing && draw) {

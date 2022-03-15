@@ -7,6 +7,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import React from 'react';
 import { FileType } from '../constants/file.type';
+import { Logger } from '../misc/Logger';
 import CommentsService from '../services/comments.service';
 import { authStore } from '../store/auth.store';
 import { IComment } from '../types/IComment';
@@ -18,6 +19,8 @@ interface CommentsProps {
 }
 
 export const Comments: React.FC<CommentsProps> = ({ comments, featureId }) => {
+  Logger.info('Comments');
+
   const sortedComment = comments.sort((el1, el2) => el2.createdAt - el1.createdAt);
   const allComments: IComment[] = [];
 
