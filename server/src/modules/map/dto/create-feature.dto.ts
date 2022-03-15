@@ -9,6 +9,7 @@ export class CreateFeatureDataDto {
   type: string;
 
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'id категории' })
+  @IsString()
   category?: string;
 
   @ApiProperty({ example: 'qwerty', description: 'Название' })

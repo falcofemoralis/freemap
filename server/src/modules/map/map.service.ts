@@ -41,6 +41,8 @@ export class MapService {
    * @returns {MapFeature} - добавленный объект
    */
   async addMapFeature(mapFeatureDto: CreateFeatureDataDto, userId: string): Promise<MapFeature> {
+    console.log(mapFeatureDto);
+
     const mapFeature = new this.mapFeatureModel({ ...mapFeatureDto, user: userId, createdAt: Date.now() });
     return (await mapFeature.save()).populate({ path: 'type' });
   }

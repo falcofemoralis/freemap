@@ -49,6 +49,7 @@ export class MapController {
     const types = await this.mapService.getFeatureTypes();
     const layers: LayerSource[] = [];
     const sources: Source[] = [];
+    let generatedId = 1;
 
     for (const type of types) {
       for (const layer of type.layers) {
@@ -72,7 +73,7 @@ export class MapController {
               type: type.geometry,
               coordinates,
             },
-            id: new Date().getTime(),
+            id: ++generatedId,
           });
         });
 

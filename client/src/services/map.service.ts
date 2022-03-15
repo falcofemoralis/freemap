@@ -2,6 +2,7 @@ import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
 import { FileType } from '../constants/file.type';
 import { errorStore } from '../store/error.store';
+import { ICategory } from '../types/ICategory';
 import { IMapData } from '../types/IMapData';
 import { ICreatedMapFeature, IMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
@@ -20,6 +21,16 @@ export default class MapService {
     }
   }
 
+  static async getCategories(): Promise<Array<ICategory>> {
+    try {
+      const { data } = await axiosInstance.get<Array<IMapFeatureType>>(`${this.API_URL}/feature/categories`);
+      return data;
+    } catch (e: AxiosError | unknown) {
+      errorStore.errorHandle(e);
+      throw e;
+    }
+  }
+
   static async getMapData(ext: number[][]): Promise<IMapData> {
     try {
       const { data } = await axiosInstance.get<IMapData>(`${this.API_URL}?latT=${ext[1][1]}&lonR=${ext[1][0]}&latB=${ext[0][1]}&lonL=${ext[0][0]}&zoom=${0}`);
@@ -31,7 +42,12 @@ export default class MapService {
   }
 
   static async addFeature(feature: ICreatedMapFeature, files: File[]): Promise<IMapFeature> {
-    const body = { ...feature, type: feature.type.id, coordinates: toJS(feature.coordinates) };
+    console.log('feature');
+    console.log(feature);
+
+    const body = { ...feature, type: feature.type.id, category: feature.category?.id, coordinates: toJS(feature.coordinates) };
+    console.log('body');
+    console.log(body);
 
     try {
       const { data } = await axiosInstance.post<IMapFeature>(`${this.API_URL}/feature`, body, { headers: headers() });

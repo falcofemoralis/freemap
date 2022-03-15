@@ -1,6 +1,6 @@
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Divider, Typography } from '@mui/material';
+import { Alert, Divider, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -24,6 +24,7 @@ import { MapContext } from '../../../../MapProvider';
 import { GeoJSONSource } from 'mapbox-gl';
 import { FeatureProps } from '../../../../types/IMapData';
 import { mapStore } from '../../../../store/map.store';
+import { ICategory } from '../../../../types/ICategory';
 
 type FormData = {
   name: string;
@@ -49,6 +50,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   const [files, setFiles] = React.useState<File[]>([]);
   const [links, setLinks] = React.useState<string[]>([]);
   const [selectedType, setSelectedType] = React.useState<IMapFeatureType | null>(null);
+  const [selectedCategory, setSelectedCategory] = React.useState<ICategory>();
+
   const [errorData, setErrorData] = React.useState<ErrorData>({ coordinates: '', type: '' });
 
   const {
@@ -79,7 +82,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
         const { id, name, createdAt, category, type, coordinates } = await MapService.addFeature(
           {
             coordinates: editorStore.createdFeature?.coordinates,
-            type: editorStore.createdFeature?.type,
+            type: selectedType ? selectedType : editorStore.createdFeature?.type,
+            category: selectedCategory,
             links,
             ...data
           },
@@ -118,6 +122,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     setLinks([]);
     setSelectedType(null);
     setLoading(false);
+    setSelectedCategory(undefined);
   };
 
   /**
@@ -132,6 +137,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   const handleFilesChange = (data: File[]) => setFiles(data);
   const handleFeatureTypeSelect = (type: IMapFeatureType | null) => setSelectedType(type);
   const handleLinksChange = (links: string[]) => setLinks(links);
+  const handleCategorySelect = (category: ICategory) => setSelectedCategory(category);
 
   return (
     <CustomDrawer open={editorStore.isFeature} onClose={handleClose}>
@@ -175,14 +181,10 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
             />
           </Grid>
           <Grid item xs={12}>
-            <AutocompleteType
-              error={Boolean(errorData.type)}
-              helperText={errorData.type}
-              onChange={handleFeatureTypeSelect}
-              featureTypes={editorStore.featureTypes ?? []}
-              selectedGeometry={editorStore.isFeature ? editorStore.createdFeature?.type?.geometry : null}
-              selectedType={editorStore.isFeature ? editorStore.createdFeature?.type : null}
-            />
+            <FeatureTypesField errorText={errorData.type} onChange={handleFeatureTypeSelect} />
+          </Grid>
+          <Grid item xs={12}>
+            <CategoriesField errorText={errorData.type} onChange={handleCategorySelect} />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -258,5 +260,61 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
         {errorStore.message && <Alert severity='error'>{errorStore.message}</Alert>}
       </Box>
     </CustomDrawer>
+  );
+});
+
+interface CustomAutocompleteFieldProps<T> {
+  errorText: string;
+  onChange: (type: T) => void;
+}
+
+const CategoriesField: React.FC<CustomAutocompleteFieldProps<ICategory>> = observer(({ errorText, onChange }) => {
+  if (!editorStore.categories) {
+    editorStore.getCategories();
+  }
+
+  return (
+    <Autocomplete
+      options={editorStore.categories ?? []}
+      autoHighlight
+      getOptionLabel={type => type.name}
+      onChange={(event, value) => value && onChange(value)}
+      renderOption={(props, type) => (
+        <Box component='li' sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+          <img loading='lazy' width='20' src={`https://flagcdn.com/w20/aq.png`} srcSet={`https://flagcdn.com/w40/aq.png 2x`} alt='' />
+          {type.name}
+        </Box>
+      )}
+      renderInput={params => (
+        <TextField
+          error={Boolean(errorText)}
+          helperText={errorText}
+          required
+          {...params}
+          label='Категория'
+          inputProps={{
+            ...params.inputProps,
+            autoComplete: 'type' // disable autocomplete and autofill
+          }}
+        />
+      )}
+    />
+  );
+});
+
+const FeatureTypesField: React.FC<CustomAutocompleteFieldProps<IMapFeatureType | null>> = observer(({ errorText, onChange }) => {
+  if (!editorStore.featureTypes) {
+    editorStore.getFeatureTypes();
+  }
+
+  return (
+    <AutocompleteType
+      error={Boolean(errorText)}
+      helperText={errorText}
+      onChange={onChange}
+      featureTypes={editorStore.featureTypes ?? []}
+      selectedGeometry={editorStore.isFeature ? editorStore.createdFeature?.type?.geometry : null}
+      selectedType={editorStore.isFeature ? editorStore.createdFeature?.type : null}
+    />
   );
 });
