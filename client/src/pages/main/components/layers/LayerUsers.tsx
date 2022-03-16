@@ -1,6 +1,6 @@
 import { Feature, Geometry, Polygon, Position } from 'geojson';
 import { GeoJSONSource } from 'mapbox-gl';
-import { autorun, observe, reaction } from 'mobx';
+import { observe } from 'mobx';
 import React from 'react';
 import { io } from 'socket.io-client';
 import { GeometryType } from '../../../../constants/geometry.type';
@@ -142,7 +142,7 @@ export const LayerUsers = () => {
   React.useEffect(() => {
     if (authStore.isAuth) {
       observe(authStore, 'user', change => {
-        initSocket(change.newValue as any);
+        initSocket(change.newValue as IUser);
       });
     } else {
       initSocket();

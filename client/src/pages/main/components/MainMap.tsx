@@ -2,9 +2,9 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
+import { Logger } from '../../../misc/Logger';
 import { mapStore } from '../../../store/map.store';
 import { FeatureProps } from '../../../types/IMapData';
-import { Logger } from '../../../misc/Logger';
 
 interface MainMapProps {
   onLoaded: (map: mapboxgl.Map) => void;
@@ -52,7 +52,7 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
       }
 
       for (const layer of mapData.layers) {
-        mapboxMap.addLayer(layer as any);
+        mapboxMap.addLayer(layer as mapboxgl.AnyLayer);
 
         if (layer.id.includes('label')) {
           continue;
@@ -87,7 +87,7 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
         });
 
         /**
-         * Листенер изменения координат. Меняется текущий url с добавлением координат и текущего зума
+         * Листенер изменения координат. Меняется текущий url с добавлением координат и текущего приближения
          */
         mapboxMap?.on('moveend', () => {
           try {

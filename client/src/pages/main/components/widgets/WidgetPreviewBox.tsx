@@ -4,8 +4,8 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import MapConstant from '../../../../constants/map.constant';
 import { MapContext } from '../../../../MapProvider';
-import { mapStore } from '../../../../store/map.store';
 import { Logger } from '../../../../misc/Logger';
+import { mapStore } from '../../../../store/map.store';
 import '../../styles/Widget.scss';
 
 const PreviewMapLabel = observer(() => {

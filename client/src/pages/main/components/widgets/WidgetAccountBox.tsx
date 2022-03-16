@@ -3,11 +3,11 @@ import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { UserAvatar } from '../../../../components/UserAvatar';
 import { FileType } from '../../../../constants/file.type';
+import { Logger } from '../../../../misc/Logger';
 import { authStore } from '../../../../store/auth.store';
 import '../../styles/Widget.scss';
 import { SignIn } from '../auth/SignIn';
 import { SignUp } from '../auth/SignUp';
-import { Logger } from '../../../../misc/Logger';
 
 enum DialogType {
   SIGN_UP,
@@ -19,10 +19,6 @@ const SETTINGS_WIDTH = 372;
 export const WidgetAccountBox = observer(() => {
   Logger.info('WidgetAccountBox');
 
-  if (authStore.isAuth && !authStore.user) {
-    authStore.getUserProfile();
-  }
-
   const [isDialog, setDialog] = React.useState(false);
   const [dialogType, setDialogType] = React.useState<DialogType>(DialogType.SIGN_IN);
   const [open, setOpen] = React.useState(false);
@@ -30,6 +26,10 @@ export const WidgetAccountBox = observer(() => {
   const handleAuthOpen = () => setDialog(true);
   const handleAuthClose = () => setDialog(false);
   const changeDialogType = (type: DialogType) => setDialogType(type);
+
+  if (authStore.isAuth && !authStore.user && !isDialog) {
+    authStore.getUserProfile();
+  }
 
   return (
     <Box className='accountBox'>

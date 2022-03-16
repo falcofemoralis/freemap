@@ -11,9 +11,9 @@ import { FileType } from '../../../../constants/file.type';
 import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { getCenter } from '../../../../misc/CoordinatesUtils';
+import { Logger } from '../../../../misc/Logger';
 import MapService from '../../../../services/map.service';
 import { Coordinates, IMapFeature } from '../../../../types/IMapFeature';
-import { Logger } from '../../../../misc/Logger';
 
 interface TabNewestProps {
   open: boolean;
@@ -23,12 +23,12 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
   Logger.info('TabNewest');
 
   const { mainMap } = React.useContext(MapContext);
-  const [newestFeatures, setNewestFeatures] = React.useState<Array<IMapFeature>>([]);
+  const [newestFeatures, setNewestFeatures] = React.useState<Array<IMapFeature> | null>(null);
 
   /**
    * Если вкладка была открыта - получение последних {n} фич
    */
-  if (open) {
+  if (open && !newestFeatures) {
     MapService.getNewestFeatures(20).then(features => setNewestFeatures(features));
   }
 
@@ -47,7 +47,7 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
   return (
     <CustomDrawer open={open} onClose={onClose}>
       <List sx={{ width: '100%' }}>
-        {newestFeatures.map(feature => (
+        {newestFeatures?.map(feature => (
           <ListItem key={feature.id}>
             <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.type.geometry)}>
               <CardActionArea>

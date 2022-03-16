@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AxiosError } from 'axios';
 import { errorStore } from '../store/error.store';
 import { ILvl } from '../types/ILvl';

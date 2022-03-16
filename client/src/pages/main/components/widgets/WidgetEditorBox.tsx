@@ -8,6 +8,7 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { FeatureTypesAutocomplete } from '../../../../components/AutocompleteType';
 import { GeometryType } from '../../../../constants/geometry.type';
+import { Logger } from '../../../../misc/Logger';
 import { authStore } from '../../../../store/auth.store';
 import { editorStore } from '../../../../store/editor.store';
 import { ICreatedMapFeature } from '../../../../types/IMapFeature';
@@ -15,16 +16,13 @@ import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
 import { LayerDraw } from '../layers/LayerDraw';
 import { TabCreate } from '../tabs/TabCreate';
-import { Logger } from '../../../../misc/Logger';
 
 export const WidgetEditorBox = () => {
   Logger.info('WidgetEditorBox');
 
-  const [alert, setAlert] = React.useState(false);
-
   const handleEditTypeSelect = (type: GeometryType | null) => {
     if (!authStore.isAuth) {
-      setAlert(true);
+      editorStore.toggleAlert();
       return;
     }
 
@@ -60,11 +58,7 @@ export const WidgetEditorBox = () => {
       <Paper className='editorCtrlBox' elevation={5}>
         <LayerDraw onFinish={handleDrawFinish} onCancel={handleDrawCancel} />
       </Paper>
-      <Snackbar open={alert} onClose={() => setAlert(false)} autoHideDuration={2000}>
-        <MuiAlert elevation={5} onClose={() => setAlert(false)} severity='info' sx={{ width: '100%' }} variant='filled'>
-          Необходимо авторизоваться!
-        </MuiAlert>
-      </Snackbar>
+      <EditorAlert />
     </Box>
   );
 };
@@ -109,5 +103,17 @@ const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, 
         <Button onClick={onApply}>Выбрать</Button>
       </DialogActions>
     </Dialog>
+  );
+});
+
+const EditorAlert = observer(() => {
+  Logger.info(`EditorAlert: ${editorStore.alert}`);
+
+  return (
+    <Snackbar open={editorStore.alert} onClose={() => editorStore.toggleAlert()} autoHideDuration={2000}>
+      <MuiAlert elevation={5} onClose={() => editorStore.toggleAlert()} severity='info' sx={{ width: '100%' }} variant='filled'>
+        Необходимо авторизоваться!
+      </MuiAlert>
+    </Snackbar>
   );
 });

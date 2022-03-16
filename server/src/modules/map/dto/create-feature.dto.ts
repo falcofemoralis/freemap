@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMinSize, IsArray, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEmpty, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { Position } from '../entities/map-feature.entity';
 
 export class CreateFeatureDataDto {
@@ -9,6 +9,7 @@ export class CreateFeatureDataDto {
   type: string;
 
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'id категории' })
+  @IsOptional()
   @IsString()
   category?: string;
 
@@ -28,18 +29,22 @@ export class CreateFeatureDataDto {
   coordinates: Position[][] | Position[][][];
 
   @ApiProperty({ example: 'qwerty', description: 'Адрес' })
+  @IsOptional()
   @IsString()
   address?: string;
 
   @ApiProperty({ example: '[url1, url2]', description: 'Доп. ссылки' })
+  @IsOptional()
   @IsArray()
   links?: string[];
 
   @ApiProperty({ example: '3809153355', description: 'Телефон' })
+  @IsOptional()
   @IsString()
   phone?: string;
 
   @ApiProperty({ example: 'wiki.com/...', description: 'Ссылка на википедию' })
+  @IsOptional()
   @IsString()
   wiki?: string;
 }

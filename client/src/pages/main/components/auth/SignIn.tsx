@@ -27,6 +27,8 @@ interface SignInProps {
 export const SignIn: React.FC<SignInProps> = ({ onSwitch, onClose }) => {
   Logger.info('SignIn');
 
+  console.log('t');
+
   const {
     register,
     handleSubmit,

@@ -6,9 +6,9 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import React from 'react';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
+import { Logger } from '../../../../misc/Logger';
 import { TabAdmin } from './TabAdmin';
 import { TabNewest } from './TabNewest';
-import { Logger } from '../../../../misc/Logger';
 
 interface TabMenuProps {
   open: boolean;

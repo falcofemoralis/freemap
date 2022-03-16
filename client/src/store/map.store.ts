@@ -1,5 +1,4 @@
 import { Feature, FeatureCollection, Geometry, Position } from 'geojson';
-import { Source } from 'mapbox-gl';
 import { makeAutoObservable } from 'mobx';
 import MapConstant from '../constants/map.constant';
 import { getQueryParams, updateQuery } from '../misc/QueryManager';

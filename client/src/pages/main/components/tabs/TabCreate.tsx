@@ -1,31 +1,29 @@
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Divider, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Alert, Divider, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
-import { Feature, Geometry, LineString, Polygon, Position } from 'geojson';
+import { Feature, Geometry } from 'geojson';
+import { GeoJSONSource } from 'mapbox-gl';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { FeatureTypesAutocomplete } from '../../../../components/AutocompleteType';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileUpload } from '../../../../components/FileUpload';
-import { GeometryType } from '../../../../constants/geometry.type';
+import { MapContext } from '../../../../MapProvider';
+import { getCenter, toText } from '../../../../misc/CoordinatesUtils';
+import { Logger } from '../../../../misc/Logger';
 import MapService from '../../../../services/map.service';
 import { editorStore } from '../../../../store/editor.store';
 import { errorStore } from '../../../../store/error.store';
-import { Coordinates } from '../../../../types/IMapFeature';
-import { IMapFeatureType } from '../../../../types/IMapFeatureType';
-import { getCenter, toText } from '../../../../misc/CoordinatesUtils';
-import { MapContext } from '../../../../MapProvider';
-import { GeoJSONSource } from 'mapbox-gl';
-import { FeatureProps } from '../../../../types/IMapData';
 import { mapStore } from '../../../../store/map.store';
 import { ICategory } from '../../../../types/ICategory';
-import { Logger } from '../../../../misc/Logger';
+import { FeatureProps } from '../../../../types/IMapData';
+import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 
 type FormData = {
   name: string;
@@ -118,7 +116,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   });
 
   /**
-   * Ресет веденных данных
+   * Сброс веденных данных
    */
   const resetData = () => {
     setFiles([]);
@@ -188,8 +186,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
               error={Boolean(errorData.type)}
               helperText={errorData.type}
               onChange={handleFeatureTypeSelect}
-              selectedGeometry={editorStore.isFeature ? editorStore.createdFeature?.type?.geometry : null}
-              selectedType={editorStore.isFeature ? editorStore.createdFeature?.type : null}
+              selectedGeometry={editorStore.createdFeature?.type?.geometry}
+              selectedType={editorStore.createdFeature?.type}
             />
           </Grid>
           <Grid item xs={12}>

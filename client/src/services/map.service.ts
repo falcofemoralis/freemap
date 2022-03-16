@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
 import { FileType } from '../constants/file.type';
@@ -42,12 +43,7 @@ export default class MapService {
   }
 
   static async addFeature(feature: ICreatedMapFeature, files: File[]): Promise<IMapFeature> {
-    console.log('feature');
-    console.log(feature);
-
     const body = { ...feature, type: feature.type.id, category: feature.category?.id, coordinates: toJS(feature.coordinates) };
-    console.log('body');
-    console.log(body);
 
     try {
       const { data } = await axiosInstance.post<IMapFeature>(`${this.API_URL}/feature`, body, { headers: headers() });

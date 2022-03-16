@@ -1,10 +1,10 @@
 import { Autocomplete, Box, SxProps, TextField, Theme } from '@mui/material';
+import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { GeometryType } from '../constants/geometry.type';
-import { IMapFeatureType } from '../types/IMapFeatureType';
 import { Logger } from '../misc/Logger';
 import { editorStore } from '../store/editor.store';
-import { observer } from 'mobx-react-lite';
+import { IMapFeatureType } from '../types/IMapFeatureType';
 
 interface FeatureTypesAutocompleteProps {
   error?: boolean;
@@ -22,12 +22,20 @@ export const FeatureTypesAutocomplete: React.FC<FeatureTypesAutocompleteProps> =
       editorStore.getFeatureTypes();
     }
 
+    const getDefaultValue = () => {
+      if (selectedType) {
+        return selectedType;
+      }
+
+      return null;
+    };
+
     return (
       <Autocomplete
         sx={{ ...sx }}
         options={editorStore.featureTypes ?? []}
         autoHighlight
-        defaultValue={selectedType}
+        defaultValue={getDefaultValue()}
         getOptionLabel={type => type.name}
         onChange={(event, value) => onChange(value)}
         renderOption={(props, type) =>

@@ -2,6 +2,8 @@ import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import { ErrorBox } from '../../components/ErrorBox';
 import { MapProvider } from '../../MapProvider';
+import { Logger } from '../../misc/Logger';
+import { LayerUsers } from './components/layers/LayerUsers';
 import { MainMap } from './components/MainMap';
 import { TabSelect } from './components/tabs/TabSelect';
 import { WidgetAccountBox } from './components/widgets/WidgetAccountBox';
@@ -11,9 +13,7 @@ import { WidgetPreviewBox } from './components/widgets/WidgetPreviewBox';
 import { WidgetSearchBox } from './components/widgets/WidgetSearchBox';
 import { WidgetToolBox } from './components/widgets/WidgetToolBox';
 import { WidgetUsersBox } from './components/widgets/WidgetUsersBox';
-import { LayerUsers } from './components/layers/LayerUsers';
 import './styles/Main.scss';
-import { Logger } from '../../misc/Logger';
 
 const Main = () => {
   Logger.info('Main');

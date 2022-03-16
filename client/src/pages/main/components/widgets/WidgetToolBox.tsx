@@ -1,3 +1,4 @@
+import ExploreIcon from '@mui/icons-material/Explore';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import GpsFixedOutlinedIcon from '@mui/icons-material/GpsFixedOutlined';
@@ -9,9 +10,8 @@ import mapboxgl from 'mapbox-gl';
 import { RulerControl } from 'mapbox-gl-controls';
 import * as React from 'react';
 import { MapContext } from '../../../../MapProvider';
-import '../../styles/Widget.scss';
-import ExploreIcon from '@mui/icons-material/Explore';
 import { Logger } from '../../../../misc/Logger';
+import '../../styles/Widget.scss';
 
 export const WidgetToolBox = () => {
   Logger.info('WidgetToolBox');
@@ -58,7 +58,7 @@ interface FullscreenButtonProps {
 }
 
 const FullscreenButton: React.FC<FullscreenButtonProps> = ({ fullscreenControl }) => {
-  console.log('FullscreenButton');
+  Logger.info('FullscreenButton');
 
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const fullscreen = () => {
@@ -66,14 +66,14 @@ const FullscreenButton: React.FC<FullscreenButtonProps> = ({ fullscreenControl }
     setIsFullscreen(!isFullscreen);
   };
 
-  return <IconButton onClick={fullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>;
+  return <IconButton onClick={fullscreen}>{isFullscreen ? <FullscreenExitIcon color='primary' /> : <FullscreenIcon />}</IconButton>;
 };
 
 interface CompassButtonProps {
   mainMap?: mapboxgl.Map;
 }
 const CompassButton: React.FC<CompassButtonProps> = ({ mainMap }) => {
-  console.log('CompassButton');
+  Logger.info('CompassButton');
 
   const compass = () => {
     mainMap?.easeTo({ bearing: 0, pitch: 0 });
@@ -90,27 +90,42 @@ interface RulerButtonProps {
   rulerControl: RulerControl;
 }
 const RulerButton: React.FC<RulerButtonProps> = ({ rulerControl }) => {
-  console.log('RulerButton');
+  Logger.info('RulerButton');
+
+  const [isMeasuring, setMeasuring] = React.useState(false);
+
+  React.useEffect(() => {
+    console.log('Add listener');
+
+    const listener = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (isMeasuring) {
+          rulerControl.measuringOff();
+          setMeasuring(false);
+          console.log('off');
+        }
+      }
+    };
+
+    window.addEventListener('keyup', listener);
+    return () => {
+      window.removeEventListener('keyup', listener);
+    };
+  });
 
   const measure = () => {
     if (rulerControl.isMeasuring) {
       rulerControl.measuringOff();
+      setMeasuring(false);
     } else {
       rulerControl.measuringOn();
+      setMeasuring(true);
     }
   };
 
-  window.addEventListener('keyup', event => {
-    if (event.key === 'Escape') {
-      if (rulerControl.isMeasuring) {
-        rulerControl.measuringOff();
-      }
-    }
-  });
-
   return (
     <IconButton onClick={measure}>
-      <StraightenOutlinedIcon />
+      <StraightenOutlinedIcon color={isMeasuring ? 'primary' : 'action'} />
     </IconButton>
   );
 };
@@ -119,7 +134,7 @@ interface GeolocationButtonProps {
   geolocationControl: mapboxgl.GeolocateControl;
 }
 const GeolocationButton: React.FC<GeolocationButtonProps> = ({ geolocationControl }) => {
-  console.log('GeolocationButton');
+  Logger.info('GeolocationButton');
 
   const [locationstart, setLocationstart] = React.useState(false);
   const [locationend, setLocationend] = React.useState(false);
@@ -147,9 +162,9 @@ const GeolocationButton: React.FC<GeolocationButtonProps> = ({ geolocationContro
     if (!locationstart && !locationend) {
       return <GpsOffIcon />;
     } else if (locationstart && !locationend) {
-      return <GpsFixedOutlinedIcon />;
+      return <GpsFixedOutlinedIcon color='primary' />;
     } else if (!locationstart && locationend) {
-      return <GpsNotFixedIcon />;
+      return <GpsNotFixedIcon color='primary' />;
     } else {
       return <GpsOffIcon />;
     }

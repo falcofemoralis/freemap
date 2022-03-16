@@ -7,9 +7,9 @@ import IconButton from '@mui/material/IconButton';
 import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
 import React from 'react';
+import { Logger } from '../../../../misc/Logger';
 import '../../styles/Widget.scss';
 import { TabMenu } from '../tabs/TabMenu';
-import { Logger } from '../../../../misc/Logger';
 
 export const WidgetSearchBox = () => {
   Logger.info('WidgetSearchBox');

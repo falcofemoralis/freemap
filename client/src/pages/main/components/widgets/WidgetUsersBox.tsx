@@ -8,7 +8,6 @@ import { MapContext } from '../../../../MapProvider';
 import { getCenter } from '../../../../misc/CoordinatesUtils';
 import { Logger } from '../../../../misc/Logger';
 import { activeUsersStore } from '../../../../store/active-users.store';
-import { IActiveUser } from '../../../../types/IActiveUser';
 import '../../styles/Widget.scss';
 
 export const WidgetUsersBox = observer(() => {

@@ -4,6 +4,7 @@ import MapService from '../services/map.service';
 import { ICategory } from '../types/ICategory';
 import { ICreatedMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
+
 class EditorStore {
   featureTypes: IMapFeatureType[] | null = null;
   categories: ICategory[] | null = null;
@@ -11,6 +12,7 @@ class EditorStore {
   isDrawing = false;
   selectedEditType: GeometryType | null = null;
   selectedFeatureType: IMapFeatureType | null = null;
+  alert = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -48,6 +50,10 @@ class EditorStore {
 
   setSelectedFeatureType(type: IMapFeatureType | null) {
     this.selectedFeatureType = type;
+  }
+
+  toggleAlert() {
+    this.alert = !this.alert;
   }
 }
 

@@ -2,7 +2,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import CheckIcon from '@mui/icons-material/Check';
 import { Box, IconButton } from '@mui/material';
-import { Feature, GeoJsonProperties, Geometry, LineString, Polygon, Position } from 'geojson';
+import { LineString, Polygon, Position } from 'geojson';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { GeometryType } from '../../../../constants/geometry.type';
@@ -10,7 +10,6 @@ import { MapContext } from '../../../../MapProvider';
 import { Logger } from '../../../../misc/Logger';
 import { editorStore } from '../../../../store/editor.store';
 import { Coordinates, ICreatedMapFeature } from '../../../../types/IMapFeature';
-import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 import '../../styles/Widget.scss';
 
 interface LayerDrawProps {
