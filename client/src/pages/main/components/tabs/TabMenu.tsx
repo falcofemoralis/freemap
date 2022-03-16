@@ -13,18 +13,25 @@ import { TabNewest } from './TabNewest';
 interface TabMenuProps {
   open: boolean;
   onClose: () => void;
+  onOpen: () => void;
 }
 
 enum MenuItem {
   NEWEST
 }
 
-export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
+export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose, onOpen }) => {
   Logger.info('TabMenu');
 
   const [menuItem, setMenuItem] = React.useState<MenuItem | null>(null);
-  const handleOpen = (item: MenuItem) => setMenuItem(item);
-  const handleClose = () => setMenuItem(null);
+  const handleOpen = (item: MenuItem) => {
+    setMenuItem(item);
+    onClose();
+  };
+  const handleClose = () => {
+    setMenuItem(null);
+    onOpen();
+  };
 
   return (
     <>
@@ -54,7 +61,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({ open, onClose }) => {
         </ListItem>
       </CustomDrawer>
       <TabAdmin />
-      <TabNewest open={menuItem == MenuItem.NEWEST} onClose={handleClose} />
+      <TabNewest open={menuItem == MenuItem.NEWEST} onClose={handleClose} onSelect={onClose} />
     </>
   );
 };

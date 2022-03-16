@@ -8,18 +8,19 @@ import Typography from '@mui/material/Typography';
 import React from 'react';
 import { CustomDrawer } from '../../../../components/CustomDrawer';
 import { FileType } from '../../../../constants/file.type';
-import { GeometryType } from '../../../../constants/geometry.type';
 import { MapContext } from '../../../../MapProvider';
 import { getCenter } from '../../../../misc/CoordinatesUtils';
 import { Logger } from '../../../../misc/Logger';
 import MapService from '../../../../services/map.service';
 import { Coordinates, IMapFeature } from '../../../../types/IMapFeature';
+import { IMapFeatureType } from '../../../../types/IMapFeatureType';
 
 interface TabNewestProps {
   open: boolean;
   onClose: () => void;
+  onSelect: () => void;
 }
-export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
+export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose, onSelect }) => {
   Logger.info('TabNewest');
 
   const { mainMap } = React.useContext(MapContext);
@@ -32,24 +33,26 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose }) => {
     MapService.getNewestFeatures(20).then(features => setNewestFeatures(features));
   }
 
-  // TODO Add zoom
   /**
    * Выбор фичи и перенаправление карты на нее
    * @param coordinates - координаты выбранной фичи
    * @param type - тип выбранной фичи
    */
-  const selectFeature = (coordinates: Coordinates, type: GeometryType) => {
+  const selectFeature = (coordinates: Coordinates, type: IMapFeatureType) => {
+    console.log(type);
+
     mainMap?.flyTo({
-      center: getCenter(coordinates, type)
+      center: getCenter(coordinates, type.geometry),
+      zoom: type.layers[0].minzoom + 1
     });
   };
 
   return (
-    <CustomDrawer open={open} onClose={onClose}>
+    <CustomDrawer open={open} onClose={onClose} hideBackdrop>
       <List sx={{ width: '100%' }}>
         {newestFeatures?.map(feature => (
           <ListItem key={feature.id}>
-            <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.type.geometry)}>
+            <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.type)}>
               <CardActionArea>
                 {feature?.files && feature?.files?.length > 0 && (
                   <CardMedia

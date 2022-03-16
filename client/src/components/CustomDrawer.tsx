@@ -9,6 +9,7 @@ interface CustomDrawerProps {
   width?: number;
   padding?: number;
   fullHeight?: boolean;
+  hideBackdrop?: boolean;
 }
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -23,7 +24,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   right: 5
 }));
 
-export const CustomDrawer: React.FC<CustomDrawerProps> = ({ onClose, open, width, children, padding, fullHeight }) => {
+export const CustomDrawer: React.FC<CustomDrawerProps> = ({ onClose, open, width, children, padding, fullHeight, hideBackdrop }) => {
   const DRAWER_WIDTH = 420;
 
   return (
@@ -36,6 +37,7 @@ export const CustomDrawer: React.FC<CustomDrawerProps> = ({ onClose, open, width
       anchor='left'
       open={open}
       onClose={onClose}
+      hideBackdrop={hideBackdrop ?? false}
     >
       <DrawerHeader>
         <IconButton className='closeBtn' onClick={onClose}>

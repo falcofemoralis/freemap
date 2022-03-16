@@ -5,6 +5,6 @@ export interface IMapFeatureType {
   id: string;
   name: string;
   geometry: GeometryType;
-  styles: Layer[];
+  layers: Layer[];
   icon?: string;
 }

@@ -35,7 +35,7 @@ export const WidgetSearchBox = () => {
           <DirectionsIcon />
         </IconButton>
       </Paper>
-      <TabMenu open={open} onClose={toggleTab} />
+      <TabMenu open={open} onClose={toggleTab} onOpen={toggleTab} />
     </Box>
   );
 };
