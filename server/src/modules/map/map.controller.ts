@@ -34,6 +34,7 @@ import { MapService } from './map.service';
 import { AreaQuery } from './query/area.query';
 import { FeatureCollection } from './types/feature-collection';
 import { LayerSource, MapData, Source } from './types/map-data';
+import { Media } from './types/media';
 
 const MEDIA_FOLDER = 'media';
 @ApiTags('map')
@@ -107,15 +108,15 @@ export class MapController {
   @ApiHeader({ name: 'auth', description: 'Токен пользователя' })
   @ApiConsumes('multipart/form-data')
   @ApiBody(MediaType)
-  @ApiResponse({ status: 201, type: [String], description: 'Добавленные медиа файлы' })
+  @ApiResponse({ status: 201, type: [Media], description: 'Добавленные медиа файлы' })
   @UseGuards(JwtAuthGuard, MapFeatureGuard)
   @UseInterceptors(MediaInterceptor)
   @Post('feature/:id/media')
-  async addMapFeatureMedia(@Param('id') id: string, @UploadedFiles() files: Array<Express.Multer.File>): Promise<string[]> {
+  async addMapFeatureMedia(@Param('id') id: string, @UploadedFiles() files: Array<Express.Multer.File>, @Request() req): Promise<Media[]> {
     try {
+      const userId = (req.user as UserPayload).id;
       const uploadedFiles = await this.filesService.saveFiles(files, { maxWidth: 1920, previewMaxWidth: 420, subfolder: MEDIA_FOLDER });
-      await this.mapService.addMapFeatureMedia(id, uploadedFiles);
-      return uploadedFiles;
+      return this.mapService.addMapFeatureMedia(id, userId, uploadedFiles);
     } catch (e) {
       throw new InternalServerErrorException(e);
     }

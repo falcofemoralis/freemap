@@ -34,8 +34,10 @@ export class FilesService {
     for (const file of files) {
       try {
         const fileName = v4();
-        await this.uploadFile(file.buffer, fileName, FileType.ORIGINAL, options);
-        await this.uploadFile(file.buffer, fileName, FileType.THUMBNAIL, options);
+        console.log(options);
+
+        await this.uploadFile(file.buffer, fileName, FileType.ORIGINAL, options.maxWidth, options.subfolder);
+        await this.uploadFile(file.buffer, fileName, FileType.THUMBNAIL, options.previewMaxWidth, options.subfolder);
         //  await this.uploadFile(file.buffer, fileName, FileType.SMALL, options);
 
         uploadedFiles.push(fileName);
@@ -49,24 +51,24 @@ export class FilesService {
     return uploadedFiles;
   }
 
-  private async uploadFile(data: Buffer, fileName: string, fileType: FileType, options?: FileUploadOptions): Promise<number> {
-    let width = 100;
-
-    switch (fileType) {
-      case FileType.ORIGINAL:
-        width = options.maxWidth;
-      case FileType.THUMBNAIL:
-        width = options.previewMaxWidth;
-      case FileType.SMALL:
-        width = options.smallMaxWidth;
-    }
+  /**
+   * Upload file
+   * @param data - what to upload
+   * @param fileName - how it's called
+   * @param fileType - what kind of thing is it
+   * @param width - in what size should it be converted
+   * @param subFolder - where it will be placed
+   * @returns the thing that you wanted
+   */
+  private async uploadFile(data: Buffer, fileName: string, fileType: FileType, width: number, subFolder: string): Promise<number> {
+    console.log(width);
 
     const image = await sharp(data)
       .jpeg({ mozjpeg: true, quality: fileType == FileType.ORIGINAL ? 90 : 50 })
       .resize({ width: width, withoutEnlargement: true })
       .toBuffer();
     const res = await this.dbx.filesUpload({
-      path: `/${options?.subfolder ? `${options.subfolder}/` : ''}${fileName}${fileType == FileType.ORIGINAL ? '' : `_${fileType}`}${EXT}`,
+      path: `/${subFolder ? `${subFolder}/` : ''}${fileName}${fileType == FileType.ORIGINAL ? '' : `_${fileType}`}${EXT}`,
       contents: image.buffer,
     });
 

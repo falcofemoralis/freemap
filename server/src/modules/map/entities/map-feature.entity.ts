@@ -4,6 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
 import { User } from 'src/modules/auth/entities/user.entity';
 import { FeatureType } from './feature-type.entity';
+import { Media } from '../types/media';
 
 export type Position = number[];
 
@@ -60,7 +61,7 @@ export class MapFeature {
 
   @ApiProperty({ example: '[1.jpg, 2.jpg]', description: 'Медиа файлы' })
   @Prop()
-  files: string[];
+  files: Media[];
 
   @ApiProperty({ example: '[]', description: 'Комментарии' })
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'UserComment', autopopulate: true })

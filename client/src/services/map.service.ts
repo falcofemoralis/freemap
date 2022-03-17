@@ -7,6 +7,7 @@ import { ICategory } from '../types/ICategory';
 import { IMapData } from '../types/IMapData';
 import { ICreatedMapFeature, IMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
+import { IMedia } from '../types/IMedia';
 import { authStore } from './../store/auth.store';
 import { axiosInstance, headers } from './index';
 export default class MapService {
@@ -47,14 +48,26 @@ export default class MapService {
 
     try {
       const { data } = await axiosInstance.post<IMapFeature>(`${this.API_URL}/feature`, body, { headers: headers() });
+      if (files.length > 0) {
+        await this.addMedia(data.id, files);
+      }
+
+      authStore.updateUserLvl();
+
+      return data;
+    } catch (e: AxiosError | unknown) {
+      errorStore.errorHandle(e);
+      throw e;
+    }
+  }
+
+  static async addMedia(id: string, files: File[]): Promise<IMedia[]> {
+    try {
       const filesFormData = new FormData();
       for (const file of files) {
         filesFormData.append('files', file);
       }
-      await axiosInstance.post(`${this.API_URL}/feature/${data.id}/media`, filesFormData, { headers: headers() });
-
-      authStore.updateUserLvl();
-
+      const { data } = await axiosInstance.post(`${this.API_URL}/feature/${id}/media`, filesFormData, { headers: headers() });
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);

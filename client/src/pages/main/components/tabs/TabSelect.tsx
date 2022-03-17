@@ -2,7 +2,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import LinkIcon from '@mui/icons-material/Link';
 import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled';
 import RoomIcon from '@mui/icons-material/Room';
-import { Button, CircularProgress, Divider, Tooltip, Typography } from '@mui/material';
+import { Button, CircularProgress, Divider, Tooltip, Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { observer } from 'mobx-react-lite';
@@ -22,6 +22,7 @@ import MapService from '../../../../services/map.service';
 import { authStore } from '../../../../store/auth.store';
 import { mapStore } from '../../../../store/map.store';
 import { IMapFeature } from '../../../../types/IMapFeature';
+import { IMedia } from '../../../../types/IMedia';
 
 export const TabSelect = observer(() => {
   Logger.info('TabSelect');
@@ -85,11 +86,11 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
     fetchData();
   }, []);
 
-  const getViewerImages = (files?: string[]): ImageDecorator[] => {
+  const getViewerImages = (files?: IMedia[]): ImageDecorator[] => {
     const images: ImageDecorator[] = [];
     if (files) {
       for (const file of files) {
-        images.push({ src: MapService.getMedia(file, FileType.ORIGINAL) });
+        images.push({ src: MapService.getMedia(file.name, FileType.ORIGINAL) });
       }
     }
     console.log(images);
@@ -97,10 +98,22 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
     return images;
   };
 
-  const openFullImage = (img: string) => {
+  const openFullImage = (img: IMedia) => {
     setViewerOpen(!viewerOpen);
-    const ind = mapFeature?.files?.findIndex(el => el == img);
+    const ind = mapFeature?.files?.findIndex(el => el.name == img.name);
     setActiveImage(ind);
+  };
+
+  const handleSubmitMedia = (files: IMedia[]) => {
+    console.log('uploaded');
+    console.log(files);
+
+    const mapFeatureTmp = mapFeature;
+    if (mapFeatureTmp) {
+      mapFeatureTmp.files?.push(...files);
+      setMapFeature(null);
+      setMapFeature(mapFeatureTmp);
+    }
   };
 
   if (mapFeature) {
@@ -108,8 +121,8 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
       <Box>
         <Carousel showThumbs={false} swipeable emulateTouch infiniteLoop showStatus={false}>
           {mapFeature.files?.map(file => (
-            <div key={file} onClick={() => openFullImage(file)} style={{ cursor: 'pointer' }}>
-              <Image src={MapService.getMedia(file, FileType.THUMBNAIL)} style={{ height: '240px', objectFit: 'cover' }} />
+            <div key={file.name} onClick={() => openFullImage(file)} style={{ cursor: 'pointer' }}>
+              <Image src={MapService.getMedia(file.name, FileType.THUMBNAIL)} style={{ height: '240px', objectFit: 'cover' }} />
             </div>
           ))}
         </Carousel>
@@ -118,6 +131,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
             <Box>
               <Typography variant='caption' gutterBottom>
                 {mapFeature.type.name}
+                {mapFeature.category ? ` - ${mapFeature.category.name}` : ''}
               </Typography>
               <Typography variant='h5'>{mapFeature.name}</Typography>
               <Typography variant='body2' gutterBottom>
@@ -163,9 +177,11 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
               <IconifiedField icon={<LinkIcon />} text={link} />
             </Grid>
           ))}
+        </Grid>
+        <Grid container spacing={2} sx={{ pl: 3, pr: 3, pb: 3 }}>
           {authStore.isAuth && (
             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <FileUpload onUpload={files => console.log(files)} />
+              <FileUpload isSubmit submitId={mapFeature.id} onSubmit={handleSubmitMedia} />
             </Grid>
           )}
         </Grid>

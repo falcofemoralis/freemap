@@ -58,7 +58,7 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose, onSelect })
                   <CardMedia
                     component='img'
                     height='140'
-                    image={MapService.getMedia(feature?.files ? feature?.files[0] : '', FileType.THUMBNAIL)}
+                    image={MapService.getMedia(feature?.files ? feature?.files[0].name : '', FileType.THUMBNAIL)}
                     alt={feature.name}
                   />
                 )}
@@ -66,7 +66,7 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose, onSelect })
                   <Typography gutterBottom variant='h5' component='div'>
                     {feature.name} • {new Date(feature.createdAt).toLocaleDateString()}
                   </Typography>
-                  <Typography variant='body2' color='text.secondary'>
+                  <Typography variant='body2' color='text.secondary' noWrap>
                     {feature.description}
                   </Typography>
                 </CardContent>

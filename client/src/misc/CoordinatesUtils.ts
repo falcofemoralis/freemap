@@ -38,7 +38,7 @@ export const toText = (coordinates: [number, number] | undefined): string => {
   if (coordinates) {
     const [lon, lat] = coordinates;
 
-    return `${lon.toFixed(5)}, ${lat.toFixed(5)}`;
+    return `${lat.toFixed(5)}N, ${lon.toFixed(5)}E`;
   }
 
   return '0, 0';

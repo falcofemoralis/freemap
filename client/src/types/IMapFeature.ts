@@ -2,6 +2,7 @@ import { Position } from 'geojson';
 import { ICategory } from './ICategory';
 import { IComment } from './IComment';
 import { IMapFeatureType } from './IMapFeatureType';
+import { IMedia } from './IMedia';
 import { IUser } from './IUser';
 
 export type Coordinates = Position[][] | Position[][][];
@@ -14,7 +15,7 @@ export interface IMapFeature {
   description: string;
   address?: string;
   links?: string[];
-  files?: string[];
+  files?: IMedia[];
   createdAt: number;
   wiki?: string;
   phone?: string;

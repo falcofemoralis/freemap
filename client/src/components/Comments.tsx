@@ -119,6 +119,9 @@ const CommentForm: React.FC<CommentFormProps> = ({ featureId, onSubmit, parentId
     setLoading(true);
     try {
       const comment = await CommentsService.addComment(featureId, text, parentId);
+      console.log('created comment');
+      console.log(comment);
+
       onSubmit(comment);
       setText('');
     } catch (e) {

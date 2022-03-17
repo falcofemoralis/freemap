@@ -8,6 +8,7 @@ import { FeatureTypeDto } from './dto/feature-type.dto';
 import { FeatureType, FeatureTypeDocument } from './entities/feature-type.entity';
 import { MapFeature, MapFeatureDocument } from './entities/map-feature.entity';
 import { AreaQuery } from './query/area.query';
+import { Media } from './types/media';
 
 @Injectable()
 export class MapService {
@@ -52,10 +53,15 @@ export class MapService {
    * @param {string} id - id объекта
    * @param {string[]} files - файлы
    */
-  async addMapFeatureMedia(id: string, files: string[]) {
+  async addMapFeatureMedia(id: string, userId: string, files: string[]): Promise<Media[]> {
     console.log(files);
 
-    return this.mapFeatureModel.findOneAndUpdate({ _id: id }, { files }, { new: true });
+    const mediaFiles: Media[] = [];
+    for (const file of files) {
+      mediaFiles.push({ name: file, createdAt: Date.now(), createdBy: userId });
+    }
+    await this.mapFeatureModel.findOneAndUpdate({ _id: id }, { $push: { files: { $each: mediaFiles } } }, { new: true });
+    return mediaFiles;
   }
 
   /**

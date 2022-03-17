@@ -222,7 +222,6 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
           <Grid item xs={12}>
             <Autocomplete
               multiple
-              id='tags-filled'
               options={links}
               onChange={(event, value) => handleLinksChange(value)}
               freeSolo
