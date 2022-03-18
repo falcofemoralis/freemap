@@ -7,12 +7,7 @@ import { MapContext } from '../../../../MapProvider';
 import { Logger } from '../../../../misc/Logger';
 import { mapStore } from '../../../../store/map.store';
 import '../../styles/Widget.scss';
-
-const PreviewMapLabel = observer(() => {
-  return (
-    <>{mapStore.mapType === MapConstant.GOOGLE ? <Typography variant='subtitle2'>Земля</Typography> : <Typography variant='subtitle2'>Карта</Typography>}</>
-  );
-});
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 
 export const WidgetPreviewBox = () => {
   Logger.info('WidgetPreviewBox');
@@ -30,8 +25,8 @@ export const WidgetPreviewBox = () => {
     const previewMapboxMap = new mapboxgl.Map({
       container: node,
       style: mapStore.mapType as string,
-      center: [mapStore.lonLat[0], mapStore.lonLat[1]],
-      zoom: mapStore.zoom
+      center: mainMap?.getCenter(),
+      zoom: mainMap?.getZoom()
     });
 
     previewMapboxMap.once('load', () => {
@@ -73,6 +68,9 @@ export const WidgetPreviewBox = () => {
   return (
     <Paper className='previewMapBox' elevation={5} onClick={changeMapType}>
       <div ref={mapNode} className='previewMapBox__map' />
+      <div className='previewMapBox__deck'>
+        <MapsDeck />
+      </div>
       <div className='previewMapBox__label'>
         <PreviewMapLabel />
       </div>
@@ -80,4 +78,14 @@ export const WidgetPreviewBox = () => {
       <div className='previewMapBox__plate'></div>
     </Paper>
   );
+};
+
+const PreviewMapLabel = observer(() => {
+  return (
+    <>{mapStore.mapType === MapConstant.GOOGLE ? <Typography variant='subtitle2'>Земля</Typography> : <Typography variant='subtitle2'>Карта</Typography>}</>
+  );
+});
+
+const MapsDeck = () => {
+  return <ArrowDropUpIcon />;
 };

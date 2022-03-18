@@ -1,18 +1,19 @@
-import { Feature, FeatureCollection, Geometry, Position } from 'geojson';
+import { Feature, FeatureCollection, Geometry } from 'geojson';
 import { makeAutoObservable } from 'mobx';
 import MapConstant from '../constants/map.constant';
-import { getQueryParams, updateQuery } from '../misc/QueryManager';
 import MapService from '../services/map.service';
+import { HashUtil } from './../misc/HashUtil';
 import { FeatureProps, IMapData } from './../types/IMapData';
 
 class MapStore {
   mapData: IMapData;
   mapType: MapConstant = MapConstant.OSM;
-  lonLat: Position = [0, 0];
-  zoom = 2;
   selectedFeatureId: string | null = null;
 
   constructor() {
+    const data = HashUtil.getHashKey('data');
+    data ? (this.mapType = MapConstant.getMapType(data)) : MapConstant.OSM;
+    this.selectedFeatureId = HashUtil.getHashKey('selected');
     makeAutoObservable(this);
   }
 
@@ -28,15 +29,13 @@ class MapStore {
       mapStore.mapType = MapConstant.OSM;
     }
 
-    this.updateUrlData();
-
+    HashUtil.updateHash('data', MapConstant.getMapName(mapStore.mapType));
     return mapStore.mapType;
   }
 
   async setSelectedFeatureId(featureId: string | null) {
     this.selectedFeatureId = featureId;
-
-    this.updateUrlData();
+    HashUtil.updateHash('selected', featureId);
   }
 
   addFeature(sourceId: string, feature: Feature<Geometry, FeatureProps>): FeatureCollection<Geometry, FeatureProps> | null {
@@ -47,27 +46,6 @@ class MapStore {
     }
 
     return null;
-  }
-
-  async updateMapPosition(lon: number, lat: number, zoom: number) {
-    this.lonLat = [Number(lon.toFixed(5)), Number(lat.toFixed(5))];
-    this.zoom = Number(zoom.toFixed(3));
-
-    this.updateUrlData();
-  }
-
-  parseUrlData(url: string) {
-    const query = getQueryParams(url);
-    if (query.get('lon') && query.get('lat')) {
-      this.lonLat = [parseFloat(query.get('lon')!.toString()), parseFloat(query.get('lat')!.toString())];
-    }
-    if (query.get('z')) this.zoom = parseFloat(query.get('z') as string);
-    if (query.get('map')) this.mapType = MapConstant.getMapType(query.get('map') as string);
-    if (query.get('selected')) this.selectedFeatureId = query.get('selected') as string;
-  }
-
-  updateUrlData() {
-    updateQuery(this.lonLat, this.zoom, this.selectedFeatureId, this.mapType);
   }
 }
 

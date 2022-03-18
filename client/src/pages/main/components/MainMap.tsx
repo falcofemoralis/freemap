@@ -1,7 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import * as React from 'react';
-import { useLocation } from 'react-router-dom';
 import { Logger } from '../../../misc/Logger';
 import { mapStore } from '../../../store/map.store';
 import { FeatureProps } from '../../../types/IMapData';
@@ -14,8 +13,6 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
 
   const mapNode = React.useRef(null);
   let hoveredStateId: string | number | undefined | null = null;
-
-  mapStore.parseUrlData(useLocation().search);
 
   React.useEffect(() => {
     const node = mapNode.current;
@@ -30,8 +27,7 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
     const mapboxMap = new mapboxgl.Map({
       container: node,
       style: mapStore.mapType as string,
-      center: [mapStore.lonLat[0], mapStore.lonLat[1]],
-      zoom: mapStore.zoom
+      hash: 'map'
     });
 
     /**
@@ -83,22 +79,6 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
         mapboxMap.on('click', layer.id, e => {
           if (e && e.features && e.features.length > 0) {
             mapStore.setSelectedFeatureId((e.features[0].properties as FeatureProps).id);
-          }
-        });
-
-        /**
-         * Листенер изменения координат. Меняется текущий url с добавлением координат и текущего приближения
-         */
-        mapboxMap?.on('moveend', () => {
-          try {
-            const zoom = mapboxMap.getZoom();
-            const center = mapboxMap.getCenter();
-
-            if (center && zoom) {
-              mapStore.updateMapPosition(center.lng, center.lat, zoom);
-            }
-          } catch (e) {
-            console.error(e);
           }
         });
       }

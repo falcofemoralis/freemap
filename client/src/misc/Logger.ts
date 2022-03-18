@@ -1,5 +1,5 @@
 export class Logger {
-  static isActive = true;
+  static isActive = false;
   static logs: string[] = [];
 
   static info(text: string) {
