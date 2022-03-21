@@ -30,9 +30,6 @@ export class HashUtil {
       .split('&')
       .find(part => {
         const [key, data] = part.split('=');
-        console.log(key);
-        console.log(data);
-
         if (key === selectedKey) {
           found = data;
           return true;

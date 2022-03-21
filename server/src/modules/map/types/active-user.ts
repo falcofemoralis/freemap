@@ -5,4 +5,5 @@ export interface ActiveUser {
   username: string;
   userColor?: string;
   userAvatar?: string;
+  profileAvatarLink?: string;
 }

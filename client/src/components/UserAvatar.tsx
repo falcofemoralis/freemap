@@ -12,7 +12,11 @@ interface UserAvatarProps {
 }
 export const UserAvatar: FC<UserAvatarProps> = ({ user, type, sx, style }) => {
   return (
-    <Avatar style={style} src={AuthService.getUserAvatar(user?.userAvatar, type)} sx={{ ...sx, bgcolor: user?.userColor ?? '#ff6f00' }}>
+    <Avatar
+      style={style}
+      src={user?.userAvatar ? AuthService.getUserAvatar(user?.userAvatar, type) : user?.profileAvatarLink}
+      sx={{ ...sx, bgcolor: user?.userColor ?? '#ff6f00' }}
+    >
       {user?.username?.charAt(0).toUpperCase()}
     </Avatar>
   );

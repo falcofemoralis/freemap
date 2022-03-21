@@ -11,8 +11,8 @@ export default class AuthService {
    * Регистрация нового пользователя
    * @returns token
    */
-  static async register(username: string, email: string, password: string, isMailing: boolean, userColor: string): Promise<string> {
-    const createUserDto = { username, password, email, isMailing, userColor };
+  static async register(username: string, email: string, password: string, isMailing: boolean): Promise<string> {
+    const createUserDto = { username, password, email, isMailing };
 
     try {
       const { data } = await axiosInstance.post<string>(`${AuthService.API_URL}/register`, createUserDto);
@@ -32,6 +32,16 @@ export default class AuthService {
 
     try {
       const { data } = await axiosInstance.post<string>(`${AuthService.API_URL}/login`, loginUserDto);
+      return data;
+    } catch (e: AxiosError | unknown) {
+      errorStore.errorHandle(e);
+      throw e;
+    }
+  }
+
+  static async googleLogin(tokenId: string) {
+    try {
+      const { data } = await axiosInstance.post<string>(`${AuthService.API_URL}/google`, { tokenId });
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);

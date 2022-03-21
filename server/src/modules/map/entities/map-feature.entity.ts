@@ -16,7 +16,7 @@ export class MapFeature {
   id: string;
 
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Пользователь который добавил объект' })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', autopopulate: { select: 'username userColor userAvatar' } })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', autopopulate: { select: '-email -passwordHash' } })
   user: User;
 
   @ApiProperty({ example: 'Building - Qwerty', description: 'Название объекта' })

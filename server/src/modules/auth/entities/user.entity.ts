@@ -32,6 +32,10 @@ export class User {
   @Prop()
   userAvatar: string;
 
+  @ApiProperty({ example: 'https://dl1.google.com/123', description: 'Ссылка на аватар пользователя' })
+  @Prop()
+  profileAvatarLink: string;
+
   @ApiProperty({ example: '#ff6f00', description: 'Цвет пользователя' })
   @Prop()
   userColor: string;

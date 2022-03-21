@@ -1,3 +1,4 @@
+import { GoogleUserDto } from './dto/google-user.dto';
 import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -8,6 +9,7 @@ import { CreateUserDto } from 'src/modules/auth/dto/create-user.dto';
 import { LoginUserDto } from 'src/modules/auth/dto/login-user.dto';
 import { User, UserDocument } from './entities/user.entity';
 import { UserPayload } from './guards/jwt-auth.guard';
+import { materialColor } from './misc/MaterialColorGenerator';
 
 @Injectable()
 export class AuthService {
@@ -36,8 +38,17 @@ export class AuthService {
    */
   async register(userDto: CreateUserDto): Promise<User> {
     const passwordHash = await hash(userDto.password, 10); //salt or round
-    const newUser = new this.userModel({ ...userDto, passwordHash });
+    const newUser = new this.userModel({ ...userDto, passwordHash, userColor: materialColor() });
     return newUser.save();
+  }
+
+  async registerAsGoogleUser(userDto: GoogleUserDto): Promise<User> {
+    const newUser = new this.userModel({ ...userDto, isMailing: true, userColor: materialColor() });
+    return newUser.save();
+  }
+
+  async updateAsGoogleUser(user: User, googleUserDto: GoogleUserDto): Promise<User> {
+    return this.userModel.findOneAndUpdate({ _id: user.id }, googleUserDto, { new: true });
   }
 
   /**

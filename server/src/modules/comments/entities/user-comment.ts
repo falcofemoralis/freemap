@@ -11,7 +11,7 @@ export class UserComment {
   id: string;
 
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Пользователь который добавил объект' })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, autopopulate: { select: 'username userColor userAvatar' }, ref: 'User' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, autopopulate: { select: '-email -passwordHash' }, ref: 'User' })
   user: User;
 
   @ApiProperty({ example: 'qwerty', description: 'Текст комментария' })

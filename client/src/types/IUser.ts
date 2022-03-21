@@ -4,4 +4,5 @@ export interface IUser {
   userColor?: string;
   userAvatar?: string;
   experience?: number;
+  profileAvatarLink?: string;
 }

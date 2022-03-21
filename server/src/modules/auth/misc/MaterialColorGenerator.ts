@@ -23,7 +23,7 @@ export const materialColor = (): string => {
       a100: '#ff8a80',
       a200: '#ff5252',
       a400: '#ff1744',
-      a700: '#d50000'
+      a700: '#d50000',
     },
     pink: {
       '50': '#fce4ec',
@@ -40,7 +40,7 @@ export const materialColor = (): string => {
       a100: '#ff80ab',
       a200: '#ff4081',
       a400: '#f50057',
-      a700: '#c51162'
+      a700: '#c51162',
     },
     purple: {
       '50': '#f3e5f5',
@@ -57,7 +57,7 @@ export const materialColor = (): string => {
       a100: '#ea80fc',
       a200: '#e040fb',
       a400: '#d500f9',
-      a700: '#aa00ff'
+      a700: '#aa00ff',
     },
     deepPurple: {
       '50': '#ede7f6',
@@ -74,7 +74,7 @@ export const materialColor = (): string => {
       a100: '#b388ff',
       a200: '#7c4dff',
       a400: '#651fff',
-      a700: '#6200ea'
+      a700: '#6200ea',
     },
     indigo: {
       '50': '#e8eaf6',
@@ -91,7 +91,7 @@ export const materialColor = (): string => {
       a100: '#8c9eff',
       a200: '#536dfe',
       a400: '#3d5afe',
-      a700: '#304ffe'
+      a700: '#304ffe',
     },
     blue: {
       '50': '#e3f2fd',
@@ -108,7 +108,7 @@ export const materialColor = (): string => {
       a100: '#82b1ff',
       a200: '#448aff',
       a400: '#2979ff',
-      a700: '#2962ff'
+      a700: '#2962ff',
     },
     lightBlue: {
       '50': '#e1f5fe',
@@ -125,7 +125,7 @@ export const materialColor = (): string => {
       a100: '#80d8ff',
       a200: '#40c4ff',
       a400: '#00b0ff',
-      a700: '#0091ea'
+      a700: '#0091ea',
     },
     teal: {
       '50': '#e0f2f1',
@@ -142,7 +142,7 @@ export const materialColor = (): string => {
       a100: '#a7ffeb',
       a200: '#64ffda',
       a400: '#1de9b6',
-      a700: '#00bfa5'
+      a700: '#00bfa5',
     },
     green: {
       '50': '#e8f5e9',
@@ -159,7 +159,7 @@ export const materialColor = (): string => {
       a100: '#b9f6ca',
       a200: '#69f0ae',
       a400: '#00e676',
-      a700: '#00c853'
+      a700: '#00c853',
     },
     lightGreen: {
       '50': '#f1f8e9',
@@ -176,7 +176,7 @@ export const materialColor = (): string => {
       a100: '#ccff90',
       a200: '#b2ff59',
       a400: '#76ff03',
-      a700: '#64dd17'
+      a700: '#64dd17',
     },
     lime: {
       '50': '#f9fbe7',
@@ -193,7 +193,7 @@ export const materialColor = (): string => {
       a100: '#f4ff81',
       a200: '#eeff41',
       a400: '#c6ff00',
-      a700: '#aeea00'
+      a700: '#aeea00',
     },
     yellow: {
       '50': '#fffde7',
@@ -210,7 +210,7 @@ export const materialColor = (): string => {
       a100: '#ffff8d',
       a200: '#ffff00',
       a400: '#ffea00',
-      a700: '#ffd600'
+      a700: '#ffd600',
     },
     amber: {
       '50': '#fff8e1',
@@ -227,7 +227,7 @@ export const materialColor = (): string => {
       a100: '#ffe57f',
       a200: '#ffd740',
       a400: '#ffc400',
-      a700: '#ffab00'
+      a700: '#ffab00',
     },
     orange: {
       '50': '#fff3e0',
@@ -244,7 +244,7 @@ export const materialColor = (): string => {
       a100: '#ffd180',
       a200: '#ffab40',
       a400: '#ff9100',
-      a700: '#ff6d00'
+      a700: '#ff6d00',
     },
     deepOrange: {
       '50': '#fbe9e7',
@@ -261,7 +261,7 @@ export const materialColor = (): string => {
       a100: '#ff9e80',
       a200: '#ff6e40',
       a400: '#ff3d00',
-      a700: '#dd2c00'
+      a700: '#dd2c00',
     },
     grey: {
       '50': '#fafafa',
@@ -274,7 +274,7 @@ export const materialColor = (): string => {
       '700': '#616161',
       '800': '#424242',
       '900': '#212121',
-      hex: '#9e9e9e'
+      hex: '#9e9e9e',
     },
     blueGrey: {
       '50': '#eceff1',
@@ -287,8 +287,8 @@ export const materialColor = (): string => {
       '700': '#455a64',
       '800': '#37474f',
       '900': '#263238',
-      hex: '#607d8b'
-    }
+      hex: '#607d8b',
+    },
   };
   // pick random property
   //var property = pickRandomProperty(colors);

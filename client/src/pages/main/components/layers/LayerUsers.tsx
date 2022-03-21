@@ -18,6 +18,7 @@ interface IActiveFeatureProps {
   clientId: string;
   userAvatar?: string;
   userColor?: string;
+  profileAvatarLink?: string;
 }
 
 export const LayerUsers = () => {
@@ -74,8 +75,9 @@ export const LayerUsers = () => {
         coordinates: currentCoordinates,
         zoom: currentZoom,
         username: user?.username ?? 'Anonymous',
-        userAvatar: user?.userAvatar,
-        userColor: user?.userColor
+        userAvatar: user?.userAvatar ?? '',
+        userColor: user?.userColor ?? '',
+        profileAvatarLink: user?.profileAvatarLink ?? ''
       }
     });
 
@@ -112,7 +114,8 @@ export const LayerUsers = () => {
                 name: user.username,
                 clientId: user.clientId,
                 userAvatar: user.userAvatar,
-                userColor: user.userColor
+                userColor: user.userColor,
+                profileAvatarLink: user.profileAvatarLink
               }
             };
             featureCollection.features.push(feature);

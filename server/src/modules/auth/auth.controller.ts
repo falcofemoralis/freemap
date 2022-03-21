@@ -1,3 +1,4 @@
+import { GoogleUserDto } from './dto/google-user.dto';
 import {
   Body,
   Controller,
@@ -19,6 +20,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Response } from 'express';
+import { OAuth2Client } from 'google-auth-library';
 import { CreateUserDto } from 'src/modules/auth/dto/create-user.dto';
 import { LoginUserDto } from 'src/modules/auth/dto/login-user.dto';
 import { FilesService } from '../files/files.service';
@@ -47,6 +49,31 @@ export class AuthController {
     }
 
     return await this.authService.createToken(user);
+  }
+
+  @ApiOperation({ summary: 'Авторизация пользователя через Google OAuth' })
+  @ApiResponse({ status: 200, type: String, description: 'Google id' })
+  @Post('google')
+  async googleLogin(@Body() data: { tokenId: string }) {
+    const client = new OAuth2Client(process.env.CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken: data.tokenId,
+      audience: process.env.CLIENT_ID,
+    });
+
+    const { name, email, picture } = ticket.getPayload();
+
+    const user = await this.usersService.findUserByEmail(email);
+    const googleUserDto: GoogleUserDto = {
+      username: name,
+      email,
+      profileAvatarLink: picture,
+    };
+    if (user) {
+      return await this.authService.createToken(await this.authService.updateAsGoogleUser(user, googleUserDto));
+    } else {
+      return await this.authService.createToken(await this.authService.registerAsGoogleUser(googleUserDto));
+    }
   }
 
   @ApiOperation({ summary: 'Регистрация пользователя' })

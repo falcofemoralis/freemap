@@ -13,7 +13,6 @@ import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Logger } from '../../../../misc/Logger';
-import { materialColor } from '../../../../misc/MaterialColorGenerator';
 import { authStore } from './../../../../store/auth.store';
 import { errorStore } from './../../../../store/error.store';
 
@@ -46,7 +45,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onSwitch, onClose }) => {
   } = useForm<FormData>();
 
   const onSubmit = handleSubmit(async data => {
-    await authStore.tryRegister(data.username, data.email, data.password, Boolean(data.isMailing), materialColor());
+    await authStore.tryRegister(data.username, data.email, data.password, Boolean(data.isMailing));
     onClose;
   });
   const password = React.useRef({});

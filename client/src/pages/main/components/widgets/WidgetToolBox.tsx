@@ -95,8 +95,6 @@ const RulerButton: React.FC<RulerButtonProps> = ({ rulerControl }) => {
   const [isMeasuring, setMeasuring] = React.useState(false);
 
   React.useEffect(() => {
-    console.log('Add listener');
-
     const listener = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         if (isMeasuring) {

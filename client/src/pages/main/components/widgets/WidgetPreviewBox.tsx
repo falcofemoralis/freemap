@@ -1,4 +1,4 @@
-import { Paper, Typography } from '@mui/material';
+import { Fade, IconButton, Paper, Popper, Typography } from '@mui/material';
 import mapboxgl from 'mapbox-gl';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
@@ -66,17 +66,17 @@ export const WidgetPreviewBox = () => {
   };
 
   return (
-    <Paper className='previewMapBox' elevation={5} onClick={changeMapType}>
-      <div ref={mapNode} className='previewMapBox__map' />
-      <div className='previewMapBox__deck'>
-        <MapsDeck />
-      </div>
-      <div className='previewMapBox__label'>
-        <PreviewMapLabel />
-      </div>
-      <div className='previewMapBox__cover'></div>
-      <div className='previewMapBox__plate'></div>
-    </Paper>
+    <>
+      {/* <MapsDeck /> */}
+      <Paper className='previewMapBox' elevation={5} onClick={changeMapType}>
+        <div ref={mapNode} className='previewMapBox__map' />
+        <div className='previewMapBox__label'>
+          <PreviewMapLabel />
+        </div>
+        <div className='previewMapBox__cover'></div>
+        <div className='previewMapBox__plate'></div>
+      </Paper>
+    </>
   );
 };
 
@@ -87,5 +87,35 @@ const PreviewMapLabel = observer(() => {
 });
 
 const MapsDeck = () => {
-  return <ArrowDropUpIcon />;
+  const [open, setOpen] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (!open) {
+      setAnchorEl(event.currentTarget);
+      setOpen(true);
+    } else {
+      setAnchorEl(null);
+      setOpen(false);
+    }
+  };
+
+  return (
+    <>
+      <Popper open={open} anchorEl={anchorEl} placement='top' transition>
+        {({ TransitionProps }) => (
+          <Fade {...TransitionProps} timeout={350}>
+            <Paper>
+              <Typography sx={{ p: 2 }}>The content of the Popper.</Typography>
+            </Paper>
+          </Fade>
+        )}
+      </Popper>
+      <Paper className='mapsDeckBox' elevation={5}>
+        <IconButton sx={{ height: 30 }} onClick={handleClick}>
+          <ArrowDropUpIcon />
+        </IconButton>
+      </Paper>
+    </>
+  );
 };

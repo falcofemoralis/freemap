@@ -11,7 +11,7 @@ export class CommentsService {
 
   async createComment(userId: string, commentDto: CommentDto) {
     const comment = new this.commentModel({ text: commentDto.text, user: userId, createdAt: Date.now(), parentCommentId: commentDto.parentCommentId });
-    const createdComment = await (await comment.save()).populate([{ path: 'user', select: 'username userColor userAvatar' }]);
+    const createdComment = await (await comment.save()).populate([{ path: 'user', select: '-email -passwordHash' }]);
 
     if (commentDto.parentCommentId) {
       await this.commentModel.findByIdAndUpdate({ _id: commentDto.parentCommentId }, { $push: { replies: createdComment.id } });

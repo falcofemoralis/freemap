@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Divider, IconButton, LinearProgress, Paper, styled, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, Divider, Fade, IconButton, LinearProgress, Paper, Popper, styled, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { UserAvatar } from '../../../../components/UserAvatar';
@@ -21,11 +21,23 @@ export const WidgetAccountBox = observer(() => {
 
   const [isDialog, setDialog] = React.useState(false);
   const [dialogType, setDialogType] = React.useState<DialogType>(DialogType.SIGN_IN);
-  const [open, setOpen] = React.useState(false);
 
   const handleAuthOpen = () => setDialog(true);
   const handleAuthClose = () => setDialog(false);
   const changeDialogType = (type: DialogType) => setDialogType(type);
+
+  const [open, setOpen] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+
+  const handleClick = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    if (!open && event) {
+      setAnchorEl(event.currentTarget);
+      setOpen(true);
+    } else {
+      setAnchorEl(null);
+      setOpen(false);
+    }
+  };
 
   if (authStore.isAuth && !authStore.user && !isDialog) {
     authStore.getUserProfile();
@@ -47,13 +59,22 @@ export const WidgetAccountBox = observer(() => {
           </Dialog>
         </Box>
       ) : (
-        <IconButton aria-haspopup='true' color='inherit' onClick={() => setOpen(true)}>
+        <IconButton aria-haspopup='true' color='inherit' onClick={handleClick}>
           <UserAvatar user={authStore.user} type={FileType.THUMBNAIL} />
         </IconButton>
       )}
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      {/* <Dialog open={open} onClose={() => setOpen(false)}>
         <AccountSettings onClose={() => setOpen(false)} />
-      </Dialog>
+      </Dialog> */}
+      <Popper open={open} anchorEl={anchorEl} placement='bottom-start' transition>
+        {({ TransitionProps }) => (
+          <Fade {...TransitionProps} timeout={350}>
+            <Paper>
+              <AccountSettings onClose={handleClick} />
+            </Paper>
+          </Fade>
+        )}
+      </Popper>
     </Box>
   );
 });
@@ -96,7 +117,9 @@ const AccountSettings: React.FC<AccountSettingsProps> = observer(({ onClose }) =
         )}
       </IconButton>
 
-      <Typography variant='h4'>{authStore?.user?.username}</Typography>
+      <Typography variant='h4' sx={{ textAlign: 'center' }}>
+        {authStore?.user?.username}
+      </Typography>
       <Typography variant='subtitle1'>{authStore?.user?.email}</Typography>
       <Typography variant='body1'>Уровень {Math.ceil((authStore?.user?.experience ?? 1) / 5000)}</Typography>
       <Box sx={{ width: '100%', mt: 1 }}>

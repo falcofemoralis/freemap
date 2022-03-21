@@ -9,10 +9,12 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React from 'react';
+import GoogleLogin, { GoogleLoginResponse, GoogleLoginResponseOffline } from 'react-google-login';
 import { useForm } from 'react-hook-form';
 import { Logger } from '../../../../misc/Logger';
 import { authStore } from './../../../../store/auth.store';
 import { errorStore } from './../../../../store/error.store';
+import '../../styles/Auth.scss';
 
 type FormData = {
   email: string;
@@ -27,8 +29,6 @@ interface SignInProps {
 export const SignIn: React.FC<SignInProps> = ({ onSwitch, onClose }) => {
   Logger.info('SignIn');
 
-  console.log('t');
-
   const {
     register,
     handleSubmit,
@@ -38,6 +38,15 @@ export const SignIn: React.FC<SignInProps> = ({ onSwitch, onClose }) => {
     await authStore.tryLogin(data.email, data.password);
     onClose();
   });
+
+  const handleGoogleLogin = async (res: GoogleLoginResponse | GoogleLoginResponseOffline) => {
+    await authStore.tryGoogleLogin((res as GoogleLoginResponse).tokenId);
+    onClose();
+  };
+
+  const handleGoogleFailure = (e: any) => {
+    errorStore.errorHandle(e);
+  };
 
   return (
     <Container component='main' maxWidth='xs'>
@@ -83,8 +92,18 @@ export const SignIn: React.FC<SignInProps> = ({ onSwitch, onClose }) => {
           <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
             Войти
           </Button>
-          <Grid container justifyContent='center'>
+          <Grid container justifyContent='center' flexDirection='column' alignItems='center'>
             <Grid item>
+              <GoogleLogin
+                className='googleBtn'
+                clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID as string}
+                buttonText='Log in with Google'
+                onSuccess={handleGoogleLogin}
+                onFailure={handleGoogleFailure}
+                cookiePolicy='single_host_origin'
+              ></GoogleLogin>
+            </Grid>
+            <Grid item sx={{ mt: 2 }}>
               <Link variant='body2' onClick={() => onSwitch()} style={{ cursor: 'pointer' }}>
                 Нету аккаунта? Создать
               </Link>

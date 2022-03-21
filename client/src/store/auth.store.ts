@@ -15,13 +15,18 @@ class AuthStore {
     this.token = localStorage.getItem(TOKEN_ITEM);
   }
 
-  public async tryRegister(username: string, email: string, password: string, isMailing: boolean, userColor: string) {
-    const token = await AuthService.register(username, email, password, isMailing, userColor);
+  public async tryRegister(username: string, email: string, password: string, isMailing: boolean) {
+    const token = await AuthService.register(username, email, password, isMailing);
     this.setToken(token);
   }
 
   public async tryLogin(email: string, password: string) {
     const token = await AuthService.login(email, password);
+    this.setToken(token);
+  }
+
+  public async tryGoogleLogin(tokenId: string) {
+    const token = await AuthService.googleLogin(tokenId);
     this.setToken(token);
   }
 
@@ -43,8 +48,6 @@ class AuthStore {
     const user = await AuthService.getUserProfile();
     runInAction(() => {
       console.log('Данные пользователя получены');
-      console.log(user);
-
       this.user = user;
     });
   }
