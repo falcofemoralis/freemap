@@ -79,5 +79,9 @@ MapFeatureSchema.set('toJSON', {
   transform: (doc, ret) => {
     delete ret._id;
     delete ret.__v;
+    ret.files.map((file) => {
+      file.name = `${process.env.DOMAIN}/api/map/feature/media/${file.name}`;
+      return file;
+    });
   },
 });

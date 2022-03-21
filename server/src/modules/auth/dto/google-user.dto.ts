@@ -15,5 +15,5 @@ export class GoogleUserDto {
 
   @ApiProperty({ type: 'string', description: 'Ссылка на аватар' })
   @IsOptional()
-  profileAvatarLink?: string;
+  googleAvatar?: string;
 }

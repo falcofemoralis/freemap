@@ -34,7 +34,7 @@ export class User {
 
   @ApiProperty({ example: 'https://dl1.google.com/123', description: 'Ссылка на аватар пользователя' })
   @Prop()
-  profileAvatarLink: string;
+  googleAvatar: string;
 
   @ApiProperty({ example: '#ff6f00', description: 'Цвет пользователя' })
   @Prop()
@@ -56,5 +56,8 @@ UserSchema.set('toJSON', {
   transform: (doc, ret) => {
     delete ret._id;
     delete ret.__v;
+    ret.userAvatar = ret.userAvatar ? `${process.env.DOMAIN}/api/auth/profile/avatar/${ret.userAvatar}` : ret.googleAvatar;
+    delete ret.googleAvatar;
+    delete ret.passwordHash;
   },
 });

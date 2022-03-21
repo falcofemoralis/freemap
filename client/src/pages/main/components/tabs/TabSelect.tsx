@@ -90,7 +90,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
     const images: ImageDecorator[] = [];
     if (files) {
       for (const file of files) {
-        images.push({ src: MapService.getMedia(file.name, FileType.ORIGINAL) });
+        images.push({ src: file.name });
       }
     }
     console.log(images);
@@ -122,7 +122,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
         <Carousel showThumbs={false} swipeable emulateTouch infiniteLoop showStatus={false}>
           {mapFeature.files?.map(file => (
             <div key={file.name} onClick={() => openFullImage(file)} style={{ cursor: 'pointer' }}>
-              <Image src={MapService.getMedia(file.name, FileType.THUMBNAIL)} style={{ height: '240px', objectFit: 'cover' }} />
+              <Image src={`${file.name}?type=${FileType.THUMBNAIL}`} style={{ height: '240px', objectFit: 'cover' }} />
             </div>
           ))}
         </Carousel>

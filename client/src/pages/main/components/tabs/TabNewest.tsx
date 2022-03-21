@@ -55,12 +55,7 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose, onSelect })
             <Card sx={{ width: '100%' }} onClick={() => selectFeature(feature.coordinates, feature.type)}>
               <CardActionArea>
                 {feature?.files && feature?.files?.length > 0 && (
-                  <CardMedia
-                    component='img'
-                    height='140'
-                    image={MapService.getMedia(feature?.files ? feature?.files[0].name : '', FileType.THUMBNAIL)}
-                    alt={feature.name}
-                  />
+                  <CardMedia component='img' height='140' image={`${feature?.files[0].name}?type=${FileType.THUMBNAIL}`} alt={feature.name} />
                 )}
                 <CardContent>
                   <Typography gutterBottom variant='h5' component='div'>

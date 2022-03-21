@@ -26,10 +26,7 @@ export const WidgetUsersBox = observer(() => {
       <List sx={{ width: '100%' }}>
         {activeUsersStore.getUsers().map(user => (
           <ListItemButton divider key={user.clientId} onClick={() => selectUser(user.coordinates, user.zoom)}>
-            <UserAvatar
-              user={{ username: user.username, userColor: user.userColor, userAvatar: user.userAvatar, profileAvatarLink: user.profileAvatarLink }}
-              sx={{ mr: 1 }}
-            />
+            <UserAvatar user={{ username: user.username, userColor: user.userColor, userAvatar: user.userAvatar }} sx={{ mr: 1 }} />
             {user.username ?? 'Anonymous'}
           </ListItemButton>
         ))}

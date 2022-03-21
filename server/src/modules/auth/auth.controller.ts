@@ -67,7 +67,7 @@ export class AuthController {
     const googleUserDto: GoogleUserDto = {
       username: name,
       email,
-      profileAvatarLink: picture,
+      googleAvatar: picture,
     };
     if (user) {
       return await this.authService.createToken(await this.authService.updateAsGoogleUser(user, googleUserDto));
@@ -118,9 +118,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile/user')
   async getUserProfile(@Req() req) {
-    const user = await this.usersService.findUserById(req.user.id);
-    user.passwordHash = undefined;
-    return user;
+    return this.usersService.findUserById(req.user.id);
   }
 
   @UseInterceptors(AvatarInterceptor)

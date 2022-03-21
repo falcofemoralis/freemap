@@ -48,6 +48,8 @@ class AuthStore {
     const user = await AuthService.getUserProfile();
     runInAction(() => {
       console.log('Данные пользователя получены');
+      console.log(user);
+
       this.user = user;
     });
   }

@@ -61,7 +61,10 @@ export class MapService {
       mediaFiles.push({ name: file, createdAt: Date.now(), createdBy: userId });
     }
     await this.mapFeatureModel.findOneAndUpdate({ _id: id }, { $push: { files: { $each: mediaFiles } } }, { new: true });
-    return mediaFiles;
+    return mediaFiles.map((file) => {
+      file.name = `${process.env.DOMAIN}/api/map/feature/media/${file.name}`;
+      return file;
+    });
   }
 
   /**

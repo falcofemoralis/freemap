@@ -73,11 +73,4 @@ export default class AuthService {
       throw e;
     }
   }
-
-  static getUserAvatar(avatar?: string, type?: FileType): string {
-    if (!avatar) {
-      return '';
-    }
-    return `${axiosInstance.defaults.baseURL}${AuthService.API_URL}/profile/avatar/${avatar}${type ? `?type=${type}` : ''}`;
-  }
 }

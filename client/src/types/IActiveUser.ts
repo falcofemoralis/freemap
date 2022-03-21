@@ -7,5 +7,4 @@ export interface IActiveUser {
   username: string;
   userColor?: string;
   userAvatar?: string;
-  profileAvatarLink?: string;
 }
