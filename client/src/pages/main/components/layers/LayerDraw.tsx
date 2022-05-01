@@ -2,6 +2,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import CheckIcon from '@mui/icons-material/Check';
 import { Box, IconButton } from '@mui/material';
+import { constants } from 'crypto';
 import { LineString, Polygon, Position } from 'geojson';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
@@ -11,7 +12,7 @@ import { Logger } from '../../../../misc/Logger';
 import { editorStore } from '../../../../store/editor.store';
 import { Coordinates, ICreatedMapFeature } from '../../../../types/IMapFeature';
 import '../../styles/Widget.scss';
-
+import bbox from '@turf/bbox';
 interface LayerDrawProps {
   onFinish: (feature: Partial<ICreatedMapFeature>) => void;
   onCancel: () => void;
@@ -28,6 +29,7 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCance
   const completeDrawing = () => {
     const features = draw?.getAll().features;
     let coordinates: Coordinates = [];
+    const bboxes: number[][] = [];
 
     if (features) {
       /**
@@ -42,12 +44,15 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCance
             break;
           case GeometryType.MULTI_POLYGON:
             (coordinates as Position[][][]).push((feature.geometry as Polygon).coordinates);
+            bboxes.push(bbox(feature.geometry as Polygon));
             break;
           case GeometryType.MULTI_LINE_STRING:
             (coordinates as Position[][]).push((feature.geometry as LineString).coordinates);
             break;
         }
       }
+
+      console.log(JSON.stringify(bboxes));
 
       if (editorStore.selectedFeatureType) {
         const createdFeature: Partial<ICreatedMapFeature> = {
