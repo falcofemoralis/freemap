@@ -8,6 +8,7 @@ Wikipedia map. The idea is that any person could mark any geographic object on e
 ![Screenshot_1](https://user-images.githubusercontent.com/24371191/175032278-62dc6081-f1ef-4b72-888e-4dedf3e0f85a.jpg)
 ![Screenshot_2](https://user-images.githubusercontent.com/24371191/175032286-a4a56a7d-3cff-4e55-b7b2-42130270eebf.jpg)
 ![Screenshot_3](https://user-images.githubusercontent.com/24371191/175032290-f375e01a-5283-493b-90a9-5d2a145cef85.jpg)
+![Screenshot_4](https://user-images.githubusercontent.com/24371191/176433262-1fe068d3-c724-40ca-a57f-2f8cc87f5e63.jpg)
 ![Screenshot_5](https://user-images.githubusercontent.com/24371191/175032295-58597e00-21e8-4ce3-a53b-51006f413fac.jpg)
 
 
