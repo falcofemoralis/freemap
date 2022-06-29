@@ -1,14 +1,13 @@
-# Open Free Map
+Wikipedia map. The idea is that any person could mark any geographic object on earth. Current maps (such as Google maps) only provide basic locations, roads, etc., but there are lot of places where people create unspoken paths, roads, etc. So in this development, anyone can add a road, path or even objects.
 
-Карта-википедия. Идея заключается в том, чтобы любой человек (который зарегестрировался) мог бы отметить любой географический обьект на земле. Текущие карты (тот же гугл мепс) предаставляет только базовые локации, дороги и т.д, но бывают такие места, где люди сами создают негласные пути (например тропинки), потому в данной разработке кто угодно может добавить дорогу, путь, обьект.
-
-1) Любой обьект можно открыть и посмотреть информацию про него (например будет возможность добавлять изображения, видео, ссылки на вики и т.д). Кроме того есть возможность размещать комментарии. 
-2) Сортировка обьектов по категориям (каждый обьект при созданиии должен будет иметь тег). Например можно будет посмотреть какие достопримечательности есть в городе (или за городом) и т.д
-3) Так как каждый юзер будет иметь свой аккаунт, можно добавить разные фичи (по типу рейтинга юзера или лвл)
+1) You can open any object and see information about it (for example, it will be possible to add images, videos, links to wikis, etc.). In addition, it is possible to post comments.
+2) Sorting objects by category (each object will have to have a tag when it is created). For example, you can see what sights are in the city (or outside the city), etc.
+3) Since each user will have his own account, you can add different features (by type of user rating or lvl)
 
 ## Main
 ![Screenshot_1](https://user-images.githubusercontent.com/24371191/175032278-62dc6081-f1ef-4b72-888e-4dedf3e0f85a.jpg)
 ![Screenshot_2](https://user-images.githubusercontent.com/24371191/175032286-a4a56a7d-3cff-4e55-b7b2-42130270eebf.jpg)
 ![Screenshot_3](https://user-images.githubusercontent.com/24371191/175032290-f375e01a-5283-493b-90a9-5d2a145cef85.jpg)
 ![Screenshot_5](https://user-images.githubusercontent.com/24371191/175032295-58597e00-21e8-4ce3-a53b-51006f413fac.jpg)
+
 
