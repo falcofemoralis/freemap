@@ -11,7 +11,7 @@ export class Geometry {
   coordinates: Position[][] | Position[][][];
 }
 
-class Feature {
+export class Feature {
   @ApiProperty({ example: 'Feature', description: 'Тип feature' })
   type: string;
 

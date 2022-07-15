@@ -1,10 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
-import { FileType } from '../constants/file.type';
 import { errorStore } from '../store/error.store';
 import { ICategory } from '../types/ICategory';
-import { IMapData } from '../types/IMapData';
+import { IMapData, Source } from '../types/IMapData';
 import { ICreatedMapFeature, IMapFeature } from '../types/IMapFeature';
 import { IMapFeatureType } from '../types/IMapFeatureType';
 import { IMedia } from '../types/IMedia';
@@ -36,6 +35,16 @@ export default class MapService {
   static async getMapData(ext: number[][]): Promise<IMapData> {
     try {
       const { data } = await axiosInstance.get<IMapData>(`${this.API_URL}?latT=${ext[1][1]}&lonR=${ext[1][0]}&latB=${ext[0][1]}&lonL=${ext[0][0]}&zoom=${0}`);
+      return data;
+    } catch (e: AxiosError | unknown) {
+      errorStore.errorHandle(e);
+      throw e;
+    }
+  }
+
+  static async getWikimapiaData(ext: number[][], zoom: number, h: number, w: number): Promise<Source> {
+    try {
+      const { data } = await axiosInstance.get<Source>(`${this.API_URL}/wikimapia?lat=${ext[1][1]}&lng=${ext[0][0]}&zoom=${zoom}&h=${h}&w=${w}`);
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);
@@ -79,7 +88,6 @@ export default class MapService {
     try {
       const { data } = await axiosInstance.get<IMapFeature>(`${this.API_URL}/feature/${id}`);
       console.log(data);
-
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);

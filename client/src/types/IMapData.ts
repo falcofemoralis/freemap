@@ -2,7 +2,7 @@ import { IMapFeature } from './IMapFeature';
 
 export type FeatureProps = Pick<IMapFeature, 'id' | 'name' | 'createdAt' | 'category'>;
 
-interface Source {
+export interface Source {
   id: string;
   featureCollection: GeoJSON.FeatureCollection<GeoJSON.Geometry, FeatureProps>;
 }

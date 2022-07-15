@@ -117,6 +117,8 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCance
 
           window.removeEventListener('keyup', escapeListener);
         }
+      } else if (event.key === 'p') {
+        mapboxDraw.changeMode('draw_polygon');
       }
     };
     window.addEventListener('keyup', escapeListener);

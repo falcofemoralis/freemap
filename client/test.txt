@@ -1,0 +1,77 @@
+          if (layer.geometry == GeometryType.POLYGON || layer.geometry == GeometryType.MULTI_POLYGON) {
+            mapboxMap.addLayer({
+              id: layer.id,
+              type: 'fill',
+              source: `${layer.id}-data`,
+              paint: {
+                'fill-color': ['interpolate', ['linear'], ['zoom'], layer.minZoom, 'hsl(35, 11%, 86%)', layer.minZoom + 1, 'hsl(35, 8%, 85%)'],
+                //'fill-opacity': ['interpolate', ['linear'], ['zoom'], layer.minZoom, 0, layer.minZoom + 1, 1],
+                // 'fill-opacity': [
+                //   'case',
+                //   ['boolean', ['feature-state', 'hover'], false],
+                //   ['interpolate', ['linear'], ['zoom'], layer.minZoom, 0, layer.minZoom + 1, 1]
+                // ],
+                // 'fill-opacity': [
+                //   'case',
+                //   ['boolean', ['feature-state', 'hover'], false], // false is DEFAULT value
+                //   //  ['interpolate', ['linear'], ['zoom'], layer.minZoom, 0, layer.minZoom + 1, 1],
+                //   1, // if expression on top is TRUE then 1
+                //   0.7
+                // ],
+                'fill-opacity': [
+                  'interpolate',
+                  ['linear'],
+                  ['zoom'],
+                  layer.minZoom,
+                  0,
+                  layer.minZoom + 1,
+                  [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false], // false is DEFAULT value
+                    1, // if expression on top is TRUE then 1
+                    0.6
+                  ],
+                  layer.maxZoom - 1,
+                  [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false], // false is DEFAULT value
+                    1, // if expression on top is TRUE then 1
+                    0.6
+                  ],
+                  layer.maxZoom,
+                  0
+                ],
+                'fill-outline-color': 'hsl(35, 6%, 79%)'
+              },
+              minzoom: layer.minZoom,
+              maxzoom: layer.maxZoom
+            });
+            mapboxMap.addLayer({
+              id: `${layer.id}-labels`,
+              type: 'symbol',
+              source: `${layer.id}-data`,
+              layout: {
+                'text-field': ['get', 'name'],
+                'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+                'text-radial-offset': 0.5,
+                'text-justify': 'auto',
+                'icon-image': ['get', 'icon']
+              },
+              minzoom: layer.minZoom,
+              maxzoom: layer.maxZoom
+            });
+          } else if (layer.geometry == GeometryType.MULTI_LINE_STRING) {
+            mapboxMap.addLayer({
+              id: layer.id,
+              type: 'line',
+              source: `${layer.id}-data`,
+              layout: {},
+              paint: {
+                'line-color': '#000',
+                'line-opacity': ['interpolate', ['linear'], ['zoom'], layer.minZoom, 0, layer.minZoom + 1, 1],
+                'line-width': 4
+              },
+              minzoom: layer.minZoom,
+              maxzoom: layer.maxZoom
+            });
+          }

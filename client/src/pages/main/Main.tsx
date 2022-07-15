@@ -34,7 +34,7 @@ const Main = () => {
           <WidgetEditorBox />
           <TabSelect />
           <ErrorBox />
-          <LayerUsers />
+          {/* <LayerUsers /> */}
         </MapProvider>
       )}
     </div>

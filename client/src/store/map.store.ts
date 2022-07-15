@@ -17,8 +17,9 @@ class MapStore {
     makeAutoObservable(this);
   }
 
-  async initMapData(bounds: number[][]): Promise<IMapData> {
+  async initMapData(bounds: number[][], zoom: number, h: number, w: number): Promise<IMapData> {
     this.mapData = await MapService.getMapData(bounds);
+    this.mapData.sources.push(await MapService.getWikimapiaData(bounds, zoom, h, w));
     return this.mapData;
   }
 

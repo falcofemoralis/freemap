@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Body,
@@ -19,6 +20,7 @@ import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } f
 import { Response } from 'express';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { WikimapiaApi } from './../../libs/wikimapia.api';
 import { UserPayload } from './../auth/guards/jwt-auth.guard';
 import { FilesService } from './../files/files.service';
 import { FileOptionsQuery } from './../files/query/media.query';
@@ -27,20 +29,22 @@ import { CategoryDto } from './dto/category.dto';
 import { CreateFeatureDataDto } from './dto/create-feature.dto';
 import { Category } from './entities/category.entity';
 import { FeatureType } from './entities/feature-type.entity';
-import { MapFeature } from './entities/map-feature.entity';
+import { MapFeature, Position } from './entities/map-feature.entity';
 import { MapFeatureGuard } from './guards/map-feature.guard';
 import MediaInterceptor, { MediaType } from './interceptors/media.interceptor';
 import { MapService } from './map.service';
 import { AreaQuery } from './query/area.query';
+import { WikimapiaQuery } from './query/wikimapia.query';
 import { FeatureCollection } from './types/feature-collection';
 import { LayerSource, MapData, Source } from './types/map-data';
 import { Media } from './types/media';
+import { LayerUtil } from './utils/layer.util';
 
 const MEDIA_FOLDER = 'media';
 @ApiTags('map')
 @Controller('map')
 export class MapController {
-  constructor(private readonly mapService: MapService, private readonly usersService: UsersService, private readonly filesService: FilesService) {}
+  constructor(private readonly mapService: MapService, private readonly usersService: UsersService, private readonly filesService: FilesService, private readonly httpService: HttpService) {}
 
   @ApiOperation({ summary: 'Получение слоев с фичами' })
   @ApiResponse({ status: 200, type: [MapData], description: 'Массив слоев' })
@@ -54,6 +58,7 @@ export class MapController {
 
     for (const type of types) {
       for (const layer of type.layers) {
+        LayerUtil.formatZoom(layer);
         layers.push({ ...layer, id: type.id + layer.id, source: type.id });
       }
 
@@ -78,7 +83,9 @@ export class MapController {
           });
         });
 
-      sources.push({ id: type.id, featureCollection });
+      if (featureCollection.features.length > 0) {
+        sources.push({ id: type.id, featureCollection });
+      }
     }
 
     return {
@@ -86,6 +93,60 @@ export class MapController {
       sources,
       layers,
     };
+  }
+
+  @ApiOperation({ summary: 'Получение данных с Wikimapia.org' })
+  @ApiResponse({ status: 200, type: [MapData], description: 'Массив фич' })
+  @Get('wikimapia')
+  async getWikimapiaData(@Query() wikimapiaQuery: WikimapiaQuery) {
+    console.log(wikimapiaQuery);
+
+    const types = await this.mapService.getFeatureTypes();
+    const type = types.find((t) => t.name == 'Wikimapia');
+    const featureCollection: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: [],
+    };
+
+    const coords = WikimapiaApi.convertCoordinates({ h: wikimapiaQuery.h, w: wikimapiaQuery.w }, { lat: wikimapiaQuery.lat, lng: wikimapiaQuery.lng }, wikimapiaQuery.zoom);
+    const url = WikimapiaApi.getTileUrl(coords.x, coords.y, wikimapiaQuery.zoom + 2);
+    const { data } = await this.httpService.axiosRef({
+      method: 'GET',
+      url: `https://open-free-map-proxy.herokuapp.com/${url}`, //http://wikimapia.org/z1/itiles/030/211/221/220/230.xy?2782950
+      decompress: true,
+      headers: {
+        'Accept-Encoding': 'gzip, deflate',
+      },
+    });
+    const wikimapiaData = WikimapiaApi.parse(data);
+
+    for (const feature of wikimapiaData.features) {
+      console.log(feature);
+
+      const coordinates: Position[][] = [[]];
+      for (const p of feature.polygon) {
+        coordinates[0].push([p.lng, p.lat]);
+      }
+      const lastPoint = feature.polygon[0];
+      coordinates[0].push([lastPoint.lng, lastPoint.lat]);
+
+      featureCollection.features.push({
+        type: 'Feature',
+        id: feature.id,
+        properties: {
+          id: 'qqqq',
+          category: { id: '6202777bb6932aed50883e35', name: '0' },
+          createdAt: 1657808119920,
+          name: feature.titles['1'],
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates,
+        },
+      });
+    }
+
+    return { id: type.id, featureCollection };
   }
 
   @ApiOperation({ summary: 'Добавление нового объекта в базу данных' })

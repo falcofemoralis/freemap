@@ -1,12 +1,10 @@
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import { observer } from 'mobx-react-lite';
-import * as React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Main from './pages/main/Main';
 import './styles/App.scss';
 
-const App = observer(() => {
+const App = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -18,6 +16,6 @@ const App = observer(() => {
       </Box>
     </Box>
   );
-});
+};
 
 export default App;

@@ -175,6 +175,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
               multiline
               error={!!errors.description}
               helperText={errors.description?.message ?? ''}
+              required
               fullWidth
               id='description'
               label='Описание'

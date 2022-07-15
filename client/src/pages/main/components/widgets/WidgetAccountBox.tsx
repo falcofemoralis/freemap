@@ -8,6 +8,7 @@ import { authStore } from '../../../../store/auth.store';
 import '../../styles/Widget.scss';
 import { SignIn } from '../auth/SignIn';
 import { SignUp } from '../auth/SignUp';
+import MapService from '../../../../services/map.service';
 
 enum DialogType {
   SIGN_UP,

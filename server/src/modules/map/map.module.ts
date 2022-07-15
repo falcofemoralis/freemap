@@ -2,6 +2,7 @@ import { Category, CategorySchema } from './entities/category.entity';
 import { UsersModule } from './../users/users.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from '../auth/auth.module';
 import { FilesModule } from '../files/files.module';
 import { FeatureType, FeatureTypeSchema } from './entities/feature-type.entity';
@@ -19,6 +20,7 @@ import { MapService } from './map.service';
     ]),
     FilesModule,
     UsersModule,
+    HttpModule,
   ],
   controllers: [MapController],
   providers: [MapService],
