@@ -1,14 +1,13 @@
+import { GeometryType } from '@/constants/geometry.type';
+import { Logger } from '@/misc/Logger';
+import MapService from '@/services/map.service';
+import { mapStore } from '@/store/map.store';
+import { FeatureProps, Layer } from '@/types/IMapData';
 import booleanWithin from '@turf/boolean-within';
 import { Polygon, Position } from 'geojson';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import * as React from 'react';
-import { Logger } from '@/misc/Logger';
-import { mapStore } from '@/store/map.store';
-import { FeatureProps } from '@/types/IMapData';
-import { GeometryType } from '@/constants/geometry.type';
-import { GeoJSONSource } from 'mapbox-gl';
-import MapService from '@/services/map.service';
 
 interface MainMapProps {
   onLoaded: (map: mapboxgl.Map) => void;
@@ -55,6 +54,30 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
       }
     };
 
+    const hoverFeature = (feature: mapboxgl.MapboxGeoJSONFeature, layer: Layer) => {
+      mapboxMap.getCanvas().style.cursor = 'pointer';
+
+      if (hoveredStateId) {
+        mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
+      }
+
+      hoveredStateId = feature.id;
+      if (hoveredStateId) {
+        mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: true });
+      }
+    };
+
+    const update = async () => {
+      const source = await MapService.getWikimapiaData(
+        mapboxMap.getCenter().toArray(),
+        Number.parseInt(mapboxMap.getZoom().toFixed(0)),
+        mapboxMap.getCanvas().height,
+        mapboxMap.getCanvas().width
+      );
+
+      (mapboxMap.getSource(source.id) as GeoJSONSource).setData(source.featureCollection);
+    };
+
     /**
      * Загрузка данных карты
      */
@@ -63,9 +86,10 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
 
       onLoaded(mapboxMap);
 
-      const mapData = await mapStore.initMapData(
+      const mapData = await mapStore.updateMapData(
         mapboxMap.getBounds().toArray(),
         Number.parseInt(mapboxMap.getZoom().toFixed(0)),
+        mapboxMap.getCenter().toArray(),
         mapboxMap.getCanvas().height,
         mapboxMap.getCanvas().width
       );
@@ -86,28 +110,28 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
 
         mapboxMap.on('mousemove', layer.id, e => {
           if (e && e.features && e.features.length > 0) {
-            const feature = e.features[0];
+            let i = 0;
+            let feature = e.features[i];
 
-            if (!isPolygonWithBoundary(feature)) {
-              if (hoveredStateId) {
-                mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
-                // hoveredStateId = null;
-                // mapboxMap.getCanvas().style.cursor = 'auto';
+            while (!isPolygonWithBoundary(feature)) {
+              i++;
+              if (i >= e.features.length) {
+                return;
               }
-
-              return;
+              feature = e.features[i];
             }
 
-            mapboxMap.getCanvas().style.cursor = 'pointer';
+            // if (!isPolygonWithBoundary(feature)) {
+            //   // if (hoveredStateId) {
+            //   //   mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
+            //   //   // hoveredStateId = null;
+            //   //   // mapboxMap.getCanvas().style.cursor = 'auto';
+            //   // }
 
-            if (hoveredStateId) {
-              mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: false });
-            }
+            //   return;
+            // }
 
-            hoveredStateId = feature.id;
-            if (hoveredStateId) {
-              mapboxMap.setFeatureState({ source: layer.source, id: hoveredStateId }, { hover: true });
-            }
+            hoverFeature(feature, layer);
           }
         });
 
@@ -126,20 +150,14 @@ export const MainMap: React.FC<MainMapProps> = ({ onLoaded }) => {
       }
     });
 
-    mapboxMap.on('dragend', async () => {
+    mapboxMap.on('dragstart', async () => {
       console.log('A dragend event occurred.');
-      const source = await MapService.getWikimapiaData(
-        mapboxMap.getBounds().toArray(),
-        Number.parseInt(mapboxMap.getZoom().toFixed(0)),
-        mapboxMap.getCanvas().height,
-        mapboxMap.getCanvas().width
-      );
-
-      (mapboxMap.getSource(source.id) as GeoJSONSource).setData(source.featureCollection);
+      update();
     });
 
-    mapboxMap.on('zoomend', () => {
+    mapboxMap.on('zoomstart', async () => {
       console.log('A zoomend event occurred.');
+      update();
     });
 
     return () => {

@@ -22,6 +22,11 @@ export interface WikimapiaData {
   features: WikimapiaFeature[];
 }
 
+export enum TileTypes {
+  OBJECTS,
+  ROADS,
+}
+
 export class WikimapiaApi {
   static LatLng = function (t, e) {
     return { lat: +t, lng: +e };
@@ -211,18 +216,14 @@ export class WikimapiaApi {
     return c;
   };
 
-  static getTileUrl = function (t, e, i) {
+  static getTileUrl = function (t, e, i, a) {
     // Wikimapia.Tile.Itile.prototype.load
     const getQuadKey = function (t, e, i, a) {
-      console.log(a);
-
       const o = [
         [-2, 1],
         [0, 2],
         [2, 3],
       ][a - 8];
-      console.log(o);
-
       let n = '0';
       let s;
       t = Math.round(t);
@@ -243,10 +244,10 @@ export class WikimapiaApi {
     };
 
     // url: "http://i{picserver}.wikimapia.org/?x={x}&y={y}&zoom={zoom}&r={random}&type={type}&lng={lng}"
-    const o = 'http://wikimapia.org/z1/itiles';
-    // if (a === Wikimapia.Layer.Interactive.TileTypes.ROADS) {
-    //     o = "http://wikimapia.org/z1/iroads"
-    // }
+    let o = 'http://wikimapia.org/z1/itiles';
+    if (a === TileTypes.ROADS) {
+      o = 'http://wikimapia.org/z1/iroads';
+    }
     const k = {
       tileID: toQuadKey(t, e, i).replace(/(\d{3})(?!$)/g, '$1/'),
       hash: Math.round(Math.random() * 1e7),
@@ -265,10 +266,6 @@ export class WikimapiaApi {
 
   static convertCoordinates = function (e, t, z) {
     const i = WikimapiaApi.fromLatLngToPixel(t, z); //  lat: t.top, lng: t.left
-
-    console.log('i');
-    console.log(i);
-
     const a = { h: 256, w: 256 };
 
     //(n = this.dragObject.position),
@@ -284,7 +281,7 @@ export class WikimapiaApi {
     // o.rows = p.bottom - p.top;
     // o.cols = p.right - p.left;
     //this.loadTiles(p);
-    return { x: p.left, y: p.bottom };
+    return { x: p.left, y: p.top };
     //this.removeRedundantTiles(p);
   };
 

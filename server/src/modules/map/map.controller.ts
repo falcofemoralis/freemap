@@ -19,6 +19,7 @@ import {
 import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
+import { TileTypes } from '../../libs/wikimapia.api';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WikimapiaApi } from './../../libs/wikimapia.api';
 import { UserPayload } from './../auth/guards/jwt-auth.guard';
@@ -99,51 +100,60 @@ export class MapController {
   @ApiResponse({ status: 200, type: [MapData], description: 'Массив фич' })
   @Get('wikimapia')
   async getWikimapiaData(@Query() wikimapiaQuery: WikimapiaQuery) {
-    console.log(wikimapiaQuery);
-
     const types = await this.mapService.getFeatureTypes();
     const type = types.find((t) => t.name == 'Wikimapia');
     const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
       features: [],
     };
+    const coords = WikimapiaApi.convertCoordinates({ h: wikimapiaQuery.h, w: wikimapiaQuery.w }, { lat: wikimapiaQuery.lat, lng: wikimapiaQuery.lng }, wikimapiaQuery.zoom - 2);
 
-    const coords = WikimapiaApi.convertCoordinates({ h: wikimapiaQuery.h, w: wikimapiaQuery.w }, { lat: wikimapiaQuery.lat, lng: wikimapiaQuery.lng }, wikimapiaQuery.zoom);
-    const url = WikimapiaApi.getTileUrl(coords.x, coords.y, wikimapiaQuery.zoom + 2);
-    const { data } = await this.httpService.axiosRef({
-      method: 'GET',
-      url: `https://open-free-map-proxy.herokuapp.com/${url}`, //http://wikimapia.org/z1/itiles/030/211/221/220/230.xy?2782950
-      decompress: true,
-      headers: {
-        'Accept-Encoding': 'gzip, deflate',
-      },
-    });
-    const wikimapiaData = WikimapiaApi.parse(data);
+    const requests = [];
+    for (let i = 0; i < 4; i++) {
+      const x = i == 2 || i == 0 ? coords.x + 1 : coords.x;
+      const y = i == 1 || i == 0 ? coords.y + 1 : coords.y;
+      const url = WikimapiaApi.getTileUrl(x, y, wikimapiaQuery.zoom, TileTypes.OBJECTS);
 
-    for (const feature of wikimapiaData.features) {
-      console.log(feature);
+      requests.push(
+        this.httpService.axiosRef({
+          method: 'GET',
+          url: `https://open-free-map-proxy.herokuapp.com/${url}`, //http://wikimapia.org/z1/itiles/030/211/221/220/230.xy?2782950
+          decompress: true,
+          headers: {
+            'Accept-Encoding': 'gzip, deflate',
+          },
+        }),
+      );
+    }
 
-      const coordinates: Position[][] = [[]];
-      for (const p of feature.polygon) {
-        coordinates[0].push([p.lng, p.lat]);
+    const responses = await Promise.all([...requests]);
+
+    for (const { data } of responses) {
+      const wikimapiaData = WikimapiaApi.parse(data);
+
+      for (const feature of wikimapiaData.features) {
+        const coordinates: Position[][] = [[]];
+        for (const p of feature.polygon) {
+          coordinates[0].push([p.lng, p.lat]);
+        }
+        const lastPoint = feature.polygon[0];
+        coordinates[0].push([lastPoint.lng, lastPoint.lat]);
+
+        featureCollection.features.push({
+          type: 'Feature',
+          id: feature.id,
+          properties: {
+            id: feature.id.toString(),
+            category: { id: '6202777bb6932aed50883e35', name: '0' },
+            createdAt: 1657808119920,
+            name: feature.titles['1'],
+          },
+          geometry: {
+            type: 'Polygon',
+            coordinates,
+          },
+        });
       }
-      const lastPoint = feature.polygon[0];
-      coordinates[0].push([lastPoint.lng, lastPoint.lat]);
-
-      featureCollection.features.push({
-        type: 'Feature',
-        id: feature.id,
-        properties: {
-          id: 'qqqq',
-          category: { id: '6202777bb6932aed50883e35', name: '0' },
-          createdAt: 1657808119920,
-          name: feature.titles['1'],
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates,
-        },
-      });
     }
 
     return { id: type.id, featureCollection };
