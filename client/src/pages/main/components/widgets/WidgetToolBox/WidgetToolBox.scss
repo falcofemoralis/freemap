@@ -1,0 +1,32 @@
+%circleBox {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 40px !important;
+}
+
+.toolBox {
+    &__compass {
+        @extend %circleBox;
+        left: 125px;
+        bottom: 25px;
+    }
+
+    &__fullscreen {
+        @extend %circleBox;
+        left: 115px;
+        bottom: 80px;
+    }
+
+    &__ruler {
+        @extend %circleBox;
+        left: 75px;
+        bottom: 125px;
+    }
+
+    &__geolocation {
+        @extend %circleBox;
+        left: 15px;
+        bottom: 135px;
+    }
+}

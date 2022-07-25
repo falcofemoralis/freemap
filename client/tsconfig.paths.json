@@ -2,6 +2,7 @@
     "compilerOptions": {
       "baseUrl": "./src",
       "paths": {
+        "@/MapContext": ["./pages/main/components/map/MapProvider"],
         "@/*": ["./*"]
       }
     }

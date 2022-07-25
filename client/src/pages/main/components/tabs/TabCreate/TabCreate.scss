@@ -1,0 +1,17 @@
+.tabCreate {
+    &__input {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__item {
+        display: flex;
+        justify-content: center;
+    }
+
+    &__submit {
+        display: flex;
+        justify-content: center;
+        margin: 15px 0 10px 0 !important;
+    }
+}

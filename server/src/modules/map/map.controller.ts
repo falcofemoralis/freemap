@@ -45,7 +45,12 @@ const MEDIA_FOLDER = 'media';
 @ApiTags('map')
 @Controller('map')
 export class MapController {
-  constructor(private readonly mapService: MapService, private readonly usersService: UsersService, private readonly filesService: FilesService, private readonly httpService: HttpService) {}
+  constructor(
+    private readonly mapService: MapService,
+    private readonly usersService: UsersService,
+    private readonly filesService: FilesService,
+    private readonly httpService: HttpService,
+  ) {}
 
   @ApiOperation({ summary: 'Получение слоев с фичами' })
   @ApiResponse({ status: 200, type: [MapData], description: 'Массив слоев' })
@@ -106,18 +111,24 @@ export class MapController {
       type: 'FeatureCollection',
       features: [],
     };
-    const coords = WikimapiaApi.convertCoordinates({ h: wikimapiaQuery.h, w: wikimapiaQuery.w }, { lat: wikimapiaQuery.lat, lng: wikimapiaQuery.lng }, wikimapiaQuery.zoom - 2);
+
+    const coords = WikimapiaApi.convertCoordinates(
+      { h: wikimapiaQuery.h, w: wikimapiaQuery.w },
+      { lat: wikimapiaQuery.lat, lng: wikimapiaQuery.lng },
+      wikimapiaQuery.zoom - 2,
+    );
 
     const requests = [];
+    const hash = Math.round(Math.random() * 1e7);
     for (let i = 0; i < 4; i++) {
       const x = i == 2 || i == 0 ? coords.x + 1 : coords.x;
       const y = i == 1 || i == 0 ? coords.y + 1 : coords.y;
-      const url = WikimapiaApi.getTileUrl(x, y, wikimapiaQuery.zoom, TileTypes.OBJECTS);
+      const url = WikimapiaApi.getTileUrl(x, y, wikimapiaQuery.zoom, wikimapiaQuery.type, hash);
 
       requests.push(
         this.httpService.axiosRef({
           method: 'GET',
-          url: `https://open-free-map-proxy.herokuapp.com/${url}`, //http://wikimapia.org/z1/itiles/030/211/221/220/230.xy?2782950
+          url: `https://open-free-map-proxy.herokuapp.com/${url}`,
           decompress: true,
           headers: {
             'Accept-Encoding': 'gzip, deflate',
@@ -127,7 +138,6 @@ export class MapController {
     }
 
     const responses = await Promise.all([...requests]);
-
     for (const { data } of responses) {
       const wikimapiaData = WikimapiaApi.parse(data);
 
@@ -149,7 +159,7 @@ export class MapController {
             name: feature.titles['1'],
           },
           geometry: {
-            type: 'Polygon',
+            type: wikimapiaQuery.type == TileTypes.OBJECTS ? 'Polygon' : 'Line',
             coordinates,
           },
         });

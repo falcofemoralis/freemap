@@ -1,3 +1,4 @@
+import { TileTypes } from './../constants/tiles.type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AxiosError } from 'axios';
 import { toJS } from 'mobx';
@@ -42,9 +43,11 @@ export default class MapService {
     }
   }
 
-  static async getWikimapiaData(center: number[], zoom: number, h: number, w: number): Promise<Source> {
+  static async getWikimapiaData(center: number[], zoom: number, h: number, w: number, type: TileTypes): Promise<Source> {
     try {
-      const { data } = await axiosInstance.get<Source>(`${this.API_URL}/wikimapia?lat=${center[1]}&lng=${center[0]}&zoom=${zoom}&h=${h}&w=${w}`);
+      const { data } = await axiosInstance.get<Source>(
+        `${this.API_URL}/wikimapia?lat=${center[1]}&lng=${center[0]}&zoom=${zoom + 1}&h=${h}&w=${w}&type=${type.toString()}`
+      );
       //const { data } = await axiosInstance.get<Source>(`${this.API_URL}/wikimapia?lat=${47.844803}&lng=${35.198693}&zoom=${15}&h=${h}&w=${w}`);
 
       return data;

@@ -1,0 +1,12 @@
+.mapsDeckBox {
+    z-index: 2;
+    position: absolute;
+    border-radius: $box-corner  !important;
+    bottom: 105px;
+    left: 31px; //15 + 38 - 22
+    height: 20px;
+    border: #fff solid 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

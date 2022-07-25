@@ -1,23 +1,18 @@
+import { ErrorBox } from '@/components/ErrorBox/ErrorBox';
 import mapboxgl from 'mapbox-gl';
 import React from 'react';
-import { ErrorBox } from '../../components/ErrorBox';
-import { MapProvider } from '../../MapProvider';
-import { Logger } from '../../misc/Logger';
-import { LayerUsers } from './components/layers/LayerUsers';
-import { MainMap } from './components/MainMap';
-import { TabSelect } from './components/tabs/TabSelect';
-import { WidgetAccountBox } from './components/widgets/WidgetAccountBox';
-import { WidgetCategoriesBox } from './components/widgets/WidgetCategoriesBox';
-import { WidgetEditorBox } from './components/widgets/WidgetEditorBox';
-import { WidgetPreviewBox } from './components/widgets/WidgetPreviewBox';
-import { WidgetSearchBox } from './components/widgets/WidgetSearchBox';
-import { WidgetToolBox } from './components/widgets/WidgetToolBox';
-import { WidgetUsersBox } from './components/widgets/WidgetUsersBox';
-import './styles/Main.scss';
+import { MainMap } from './components/map/MainMap/MainMap';
+import { MapProvider } from './components/map/MapProvider';
+import { TabSelect } from './components/tabs/TabSelect/TabSelect';
+import { WidgetAccountBox } from './components/widgets/WidgetAccountBox/WidgetAccountBox';
+import { WidgetCategoriesBox } from './components/widgets/WidgetCategoriesBox/WidgetCategoriesBox';
+import { WidgetEditorBox } from './components/widgets/WidgetEditorBox/WidgetEditorBox';
+import { WidgetPreviewBox } from './components/widgets/WidgetPreviewBox/WidgetPreviewBox';
+import { WidgetSearchBox } from './components/widgets/WidgetSearchBox/WidgetSearchBox';
+import { WidgetToolBox } from './components/widgets/WidgetToolBox/WidgetToolBox';
+import './Main.scss';
 
 const Main = () => {
-  Logger.info('Main');
-
   const [map, setMap] = React.useState<mapboxgl.Map>();
 
   return (
@@ -26,7 +21,7 @@ const Main = () => {
       {map && (
         <MapProvider mainMap={map}>
           <WidgetSearchBox />
-          <WidgetUsersBox />
+          {/* <WidgetUsersBox /> */}
           <WidgetCategoriesBox />
           <WidgetAccountBox />
           <WidgetToolBox />
