@@ -23,8 +23,8 @@ export interface WikimapiaData {
 }
 
 export enum TileTypes {
-  OBJECTS,
-  ROADS,
+  OBJECTS = 'objects',
+  ROADS = 'roads',
 }
 
 export class WikimapiaApi {
@@ -216,7 +216,7 @@ export class WikimapiaApi {
     return c;
   };
 
-  static getTileUrl = function (t, e, i, a) {
+  static getTileUrl = function (t, e, i, a, hash) {
     // Wikimapia.Tile.Itile.prototype.load
     const getQuadKey = function (t, e, i, a) {
       const o = [
@@ -250,7 +250,7 @@ export class WikimapiaApi {
     }
     const k = {
       tileID: toQuadKey(t, e, i).replace(/(\d{3})(?!$)/g, '$1/'),
-      hash: Math.round(Math.random() * 1e7),
+      hash,
     };
 
     return `${o}/${k.tileID}.xy?${k.hash}`;

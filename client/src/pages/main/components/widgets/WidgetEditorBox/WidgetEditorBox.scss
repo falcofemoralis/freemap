@@ -1,0 +1,19 @@
+$box-corner: 25px;
+
+.editorBox {
+    border-radius: $box-corner  !important;
+    z-index: 1;
+    position: absolute;
+    display: flex;
+    bottom: 25px;
+    left: 180px;
+}
+
+.editorCtrlBox {
+    border-radius: $box-corner  !important;
+    z-index: 1;
+    position: absolute;
+    display: flex;
+    bottom: 25px;
+    left: 370px;
+}

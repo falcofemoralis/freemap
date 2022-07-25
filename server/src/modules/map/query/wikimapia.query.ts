@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber } from 'class-validator';
+import { IsEnum, IsNumber } from 'class-validator';
+import { TileTypes } from '../../../libs/wikimapia.api';
 
 export class WikimapiaQuery {
   @ApiProperty({ example: '10', description: 'Верхняя точка широты' })
@@ -27,4 +28,7 @@ export class WikimapiaQuery {
   @IsNumber()
   @Type(() => Number)
   zoom: number;
+
+  @IsEnum(TileTypes)
+  type: TileTypes;
 }

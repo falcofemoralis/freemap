@@ -2,13 +2,15 @@ import { Feature, FeatureCollection, Geometry } from 'geojson';
 import { makeAutoObservable } from 'mobx';
 import MapConstant from '../constants/map.constant';
 import MapService from '../services/map.service';
-import { HashUtil } from './../misc/HashUtil';
+import { HashUtil } from '../utils/HashUtil';
 import { FeatureProps, IMapData } from './../types/IMapData';
+import { TileTypes } from '../constants/tiles.type';
 
 class MapStore {
   mapData: IMapData;
   mapType: MapConstant = MapConstant.OSM;
   selectedFeatureId: string | null = null;
+  performingUpdate = false;
 
   constructor() {
     const data = HashUtil.getHashKey('data');
@@ -17,9 +19,16 @@ class MapStore {
     makeAutoObservable(this);
   }
 
-  async updateMapData(bounds: number[][], zoom: number, center: number[], h: number, w: number): Promise<IMapData> {
+  async updateMapData(bounds: number[][], zoom: number, center: number[], h: number, w: number): Promise<IMapData | undefined> {
+    if (this.performingUpdate) {
+      return;
+    }
+
+    this.performingUpdate = true;
     this.mapData = await MapService.getMapData(bounds);
-    this.mapData.sources.push(await MapService.getWikimapiaData(center, zoom, h, w));
+    //this.mapData.sources.push(await MapService.getWikimapiaData(center, zoom, h, w, TileTypes.OBJECTS));
+    this.performingUpdate = false;
+
     return this.mapData;
   }
 

@@ -1,0 +1,28 @@
+.accountSettings {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    width: 372px;
+
+    &__avatar {
+        width: 64px !important;
+        height: 64px !important;
+        cursor: pointer !important;
+    }
+
+    &__username {
+        text-align: center;
+    }
+
+    &__progress {
+        width: 100%;
+        margin: 5px;
+    }
+
+    &__divider {
+        width: 100%;
+        margin: 15px 0 15px 0 !important;
+    }
+}

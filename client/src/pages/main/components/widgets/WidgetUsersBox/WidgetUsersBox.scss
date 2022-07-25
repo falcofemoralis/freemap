@@ -1,0 +1,24 @@
+.usersBox {
+    z-index: 1;
+    position: absolute;
+    display: flex;
+    top: 68px;
+    left: 15px;
+    width: 250px;
+    max-height: 500px;
+
+    &__list {
+        width: 100%;
+
+        &-avatar {
+            margin-right: 5px;
+        }
+
+        &-online {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 25px;
+        }
+    }
+}

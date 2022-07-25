@@ -1,0 +1,15 @@
+@import '@/styles/App.scss';
+
+.accountBox {
+    z-index: 1;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    width: auto;
+    height: auto;
+
+    @media screen and (max-width: $mobile-screen) {
+        display: none;
+    }
+}
+
