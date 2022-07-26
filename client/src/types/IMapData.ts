@@ -1,10 +1,44 @@
-import { IMapFeature } from './IMapFeature';
+import { FeatureCollection, MultiLineString, MultiPolygon, Polygon } from 'geojson';
+import { ICategory } from './ICategory';
+import { IComment } from './IComment';
+import { IFeatureType } from './IFeatureType';
+import { IMedia } from './IMedia';
+import { IUser } from './IUser';
 
-export type FeatureProps = Pick<IMapFeature, 'id' | 'name' | 'createdAt' | 'category'>;
+export type GeometryProp = MultiLineString | Polygon | MultiPolygon;
+export type GeometryType = GeometryProp['type'];
+export type GeometryCoordinates = GeometryProp['coordinates'];
+
+export interface CreateFeatureProps {
+  type: string;
+  category?: string;
+  name: string;
+  description: string;
+  address?: string;
+  links?: string[];
+  phone?: string;
+  wiki?: string;
+}
+
+export interface FeatureProps {
+  id: string;
+  type: IFeatureType;
+  name: string;
+  description: string;
+  address?: string;
+  links?: string[];
+  files?: IMedia[];
+  createdAt: number;
+  wiki?: string;
+  phone?: string;
+  comments: IComment[];
+  user: IUser;
+  category?: ICategory;
+}
 
 export interface Source {
   id: string;
-  featureCollection: GeoJSON.FeatureCollection<GeoJSON.Geometry, FeatureProps>;
+  featureCollection: FeatureCollection<GeometryProp, FeatureProps>;
 }
 
 export interface Layer {

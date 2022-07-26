@@ -1,9 +1,9 @@
-import { GeometryType } from '@/constants/geometry.type';
 import { authStore } from '@/store/auth.store';
 import { editorStore } from '@/store/editor.store';
-import { ICreatedMapFeature } from '@/types/IMapFeature';
-import { IMapFeatureType } from '@/types/IMapFeatureType';
+import { GeometryType } from '@/types/IMapData';
+import { IFeatureType } from '@/types/IFeatureType';
 import { Box, Paper } from '@mui/material';
+import { useState } from 'react';
 import { LayerDraw } from '../../layers/LayerDraw/LayerDraw';
 import { TabCreate } from '../../tabs/TabCreate/TabCreate';
 import { EditorAlert } from './components/EditorAlert/EditorAlert';
@@ -12,6 +12,7 @@ import { TypesDialog } from './components/TypesDialog/TypesDialog';
 import './WidgetEditorBox.scss';
 
 export const WidgetEditorBox = () => {
+  const [typesDialogOpen, setTypesDialogOpen] = useState(false);
   /**
    * Handle geometry type select from editor panel box
    * @param type - geometry type
@@ -22,36 +23,28 @@ export const WidgetEditorBox = () => {
       return;
     }
 
-    editorStore.setSelectedEditType(type);
-  };
-
-  /**
-   * Handle feature type select from types dialog
-   * @param type - selected type
-   */
-  const handleFeatureTypeSelect = (type: IMapFeatureType | null) => {
-    editorStore.setSelectedFeatureType(type);
+    setTypesDialogOpen(true);
+    editorStore.setDrawMode(type);
   };
 
   /**
    * Handle feature type apply
    */
-  const onFeatureTypeApply = () => {
-    // check if featureType was select in onChange
-    if (editorStore.selectedFeatureType) {
-      editorStore.setSelectedEditType(null);
+  const onFeatureTypeApply = (type: IFeatureType | null) => {
+    if (type) {
+      setTypesDialogOpen(false);
       editorStore.toggleDrawing();
+      editorStore.setSelectedFeatureType(type);
     }
   };
 
-  const handleDrawFinish = (feature: Partial<ICreatedMapFeature>) => editorStore.setFeature(feature);
   const handleDrawCancel = () => editorStore.toggleDrawing();
 
   /**
    * Handle tab create close
    */
   const handleCloseTab = () => {
-    editorStore.setFeature(null);
+    editorStore.setCreatedGeometry(null);
     handleDrawCancel();
   };
 
@@ -59,11 +52,11 @@ export const WidgetEditorBox = () => {
     <Box>
       <Paper className='editorBox' elevation={5}>
         <EditorPanel onSelect={handleEditTypeSelect} />
-        <TypesDialog onChange={handleFeatureTypeSelect} onApply={onFeatureTypeApply} onCancel={() => handleEditTypeSelect(null)} />
+        <TypesDialog open={typesDialogOpen} onApply={onFeatureTypeApply} onCancel={() => setTypesDialogOpen(false)} />
         <TabCreate onSubmit={handleCloseTab} onClose={handleCloseTab} />
       </Paper>
       <Paper className='editorCtrlBox' elevation={5}>
-        <LayerDraw onFinish={handleDrawFinish} onCancel={handleDrawCancel} />
+        <LayerDraw onCancel={handleDrawCancel} />
       </Paper>
       <EditorAlert />
     </Box>

@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMinSize, IsArray, IsEmpty, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-import { Position } from '../entities/map-feature.entity';
+import { IsArray, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class CreateFeatureDataDto {
+export class CreateFeaturePropsDto {
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'id типа' })
   @IsNotEmpty()
   @IsString()
@@ -22,11 +21,6 @@ export class CreateFeatureDataDto {
   @ApiProperty({ example: 'Lorem Ipsum Dolor', description: 'Описание' })
   @MaxLength(1200)
   description: string;
-
-  @ApiProperty({ example: '[]', description: 'Координаты объекта' })
-  @IsNotEmpty()
-  @ArrayMinSize(1)
-  coordinates: Position[][] | Position[][][];
 
   @ApiProperty({ example: 'qwerty', description: 'Адрес' })
   @IsOptional()

@@ -11,9 +11,9 @@ const App = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box>
       <CssBaseline />
-      <Box component='main' sx={{ flexGrow: 1 }}>
+      <Box component='main'>
         <Routes>
           <Route path='*' element={<Navigate to='/' />} />
           <Route path='/' element={<Main />} />

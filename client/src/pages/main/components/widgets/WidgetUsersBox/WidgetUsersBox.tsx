@@ -1,5 +1,5 @@
 import { UserAvatar } from '@/components/UserAvatar/UserAvatar';
-import { GeometryType } from '@/constants/geometry.type';
+import { GeometryConstant } from '@/constants/geometry.type';
 import { MapContext } from '@/MapContext';
 import { usersStore } from '@/store/users.store';
 import { IActiveUser } from '@/types/IActiveUser';
@@ -15,7 +15,7 @@ export const WidgetUsersBox = observer(() => {
   const { mainMap } = useContext(MapContext);
 
   const selectUser = (user: IActiveUser) => {
-    mainMap?.flyTo({ center: getCenter([user.coordinates], GeometryType.POLYGON), zoom: user.zoom });
+    mainMap?.flyTo({ center: getCenter([user.coordinates], GeometryConstant.POLYGON), zoom: user.zoom });
   };
 
   return (

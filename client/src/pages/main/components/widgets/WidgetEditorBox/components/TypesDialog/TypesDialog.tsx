@@ -1,29 +1,31 @@
 import { FeatureTypesAutocomplete } from '@/components/AutocompleteType/AutocompleteType';
 import { editorStore } from '@/store/editor.store';
-import { IMapFeatureType } from '@/types/IMapFeatureType';
+import { IFeatureType } from '@/types/IFeatureType';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import './TypesDialog.scss';
 
 interface TypesDialogProps {
-  onChange: (type: IMapFeatureType | null) => void;
-  onApply: () => void;
+  open: boolean;
+  onApply: (type: IFeatureType | null) => void;
   onCancel: () => void;
 }
-export const TypesDialog: React.FC<TypesDialogProps> = observer(({ onChange, onCancel, onApply }) => {
+export const TypesDialog: React.FC<TypesDialogProps> = observer(({ open, onCancel, onApply }) => {
   const { t } = useTranslation();
+  const [selectedType, setSelectedType] = useState<IFeatureType | null>(null);
 
   return (
-    <Dialog open={Boolean(editorStore.selectedEditType)} onClose={onCancel}>
+    <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{t('SELECT_TYPE')}</DialogTitle>
       <DialogContent>
-        <FeatureTypesAutocomplete className='typesDialog__autocomplete' onChange={onChange} selectedGeometry={editorStore.selectedEditType} />
+        <FeatureTypesAutocomplete className='typesDialog__autocomplete' onChange={setSelectedType} drawMode={editorStore.drawMode} />
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>{t('CANCEL')}</Button>
-        <Button onClick={onApply}>{t('SELECT')}</Button>
+        <Button onClick={() => onApply(selectedType)}>{t('SELECT')}</Button>
       </DialogActions>
     </Dialog>
   );

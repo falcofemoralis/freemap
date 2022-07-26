@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
-import { GeometryType } from 'src/modules/map/constants/geometry.type';
-import { Layer } from '../types/layer';
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { GeometryConstant } from 'src/modules/map/constants/geometry.type';
+import { Layer } from '../types/map-data';
 
 export class FeatureTypeDto {
   @ApiProperty({ example: 'qwerty', description: 'Название типа' })
@@ -9,8 +9,8 @@ export class FeatureTypeDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ enum: Object.values(GeometryType), description: 'Тип геометрии' })
-  @IsEnum(GeometryType)
+  @ApiProperty({ enum: Object.values(GeometryConstant), description: 'Тип геометрии' })
+  @IsEnum(GeometryConstant)
   @IsNotEmpty()
   geometry: string;
 

@@ -20,9 +20,9 @@ export class Category {
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
 
-CategorySchema.virtual('id').get(function (this: CategoryDocument) {
-  return this._id.toHexString();
-});
+// CategorySchema.virtual('id').get(function (this: CategoryDocument) {
+//   return this._id.toHexString();
+// });
 
 CategorySchema.set('toJSON', {
   virtuals: true,

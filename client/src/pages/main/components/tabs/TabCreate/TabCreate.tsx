@@ -7,20 +7,21 @@ import { editorStore } from '@/store/editor.store';
 import { errorStore } from '@/store/error.store';
 import { mapStore } from '@/store/map.store';
 import { ICategory } from '@/types/ICategory';
-import { FeatureProps } from '@/types/IMapData';
-import { IMapFeatureType } from '@/types/IMapFeatureType';
+import { FeatureProps, GeometryProp } from '@/types/IMapData';
+import { IFeatureType } from '@/types/IFeatureType';
 import { getCenter, toText } from '@/utils/CoordinatesUtils';
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Divider, Typography, Autocomplete, Box, Chip, Grid, TextField } from '@mui/material';
-import { Feature, Geometry } from 'geojson';
+import { Alert, Autocomplete, Box, Chip, Divider, Grid, TextField, Typography } from '@mui/material';
+import { Feature } from 'geojson';
 import { GeoJSONSource } from 'mapbox-gl';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { CategoriesAutocomplete } from './components/CategoriesAutocomplete/CategoriesAutocomplete';
+import { CreateFeatureProps } from '../../../../../types/IMapData';
 import './TabCreate.scss';
 
 interface FormData {
@@ -45,7 +46,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   const [isLoading, setLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [links, setLinks] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState<IMapFeatureType | null>(null);
+  const [selectedType, setSelectedType] = useState<IFeatureType | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<ICategory>();
   const [errorData, setErrorData] = useState<ErrorData>({ coordinates: '', type: '' });
 
@@ -63,12 +64,12 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
    * Send created object to the server
    */
   const handleOnSubmit = handleSubmit(async data => {
-    if (!editorStore.createdFeature?.type || !selectedType) {
+    if (!editorStore.selectedFeatureType || !selectedType) {
       setErrorData({ ...errorData, type: t('CATEGORY_REQUIRED') });
       return;
     }
 
-    if (!editorStore.createdFeature?.coordinates) {
+    if (!editorStore.createdGeometry) {
       setErrorData({ ...errorData, coordinates: t('COORDINATES_REQUIRED') });
       return;
     }
@@ -76,29 +77,18 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     setLoading(true);
 
     try {
-      const createdFeature = {
-        coordinates: editorStore.createdFeature?.coordinates,
-        type: selectedType ? selectedType : editorStore.createdFeature?.type,
-        category: selectedCategory,
-        links,
-        ...data
-      };
-
-      const { id, name, createdAt, category, type, coordinates } = await MapService.addFeature(createdFeature, files);
-
-      const feature: Feature<Geometry, FeatureProps> = {
+      const createdFeature: Feature<GeometryProp, CreateFeatureProps> = {
         type: 'Feature',
-        properties: { id, name, createdAt, category },
-        geometry: {
-          type: type.geometry,
-          coordinates: coordinates as any
-        },
+        properties: { type: selectedType.id, category: selectedCategory?.id, links, ...data },
+        geometry: toJS(editorStore.createdGeometry),
         id: new Date().getTime()
       };
 
-      const collection = mapStore.addFeature(type.id, feature);
-      if (data) {
-        (mainMap?.getSource(type.id) as GeoJSONSource).setData(collection as any);
+      console.log(createdFeature);
+
+      const collection = await mapStore.addFeature(createdFeature, files);
+      if (collection) {
+        (mainMap?.getSource(selectedType.id) as GeoJSONSource).setData(collection);
       }
 
       reset();
@@ -134,12 +124,12 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
    * Get feature coordinates as plain text
    */
   const getCoordinatesAsText = () => {
-    const feature = toJS(editorStore.createdFeature);
-    editorStore.isFeature && toText(getCenter(feature?.coordinates, feature?.type?.geometry));
+    const geometry = toJS(editorStore.createdGeometry);
+    return editorStore.isFeature && toText(getCenter(geometry?.coordinates, geometry?.type));
   };
 
   const handleFilesChange = (data: File[]) => setFiles(data);
-  const handleFeatureTypeSelect = (type: IMapFeatureType | null) => setSelectedType(type);
+  const handleFeatureTypeSelect = (type: IFeatureType | null) => setSelectedType(type);
   const handleLinksChange = (links: string[]) => setLinks(links);
   const handleCategorySelect = (category: ICategory) => setSelectedCategory(category);
 
@@ -190,8 +180,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
               error={Boolean(errorData.type)}
               helperText={errorData.type}
               onChange={handleFeatureTypeSelect}
-              selectedGeometry={editorStore.createdFeature?.type?.geometry}
-              selectedType={editorStore.createdFeature?.type}
+              drawMode={editorStore.drawMode}
+              featureType={editorStore.selectedFeatureType}
             />
           </Grid>
           <Grid item xs={12}>

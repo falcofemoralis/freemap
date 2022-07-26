@@ -1,6 +1,8 @@
 import { ErrorBox } from '@/components/ErrorBox/ErrorBox';
 import mapboxgl from 'mapbox-gl';
-import React from 'react';
+import { useState } from 'react';
+import { LayerData } from './components/layers/LayerData/LayerData';
+import { LayerHover } from './components/layers/LayerHover/LayerHover';
 import { MainMap } from './components/map/MainMap/MainMap';
 import { MapProvider } from './components/map/MapProvider';
 import { TabSelect } from './components/tabs/TabSelect/TabSelect';
@@ -13,7 +15,7 @@ import { WidgetToolBox } from './components/widgets/WidgetToolBox/WidgetToolBox'
 import './Main.scss';
 
 const Main = () => {
-  const [map, setMap] = React.useState<mapboxgl.Map>();
+  const [map, setMap] = useState<mapboxgl.Map>();
 
   return (
     <div className='main' id='main'>
@@ -29,6 +31,8 @@ const Main = () => {
           <WidgetEditorBox />
           <TabSelect />
           <ErrorBox />
+          <LayerData />
+          <LayerHover />
           {/* <LayerUsers /> */}
         </MapProvider>
       )}

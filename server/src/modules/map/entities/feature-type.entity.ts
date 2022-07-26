@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import * as mongoose from 'mongoose';
-import { GeometryType } from '../constants/geometry.type';
-import { Layer } from '../types/layer';
+import { GeometryType, Layer } from '../types/map-data';
 
 export type FeatureTypeDocument = FeatureType & Document & { _id: mongoose.Types.ObjectId };
 
@@ -15,9 +14,9 @@ export class FeatureType {
   @Prop()
   name: string;
 
-  @ApiProperty({ enum: Object.values(GeometryType), description: 'Тип геометрии объекта' })
+  @ApiProperty({ description: 'Тип геометрии объекта' })
   @Prop()
-  geometry: string;
+  geometry: GeometryType;
 
   @ApiProperty({ example: '[]', description: 'Стили типа' })
   @Prop()
@@ -30,9 +29,11 @@ export class FeatureType {
 
 export const FeatureTypeSchema = SchemaFactory.createForClass(FeatureType);
 
-FeatureTypeSchema.virtual('id').get(function (this: FeatureTypeDocument) {
-  return this._id.toHexString();
-});
+// FeatureTypeSchema.virtual('id').get((c: FeatureTypeDocument) => {
+//   console.log(this);
+
+//   return '';
+// });
 
 FeatureTypeSchema.set('toJSON', {
   virtuals: true,

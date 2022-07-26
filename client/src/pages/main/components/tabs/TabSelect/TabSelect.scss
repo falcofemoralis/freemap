@@ -1,0 +1,24 @@
+.tabSelect {
+    &__progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    &__fileUpload {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+.gallery {
+    &__item {
+        cursor: pointer;
+    }
+
+    &__image {
+        height: 240px;
+        object-fit: cover;
+    }
+}

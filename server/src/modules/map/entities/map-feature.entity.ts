@@ -1,20 +1,16 @@
-import { Category } from './category.entity';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import { Feature, Position } from 'geojson';
 import * as mongoose from 'mongoose';
 import { User } from 'src/modules/auth/entities/user.entity';
-import { FeatureType } from './feature-type.entity';
 import { Media } from '../types/media';
-
-export type Position = number[];
+import { GeometryProp } from './../types/map-data';
+import { Category } from './category.entity';
+import { FeatureType } from './feature-type.entity';
 
 export type MapFeatureDocument = MapFeature & Document & { _id: mongoose.Types.ObjectId };
 
-@Schema()
-export class MapFeature {
-  @ApiProperty({ example: '6202777bb6932aed20883e35', description: 'Уникальный id объекта' })
-  id: string;
-
+export class MapFeatureProps {
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Пользователь который добавил объект' })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', autopopulate: { select: '-email -passwordHash' } })
   user: User;
@@ -34,10 +30,6 @@ export class MapFeature {
   @ApiProperty({ example: '6202777bb6932aedd0883e35', description: 'Категория объекта' })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category', autopopulate: true })
   category: Category;
-
-  @ApiProperty({ example: '[]', description: 'Координаты объекта' })
-  @Prop()
-  coordinates: Position[][] | Position[][][];
 
   @ApiProperty({ example: 'qwerty', description: 'Адрес объекта' })
   @Prop()
@@ -68,18 +60,54 @@ export class MapFeature {
   comments: string[];
 }
 
+class MultiLineString {
+  @Prop()
+  type: 'MultiLineString';
+  @Prop()
+  coordinates: Position[][];
+}
+
+class Polygon {
+  @Prop()
+  type: 'Polygon';
+  @Prop()
+  coordinates: Position[][];
+}
+
+class MultiPolygon {
+  @Prop()
+  type: 'MultiPolygon';
+  @Prop()
+  coordinates: Position[][][];
+}
+
+@Schema()
+export class MapFeature implements Feature<GeometryProp, MapFeatureProps> {
+  @ApiProperty({ example: '6202777bb6932aed20883e35', description: 'Уникальный id объекта' })
+  id: string;
+
+  @Prop()
+  type: 'Feature';
+
+  @Prop({ type: MultiLineString && Polygon && MultiPolygon })
+  geometry: MultiLineString | Polygon | MultiPolygon;
+
+  @Prop({ type: MapFeatureProps })
+  properties: MapFeatureProps;
+}
+
 export const MapFeatureSchema = SchemaFactory.createForClass(MapFeature);
 
-MapFeatureSchema.virtual('id').get(function (this: MapFeatureDocument) {
-  return this._id.toHexString();
-});
+// MapFeatureSchema.virtual('id').get(function (this: MapFeatureDocument) {
+//   return this._id.toHexString();
+// });
 
 MapFeatureSchema.set('toJSON', {
   virtuals: true,
   transform: (doc, ret) => {
     delete ret._id;
     delete ret.__v;
-    ret.files.map((file) => {
+    ret.files?.map((file) => {
       file.name = `${process.env.DOMAIN}/api/map/feature/media/${file.name}`;
       return file;
     });

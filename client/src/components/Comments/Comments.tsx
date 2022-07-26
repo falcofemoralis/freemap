@@ -1,7 +1,7 @@
 import { authStore } from '@/store/auth.store';
 import { IComment } from '@/types/IComment';
 import { Box } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { CommentForm } from './components/CommentForm/CommentForm';
 import { Comment } from './components/Comment/Comment';
 
@@ -29,7 +29,8 @@ export const Comments: React.FC<CommentsProps> = ({ comments, featureId }) => {
     getReplies(comment.replies, 1);
   }
 
-  const [commentsArr, setComments] = React.useState<IComment[]>(allComments);
+  const [commentsArr, setComments] = useState<IComment[]>(allComments);
+
   const onSubmit = (comment: IComment) => setComments([comment, ...commentsArr]);
   const onReply = (comment: IComment, index: number) => {
     const tmp: IComment[] = [];

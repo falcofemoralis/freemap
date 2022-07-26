@@ -2,10 +2,11 @@ import { CustomDrawer } from '@/components/CustomDrawer/CustomDrawer';
 import { FileType } from '@/constants/file.type';
 import { MapContext } from '@/MapContext';
 import MapService from '@/services/map.service';
-import { IMapFeature } from '@/types/IMapFeature';
 import { getCenter } from '@/utils/CoordinatesUtils';
 import { Card, CardActionArea, CardContent, CardMedia, List, ListItem, Typography } from '@mui/material';
 import React, { useContext, useState } from 'react';
+import { FeatureProps, GeometryProp } from '@/types/IMapData';
+import { Feature } from 'geojson';
 import './TabNewest.scss';
 
 interface TabNewestProps {
@@ -15,7 +16,7 @@ interface TabNewestProps {
 }
 export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose, onSelect }) => {
   const { mainMap } = useContext(MapContext);
-  const [newestFeatures, setNewestFeatures] = useState<Array<IMapFeature> | null>(null);
+  const [newestFeatures, setNewestFeatures] = useState<Array<Feature<GeometryProp, FeatureProps>> | null>(null);
 
   /**
    * Load latest features on tab open
@@ -29,10 +30,10 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose, onSelect })
    * @param coordinates - feature coordinates
    * @param type - feature type
    */
-  const selectFeature = (feature: IMapFeature) => {
+  const selectFeature = (feature: Feature<GeometryProp, FeatureProps>) => {
     mainMap?.flyTo({
-      center: getCenter(feature.coordinates, feature.type.geometry),
-      zoom: feature.type.layers[0].minzoom + 1
+      center: getCenter(feature.geometry.coordinates, feature.geometry.type),
+      zoom: feature.properties.type.layers[0].minzoom + 1
     });
   };
 
@@ -43,15 +44,20 @@ export const TabNewest: React.FC<TabNewestProps> = ({ open, onClose, onSelect })
           <ListItem key={feature.id}>
             <Card className='tabNewest__card' onClick={() => selectFeature(feature)}>
               <CardActionArea>
-                {feature?.files && feature?.files?.length > 0 && (
-                  <CardMedia component='img' height='140' image={`${feature?.files[0].name}?type=${FileType.THUMBNAIL}`} alt={feature.name} />
+                {feature?.properties.files && feature?.properties.files?.length > 0 && (
+                  <CardMedia
+                    component='img'
+                    height='140'
+                    image={`${feature?.properties.files[0].name}?type=${FileType.THUMBNAIL}`}
+                    alt={feature?.properties.name}
+                  />
                 )}
                 <CardContent>
                   <Typography gutterBottom variant='h5' component='div'>
-                    {feature.name} • {new Date(feature.createdAt).toLocaleDateString()}
+                    {feature?.properties.name} • {new Date(feature?.properties.createdAt).toLocaleDateString()}
                   </Typography>
                   <Typography variant='body2' color='text.secondary' noWrap>
-                    {feature.description}
+                    {feature?.properties.description}
                   </Typography>
                 </CardContent>
               </CardActionArea>

@@ -1,0 +1,17 @@
+.iconField {
+    &__button {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: flex-start;
+        padding: 5px 15px !important;
+    }
+
+    &__text{
+        margin-left: 15px !important;
+        word-break: break-all;
+        text-transform: none;
+        text-align: start;
+        color: #000;
+    }
+}

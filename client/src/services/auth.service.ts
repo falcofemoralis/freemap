@@ -1,5 +1,4 @@
 import { AxiosError } from 'axios';
-import { FileType } from '../constants/file.type';
 import { errorStore } from '../store/error.store';
 import { IUser } from '../types/IUser';
 import { axiosInstance, headers } from './index';
@@ -8,7 +7,7 @@ export default class AuthService {
   private static API_URL = '/auth';
 
   /**
-   * Регистрация нового пользователя
+   * Sign up
    * @returns token
    */
   static async register(username: string, email: string, password: string, isMailing: boolean): Promise<string> {
@@ -24,7 +23,7 @@ export default class AuthService {
   }
 
   /**
-   * Авторизация пользователя
+   * Sign in
    * @returns token
    */
   static async login(email: string, password: string): Promise<string> {
@@ -39,6 +38,11 @@ export default class AuthService {
     }
   }
 
+  /**
+   * Sign in via google
+   * @param tokenId
+   * @returns token
+   */
   static async googleLogin(tokenId: string) {
     try {
       const { data } = await axiosInstance.post<string>(`${AuthService.API_URL}/google`, { tokenId });
@@ -49,6 +53,10 @@ export default class AuthService {
     }
   }
 
+  /**
+   * Get user profile
+   * @returns user
+   */
   static async getUserProfile(): Promise<IUser> {
     try {
       const { data } = await axiosInstance.get<IUser>(`${AuthService.API_URL}/profile/user`, { headers: headers() });
@@ -59,6 +67,11 @@ export default class AuthService {
     }
   }
 
+  /**
+   * Send new user avatar
+   * @param file
+   * @returns image uri
+   */
   static async updateUserAvatar(file: File): Promise<string> {
     try {
       const formData = new FormData();

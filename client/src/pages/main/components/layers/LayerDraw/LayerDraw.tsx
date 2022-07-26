@@ -1,25 +1,19 @@
-import { GeometryType } from '@/constants/geometry.type';
+import { GeometryConstant } from '@/constants/geometry.type';
 import { MapContext } from '@/MapContext';
 import '@/pages/main/components/widgets/WidgetEditorBox/WidgetEditorBox.scss';
 import { editorStore } from '@/store/editor.store';
-import { Coordinates, ICreatedMapFeature } from '@/types/IMapFeature';
-import { Logger } from '@/utils/Logger';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import CheckIcon from '@mui/icons-material/Check';
 import { Box, IconButton } from '@mui/material';
-import bbox from '@turf/bbox';
 import { LineString, Polygon, Position } from 'geojson';
 import { observer } from 'mobx-react-lite';
 import React, { useContext, useState } from 'react';
 
 interface LayerDrawProps {
-  onFinish: (feature: Partial<ICreatedMapFeature>) => void;
   onCancel: () => void;
 }
-export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCancel }) => {
-  Logger.info('LayerDraw');
-
+export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onCancel }) => {
   const { mainMap } = useContext(MapContext);
   const [draw, setDraw] = useState<MapboxDraw | null>(null);
 
@@ -28,40 +22,32 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCance
    */
   const onCompleteDrawing = () => {
     const features = draw?.getAll().features;
-    let coordinates: Coordinates = [];
-    const bboxes: number[][] = [];
+    if (!features) {
+      return;
+    }
 
-    if (features) {
-      /**
-       * Преобразование координат с разных типов геометрии. Например преобразование координат нескольких фич Polygon в вид координат Multi_Polygon
-       */
+    if (editorStore.drawMode == GeometryConstant.POLYGON) {
+      const coordinates = (features[0].geometry as Polygon).coordinates;
+      editorStore.setCreatedGeometry({ type: GeometryConstant.POLYGON, coordinates });
+    } else if (editorStore.drawMode == GeometryConstant.MULTI_POLYGON) {
+      const coordinates: Position[][][] = [];
+      //const bboxes: number[][] = []; // for test
+
       for (const feature of features) {
-        const geometryType = editorStore.selectedFeatureType?.geometry as GeometryType;
-
-        switch (geometryType) {
-          case GeometryType.POLYGON:
-            coordinates = (feature.geometry as Polygon).coordinates;
-            break;
-          case GeometryType.MULTI_POLYGON:
-            (coordinates as Position[][][]).push((feature.geometry as Polygon).coordinates);
-            bboxes.push(bbox(feature.geometry as Polygon));
-            break;
-          case GeometryType.MULTI_LINE_STRING:
-            (coordinates as Position[][]).push((feature.geometry as LineString).coordinates);
-            break;
-        }
+        coordinates.push((feature.geometry as Polygon).coordinates);
+        //bboxes.push(bbox(feature.geometry as Polygon));
       }
 
-      console.log(JSON.stringify(bboxes));
+      editorStore.setCreatedGeometry({ type: GeometryConstant.MULTI_POLYGON, coordinates });
+      //console.log(JSON.stringify(bboxes));
+    } else if (editorStore.drawMode == GeometryConstant.MULTI_LINE_STRING) {
+      const coordinates: Position[][] = [];
 
-      if (editorStore.selectedFeatureType) {
-        const createdFeature: Partial<ICreatedMapFeature> = {
-          type: editorStore.selectedFeatureType,
-          coordinates
-        };
-
-        onFinish(createdFeature);
+      for (const feature of features) {
+        coordinates.push((feature.geometry as LineString).coordinates);
       }
+
+      editorStore.setCreatedGeometry({ type: GeometryConstant.MULTI_LINE_STRING, coordinates });
     }
   };
 
@@ -76,15 +62,15 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCance
     /**
      * Detect drawing mode by selected geometry
      */
-    switch (editorStore.selectedFeatureType?.geometry) {
-      case GeometryType.POLYGON:
+    switch (editorStore.drawMode) {
+      case GeometryConstant.POLYGON:
         mode = 'draw_polygon';
         break;
-      case GeometryType.MULTI_LINE_STRING:
+      case GeometryConstant.MULTI_LINE_STRING:
         mode = 'draw_line_string';
         isLine = true;
         break;
-      case GeometryType.MULTI_POLYGON:
+      case GeometryConstant.MULTI_POLYGON:
         isPolygon = true;
         mode = 'draw_polygon';
         break;
@@ -101,22 +87,12 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onFinish, onCance
     });
     mainMap?.addControl(mapboxDraw, 'bottom-right');
 
-    /**
-     * Buttons listener
-     */
     const escapeListener = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (mapboxDraw) {
-          onCancel();
-          try {
-            mainMap?.removeControl(mapboxDraw);
-          } catch (e) {
-            // skip
-          }
-          setDraw(null);
-
-          window.removeEventListener('keyup', escapeListener);
-        }
+        onCancel();
+        setDraw(null);
+        mainMap?.removeControl(mapboxDraw);
+        window.removeEventListener('keyup', escapeListener);
       } else if (event.key === 'p') {
         mapboxDraw.changeMode('draw_polygon');
       }

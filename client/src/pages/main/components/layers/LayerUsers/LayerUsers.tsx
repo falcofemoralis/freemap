@@ -1,4 +1,4 @@
-import { GeometryType } from '@/constants/geometry.type';
+import { GeometryConstant } from '@/constants/geometry.type';
 import { MapContext } from '@/MapContext';
 import { MAP_SOCKET } from '@/services';
 import { authStore } from '@/store/auth.store';
@@ -104,7 +104,7 @@ export const LayerUsers = () => {
             const feature: Feature<Geometry, IActiveFeatureProps> = {
               type: 'Feature',
               geometry: {
-                type: GeometryType.POLYGON,
+                type: GeometryConstant.POLYGON,
                 coordinates: [currentCoordinates as Position[]]
               },
               properties: {

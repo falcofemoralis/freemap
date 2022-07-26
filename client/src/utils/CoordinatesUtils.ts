@@ -1,17 +1,17 @@
 import { Position } from 'geojson';
-import { GeometryType } from '../constants/geometry.type';
-import { Coordinates } from '../types/IMapFeature';
+import { GeometryConstant } from '../constants/geometry.type';
+import { GeometryCoordinates, GeometryType } from '../types/IMapData';
 
-export const getCenter = (coordinates: Coordinates | undefined, type: GeometryType | undefined): [number, number] => {
+export const getCenter = (coordinates: GeometryCoordinates | undefined, type: GeometryType | undefined): [number, number] => {
   const arr: Position[] = [];
 
-  if (type == GeometryType.POLYGON || type == GeometryType.MULTI_LINE_STRING) {
+  if (type == GeometryConstant.POLYGON || type == GeometryConstant.MULTI_LINE_STRING) {
     for (const tuple of coordinates as Position[][]) {
       for (const position of tuple) {
         arr.push(position);
       }
     }
-  } else if (type == GeometryType.MULTI_POLYGON) {
+  } else if (type == GeometryConstant.MULTI_POLYGON) {
     for (const polygons of coordinates as Position[][][]) {
       for (const tuple of polygons) {
         for (const position of tuple) {

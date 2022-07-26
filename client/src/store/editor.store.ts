@@ -1,39 +1,21 @@
-import { makeAutoObservable, runInAction } from 'mobx';
-import { GeometryType } from '../constants/geometry.type';
-import MapService from '../services/map.service';
-import { ICategory } from '../types/ICategory';
-import { ICreatedMapFeature } from '../types/IMapFeature';
-import { IMapFeatureType } from '../types/IMapFeatureType';
+import { GeometryProp } from './../types/IMapData';
+import { GeometryType } from '@/types/IMapData';
+import { makeAutoObservable } from 'mobx';
+import { IFeatureType } from '../types/IFeatureType';
 
 class EditorStore {
-  featureTypes: IMapFeatureType[] | null = null;
-  categories: ICategory[] | null = null;
-  createdFeature: Partial<ICreatedMapFeature> | null = null; // created feature
+  drawMode: GeometryType | null = null;
+  selectedFeatureType: IFeatureType | null = null;
+  createdGeometry: GeometryProp | null = null;
   isDrawing = false;
-  selectedEditType: GeometryType | null = null;
-  selectedFeatureType: IMapFeatureType | null = null;
   alert = false;
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  async getFeatureTypes() {
-    const types = await MapService.getFeatureTypes();
-    runInAction(() => {
-      this.featureTypes = types;
-    });
-  }
-
-  async getCategories() {
-    const categories = await MapService.getCategories();
-    runInAction(() => {
-      this.categories = categories;
-    });
-  }
-
-  setFeature(feature: Partial<ICreatedMapFeature> | null) {
-    this.createdFeature = feature;
+  setCreatedGeometry(geometry: GeometryProp | null) {
+    this.createdGeometry = geometry;
   }
 
   toggleDrawing() {
@@ -41,14 +23,14 @@ class EditorStore {
   }
 
   get isFeature() {
-    return this.createdFeature != null;
+    return this.createdGeometry != null;
   }
 
-  setSelectedEditType(type: GeometryType | null) {
-    this.selectedEditType = type;
+  setDrawMode(type: GeometryType | null) {
+    this.drawMode = type;
   }
 
-  setSelectedFeatureType(type: IMapFeatureType | null) {
+  setSelectedFeatureType(type: IFeatureType | null) {
     this.selectedFeatureType = type;
   }
 

@@ -1,21 +1,23 @@
 import { TileTypes } from './../constants/tiles.type';
+import { GeometryProp } from './../types/IMapData';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { FeatureProps } from '@/types/IMapData';
 import { AxiosError } from 'axios';
-import { toJS } from 'mobx';
+import { Feature } from 'geojson';
 import { errorStore } from '../store/error.store';
 import { ICategory } from '../types/ICategory';
-import { IMapData, Source } from '../types/IMapData';
-import { ICreatedMapFeature, IMapFeature } from '../types/IMapFeature';
-import { IMapFeatureType } from '../types/IMapFeatureType';
+import { IMapData, Source, CreateFeatureProps } from '../types/IMapData';
+import { IFeatureType } from '../types/IFeatureType';
 import { IMedia } from '../types/IMedia';
 import { authStore } from './../store/auth.store';
 import { axiosInstance, headers } from './index';
+
 export default class MapService {
   private static API_URL = '/map';
 
-  static async getFeatureTypes(): Promise<Array<IMapFeatureType>> {
+  static async getFeatureTypes(): Promise<Array<IFeatureType>> {
     try {
-      const { data } = await axiosInstance.get<Array<IMapFeatureType>>(`${this.API_URL}/feature/types`);
+      const { data } = await axiosInstance.get<Array<IFeatureType>>(`${this.API_URL}/feature/types`);
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);
@@ -25,7 +27,7 @@ export default class MapService {
 
   static async getCategories(): Promise<Array<ICategory>> {
     try {
-      const { data } = await axiosInstance.get<Array<IMapFeatureType>>(`${this.API_URL}/feature/categories`);
+      const { data } = await axiosInstance.get<Array<IFeatureType>>(`${this.API_URL}/feature/categories`);
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);
@@ -57,15 +59,12 @@ export default class MapService {
     }
   }
 
-  static async addFeature(feature: ICreatedMapFeature, files: File[]): Promise<IMapFeature> {
-    const body = { ...feature, type: feature.type.id, category: feature.category?.id, coordinates: toJS(feature.coordinates) };
-
+  static async addFeature(feature: Feature<GeometryProp, CreateFeatureProps>, files: File[]): Promise<Feature<GeometryProp, FeatureProps>> {
     try {
-      const { data } = await axiosInstance.post<IMapFeature>(`${this.API_URL}/feature`, body, { headers: headers() });
-      if (files.length > 0) {
-        await this.addMedia(data.id, files);
+      const { data } = await axiosInstance.post<Feature<GeometryProp, FeatureProps>>(`${this.API_URL}/feature`, feature, { headers: headers() });
+      if (files.length > 0 && data.properties.id) {
+        await this.addMedia(data.properties.id, files);
       }
-
       authStore.updateUserLvl();
 
       return data;
@@ -89,10 +88,9 @@ export default class MapService {
     }
   }
 
-  static async getMapFeature(id: string): Promise<IMapFeature> {
+  static async getMapFeature(id: string): Promise<Feature<GeometryProp, FeatureProps>> {
     try {
-      const { data } = await axiosInstance.get<IMapFeature>(`${this.API_URL}/feature/${id}`);
-      console.log(data);
+      const { data } = await axiosInstance.get<Feature<GeometryProp, FeatureProps>>(`${this.API_URL}/feature/${id}`);
       return data;
     } catch (e: AxiosError | unknown) {
       errorStore.errorHandle(e);
@@ -100,8 +98,8 @@ export default class MapService {
     }
   }
 
-  static async getNewestFeatures(amount: number): Promise<Array<IMapFeature>> {
-    const { data } = await axiosInstance.get<Array<IMapFeature>>(`${this.API_URL}/newest/${amount}`);
+  static async getNewestFeatures(amount: number): Promise<Array<Feature<GeometryProp, FeatureProps>>> {
+    const { data } = await axiosInstance.get<Array<Feature<GeometryProp, FeatureProps>>>(`${this.API_URL}/newest/${amount}`);
     return data;
   }
 }

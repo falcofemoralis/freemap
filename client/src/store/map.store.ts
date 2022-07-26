@@ -1,10 +1,10 @@
-import { Feature, FeatureCollection, Geometry } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { makeAutoObservable } from 'mobx';
 import MapConstant from '../constants/map.constant';
 import MapService from '../services/map.service';
 import { HashUtil } from '../utils/HashUtil';
-import { FeatureProps, IMapData } from './../types/IMapData';
-import { TileTypes } from '../constants/tiles.type';
+import { FeatureProps, GeometryProp, IMapData } from './../types/IMapData';
+import { CreateFeatureProps } from '../types/IMapData';
 
 class MapStore {
   mapData: IMapData;
@@ -32,7 +32,7 @@ class MapStore {
     return this.mapData;
   }
 
-  async toggleMapType(): Promise<MapConstant> {
+  toggleMapType(): MapConstant {
     if (mapStore.mapType == MapConstant.OSM) {
       mapStore.mapType = MapConstant.GOOGLE;
     } else {
@@ -43,15 +43,17 @@ class MapStore {
     return mapStore.mapType;
   }
 
-  async setSelectedFeatureId(featureId: string | null) {
+  setSelectedFeatureId(featureId: string | null) {
     this.selectedFeatureId = featureId;
     HashUtil.updateHash('selected', featureId);
   }
 
-  addFeature(sourceId: string, feature: Feature<Geometry, FeatureProps>): FeatureCollection<Geometry, FeatureProps> | null {
-    const source = this.mapData.sources.find(source => source.id == sourceId);
+  async addFeature(feature: Feature<GeometryProp, CreateFeatureProps>, files: File[]): Promise<FeatureCollection<GeometryProp, FeatureProps> | null> {
+    const addedFeature = await MapService.addFeature(feature, files);
+    const source = this.mapData.sources.find(source => source.id == addedFeature.properties.type.id);
+
     if (source) {
-      source.featureCollection.features.push(feature);
+      source.featureCollection.features.push(addedFeature);
       return source.featureCollection;
     }
 

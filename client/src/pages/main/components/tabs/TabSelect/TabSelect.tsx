@@ -1,28 +1,30 @@
-import { Comments } from '@/components/Comments/Comments';
 import { CustomDrawer } from '@/components/CustomDrawer/CustomDrawer';
+import { mapStore } from '@/store/map.store';
+import { observer } from 'mobx-react-lite';
+import { Comments } from '@/components/Comments/Comments';
 import { FileUpload } from '@/components/FileUpload/FileUpload';
 import { UserAvatar } from '@/components/UserAvatar/UserAvatar';
 import { FileType } from '@/constants/file.type';
 import MapService from '@/services/map.service';
 import { authStore } from '@/store/auth.store';
-import { mapStore } from '@/store/map.store';
-import { IMapFeature } from '@/types/IMapFeature';
+import { FeatureProps, GeometryProp } from '@/types/IMapData';
 import { IMedia } from '@/types/IMedia';
 import { getCenter, toText } from '@/utils/CoordinatesUtils';
-import { Logger } from '@/utils/Logger';
 import HomeIcon from '@mui/icons-material/Home';
 import LinkIcon from '@mui/icons-material/Link';
 import PhoneEnabledIcon from '@mui/icons-material/PhoneEnabled';
 import RoomIcon from '@mui/icons-material/Room';
-import { Button, CircularProgress, Divider, Tooltip, Typography } from '@mui/material';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import { observer } from 'mobx-react-lite';
-import React, { useEffect, useRef, useState } from 'react';
+import { CircularProgress, Divider, Typography, Box, Grid } from '@mui/material';
+import { Feature } from 'geojson';
+import React, { useEffect, useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import Viewer from 'react-viewer';
 import { ImageDecorator } from 'react-viewer/lib/ViewerProps';
+import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
+import './TabSelect.scss';
+import { IconField } from './components/IconField/IconField';
+import { Image } from './components/Image/Image';
+import { useTranslation } from 'react-i18next';
 
 export const TabSelect = observer(() => {
   const handleTabClose = () => mapStore.setSelectedFeatureId(null);
@@ -34,49 +36,19 @@ export const TabSelect = observer(() => {
   );
 });
 
-interface IconFieldProps {
-  icon: React.ReactNode;
-  text: string;
-}
-const IconifiedField: React.FC<IconFieldProps> = ({ icon, text }) => {
-  Logger.info('IconifiedField');
-
-  const [open, setOpen] = React.useState(false);
-
-  const copy = () => {
-    navigator.clipboard.writeText(text).then(() => setOpen(true));
-  };
-  return (
-    <Tooltip
-      PopperProps={{
-        disablePortal: true
-      }}
-      onClose={() => setOpen(false)}
-      open={open}
-      leaveDelay={500}
-      title='Copied!'
-    >
-      <Button onClick={copy} sx={{ display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'flex-start', pl: 3, pr: 3, pt: 1, pb: 1 }}>
-        {icon}
-        <Typography variant='body1' sx={{ ml: 3, wordBreak: 'break-all', textTransform: 'none', textAlign: 'start', color: 'black' }}>
-          {text}
-        </Typography>
-      </Button>
-    </Tooltip>
-  );
-};
-
 interface DrawerTabProps {
   featureId: string;
 }
 const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
-  Logger.info('TabSelectDrawer');
+  const { t } = useTranslation();
+  const [mapFeature, setMapFeature] = useState<Feature<GeometryProp, FeatureProps> | null>(null);
+  const [viewerOpen, setViewerOpen] = useState<boolean>(false);
+  const [activeImage, setActiveImage] = useState<number | undefined>();
 
-  const [mapFeature, setMapFeature] = React.useState<IMapFeature | null>(null);
-  const [viewerOpen, setViewerOpen] = React.useState<boolean>(false);
-  const [activeImage, setActiveImage] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
+  /**
+   * Init feature data
+   */
+  useEffect(() => {
     const fetchData = async () => {
       setMapFeature(await MapService.getMapFeature(featureId));
     };
@@ -84,6 +56,11 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
     fetchData();
   }, []);
 
+  /**
+   *
+   * @param files
+   * @returns
+   */
   const getViewerImages = (files?: IMedia[]): ImageDecorator[] => {
     const images: ImageDecorator[] = [];
     if (files) {
@@ -91,149 +68,121 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
         images.push({ src: file.name });
       }
     }
-    console.log(images);
-
     return images;
   };
 
+  /**
+   *
+   * @param img
+   */
   const openFullImage = (img: IMedia) => {
     setViewerOpen(!viewerOpen);
-    const ind = mapFeature?.files?.findIndex(el => el.name == img.name);
+    const ind = mapFeature?.properties?.files?.findIndex(el => el.name == img.name);
     setActiveImage(ind);
   };
 
+  /**
+   *
+   * @param files
+   */
   const handleSubmitMedia = (files: IMedia[]) => {
-    console.log('uploaded');
-    console.log(files);
-
     const mapFeatureTmp = mapFeature;
     if (mapFeatureTmp) {
-      mapFeatureTmp.files?.push(...files);
+      mapFeatureTmp.properties.files?.push(...files);
       setMapFeature(null);
       setMapFeature(mapFeatureTmp);
     }
   };
 
-  if (mapFeature) {
+  /**
+   * Show progress while feature data is fetching
+   */
+  if (!mapFeature) {
     return (
-      <Box>
-        <Carousel showThumbs={false} swipeable emulateTouch infiniteLoop showStatus={false}>
-          {mapFeature.files?.map(file => (
-            <div key={file.name} onClick={() => openFullImage(file)} style={{ cursor: 'pointer' }}>
-              <Image src={`${file.name}?type=${FileType.THUMBNAIL}`} style={{ height: '240px', objectFit: 'cover' }} />
-            </div>
-          ))}
-        </Carousel>
-        <Grid container spacing={2} sx={{ p: 3 }}>
-          <Grid item xs={12}>
-            <Box>
-              <Typography variant='caption' gutterBottom>
-                {mapFeature.type.name}
-                {mapFeature.category ? ` - ${mapFeature.category.name}` : ''}
-              </Typography>
-              <Typography variant='h5'>{mapFeature.name}</Typography>
-              <Typography variant='body2' gutterBottom>
-                {new Date(mapFeature.createdAt).toLocaleDateString()}
-              </Typography>
-              <Typography variant='body1' gutterBottom>
-                {mapFeature.description}
-              </Typography>
-              {/* <Typography variant='caption' gutterBottom>
-                2,517 комментариев
-              </Typography> */}
-              <Box sx={{ display: 'flex' }}>
-                <UserAvatar user={mapFeature.user} sx={{ mr: 1 }} type={FileType.THUMBNAIL} />
-                <Typography variant='h6' gutterBottom>
-                  {mapFeature.user.username}
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-        <Divider />
-        <Grid container spacing={1} sx={{ mt: 2, mb: 2 }}>
-          {mapFeature.address && (
-            <Grid item xs={12}>
-              <IconifiedField icon={<HomeIcon />} text={mapFeature.address} />
-            </Grid>
-          )}
-          {mapFeature.wiki && (
-            <Grid item xs={12}>
-              <IconifiedField icon={<LinkIcon />} text={mapFeature.wiki} />
-            </Grid>
-          )}
-          {mapFeature.phone && (
-            <Grid item xs={12}>
-              <IconifiedField icon={<PhoneEnabledIcon />} text={mapFeature.phone} />
-            </Grid>
-          )}
-          <Grid item xs={12}>
-            <IconifiedField icon={<RoomIcon />} text={toText(getCenter(mapFeature?.coordinates, mapFeature?.type.geometry))} />
-          </Grid>
-          {mapFeature.links?.map(link => (
-            <Grid item xs={12} key={link}>
-              <IconifiedField icon={<LinkIcon />} text={link} />
-            </Grid>
-          ))}
-        </Grid>
-        <Grid container spacing={2} sx={{ pl: 3, pr: 3, pb: 3 }}>
-          {authStore.isAuth && (
-            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <FileUpload isSubmit submitId={mapFeature.id} onSubmit={handleSubmitMedia} />
-            </Grid>
-          )}
-        </Grid>
-        <Divider />
-        <Grid container spacing={2} sx={{ p: 3 }}>
-          <Grid item xs={12}>
-            <Typography variant='h6'>Комментарии</Typography>
-            <Comments comments={mapFeature.comments} featureId={mapFeature.id} />
-          </Grid>
-        </Grid>
-        <Viewer zIndex={5000} activeIndex={activeImage} visible={viewerOpen} images={getViewerImages(mapFeature.files)} onClose={() => setViewerOpen(false)} />
-      </Box>
-    );
-  } else {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Box className='tabSelect__progress'>
         <CircularProgress />
       </Box>
     );
   }
-};
 
-const useImageLoaded = () => {
-  const [loaded, setLoaded] = useState(false);
-  const ref = useRef();
-
-  const onLoad = () => {
-    setLoaded(true);
-  };
-
-  useEffect(() => {
-    if (ref.current && (ref as any).current.complete) {
-      onLoad();
-    }
-  });
-
-  return [ref, loaded, onLoad];
-};
-
-interface ImageProps {
-  src: string;
-  style: any;
-}
-const Image: React.FC<ImageProps> = ({ src, style }) => {
-  const [ref, loaded, onLoad] = useImageLoaded();
+  const {
+    geometry,
+    properties: { id, name, files, createdAt, description, address, wiki, phone, links, comments, type, category, user }
+  } = mapFeature;
 
   return (
-    <div>
-      <img ref={ref as any} onLoad={onLoad as any} src={src} alt='' style={{ ...style, display: loaded ? 'block' : 'none' }} />
-      {!loaded && (
-        <div style={{ height: style.height, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <CircularProgress />
-        </div>
-      )}
-    </div>
+    <Box>
+      <Carousel showThumbs={false} swipeable emulateTouch infiniteLoop showStatus={false}>
+        {files?.map(file => (
+          <div className='gallery__item' key={file.name} onClick={() => openFullImage(file)}>
+            <Image className='gallery__image' src={`${file.name}?type=${FileType.THUMBNAIL}`} />
+          </div>
+        ))}
+      </Carousel>
+      <Grid container spacing={2} sx={{ p: 3 }}>
+        <Grid item xs={12}>
+          <Box>
+            <Typography variant='caption' gutterBottom>
+              {type.name}
+              {category ? ` - ${category.name}` : ''}
+            </Typography>
+            <Typography variant='h5'>{name}</Typography>
+            <Typography variant='body2' gutterBottom>
+              {new Date(createdAt).toLocaleDateString()}
+            </Typography>
+            <Typography variant='body1' gutterBottom>
+              {description}
+            </Typography>
+            <Box sx={{ display: 'flex' }}>
+              <UserAvatar user={user} sx={{ mr: 1 }} type={FileType.THUMBNAIL} />
+              <Typography variant='h6' gutterBottom>
+                {user.username}
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+      <Divider />
+      <Grid container spacing={1} sx={{ mt: 2, mb: 2 }}>
+        {address && (
+          <Grid item xs={12}>
+            <IconField icon={<HomeIcon />} text={address} />
+          </Grid>
+        )}
+        {wiki && (
+          <Grid item xs={12}>
+            <IconField icon={<LinkIcon />} text={wiki} />
+          </Grid>
+        )}
+        {phone && (
+          <Grid item xs={12}>
+            <IconField icon={<PhoneEnabledIcon />} text={phone} />
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <IconField icon={<RoomIcon />} text={toText(getCenter(geometry.coordinates, geometry.type))} />
+        </Grid>
+        {links?.map(link => (
+          <Grid item xs={12} key={link}>
+            <IconField icon={<LinkIcon />} text={link} />
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={2} sx={{ pl: 3, pr: 3, pb: 3 }}>
+        {authStore.isAuth && (
+          <Grid className='tabSelect__fileUpload' item xs={12}>
+            <FileUpload isSubmit submitId={id} onSubmit={handleSubmitMedia} />
+          </Grid>
+        )}
+      </Grid>
+      <Divider />
+      <Grid container spacing={2} sx={{ p: 3 }}>
+        <Grid item xs={12}>
+          <Typography variant='h6'>{t('COMMENTS')}</Typography>
+          <Comments comments={comments} featureId={id} />
+        </Grid>
+      </Grid>
+      <Viewer zIndex={5000} activeIndex={activeImage} visible={viewerOpen} images={getViewerImages(files)} onClose={() => setViewerOpen(false)} />
+    </Box>
   );
 };

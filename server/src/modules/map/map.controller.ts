@@ -18,8 +18,8 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Feature, FeatureCollection, Polygon } from 'geojson';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
-import { TileTypes } from '../../libs/wikimapia.api';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WikimapiaApi } from './../../libs/wikimapia.api';
 import { UserPayload } from './../auth/guards/jwt-auth.guard';
@@ -27,17 +27,16 @@ import { FilesService } from './../files/files.service';
 import { FileOptionsQuery } from './../files/query/media.query';
 import { UsersService } from './../users/users.service';
 import { CategoryDto } from './dto/category.dto';
-import { CreateFeatureDataDto } from './dto/create-feature.dto';
+import { CreateFeaturePropsDto } from './dto/create-feature.dto';
 import { Category } from './entities/category.entity';
 import { FeatureType } from './entities/feature-type.entity';
-import { MapFeature, Position } from './entities/map-feature.entity';
+import { MapFeature, MapFeatureProps } from './entities/map-feature.entity';
 import { MapFeatureGuard } from './guards/map-feature.guard';
 import MediaInterceptor, { MediaType } from './interceptors/media.interceptor';
 import { MapService } from './map.service';
 import { AreaQuery } from './query/area.query';
 import { WikimapiaQuery } from './query/wikimapia.query';
-import { FeatureCollection } from './types/feature-collection';
-import { LayerSource, MapData, Source } from './types/map-data';
+import { GeometryProp, LayerSource, MapData, Source } from './types/map-data';
 import { Media } from './types/media';
 import { LayerUtil } from './utils/layer.util';
 
@@ -60,7 +59,6 @@ export class MapController {
     const types = await this.mapService.getFeatureTypes();
     const layers: LayerSource[] = [];
     const sources: Source[] = [];
-    let generatedId = 1;
 
     for (const type of types) {
       for (const layer of type.layers) {
@@ -68,27 +66,12 @@ export class MapController {
         layers.push({ ...layer, id: type.id + layer.id, source: type.id });
       }
 
-      const featureCollection: FeatureCollection = {
+      const featureCollection: FeatureCollection<GeometryProp, MapFeatureProps> = {
         type: 'FeatureCollection',
         features: [],
       };
 
-      mapFeatures
-        .filter((feature) => feature.type.id == type.id)
-        .forEach((feature) => {
-          const { id, name, createdAt, category, type, coordinates } = feature;
-
-          featureCollection.features.push({
-            type: 'Feature',
-            properties: { id, name, createdAt, category },
-            geometry: {
-              type: type.geometry,
-              coordinates,
-            },
-            id: ++generatedId,
-          });
-        });
-
+      featureCollection.features.push(...mapFeatures.filter((feature) => feature.properties.type.id == type.id));
       if (featureCollection.features.length > 0) {
         sources.push({ id: type.id, featureCollection });
       }
@@ -107,7 +90,7 @@ export class MapController {
   async getWikimapiaData(@Query() wikimapiaQuery: WikimapiaQuery) {
     const types = await this.mapService.getFeatureTypes();
     const type = types.find((t) => t.name == 'Wikimapia');
-    const featureCollection: FeatureCollection = {
+    const featureCollection: FeatureCollection<GeometryProp, Partial<MapFeatureProps>> = {
       type: 'FeatureCollection',
       features: [],
     };
@@ -142,26 +125,25 @@ export class MapController {
       const wikimapiaData = WikimapiaApi.parse(data);
 
       for (const feature of wikimapiaData.features) {
-        const coordinates: Position[][] = [[]];
+        const geometry: Polygon = {
+          type: 'Polygon',
+          coordinates: [],
+        };
         for (const p of feature.polygon) {
-          coordinates[0].push([p.lng, p.lat]);
+          geometry.coordinates[0].push([p.lng, p.lat]);
         }
         const lastPoint = feature.polygon[0];
-        coordinates[0].push([lastPoint.lng, lastPoint.lat]);
+        geometry.coordinates[0].push([lastPoint.lng, lastPoint.lat]);
 
         featureCollection.features.push({
           type: 'Feature',
-          id: feature.id,
+          id: feature.id.toString(),
           properties: {
-            id: feature.id.toString(),
+            name: feature.titles['1'],
             category: { id: '6202777bb6932aed50883e35', name: '0' },
             createdAt: 1657808119920,
-            name: feature.titles['1'],
           },
-          geometry: {
-            type: wikimapiaQuery.type == TileTypes.OBJECTS ? 'Polygon' : 'Line',
-            coordinates,
-          },
+          geometry,
         });
       }
     }
@@ -174,10 +156,12 @@ export class MapController {
   @ApiResponse({ status: 201, type: MapFeature, description: 'Объект карты' })
   @UseGuards(JwtAuthGuard)
   @Post('feature')
-  async addMapFeature(@Body() featureDto: CreateFeatureDataDto, @Request() req): Promise<MapFeature> {
+  async addMapFeature(@Body() featureDto: Feature<GeometryProp, CreateFeaturePropsDto>, @Request() req): Promise<MapFeature> {
     try {
       const userId = (req.user as UserPayload).id;
       const insertedFeature = await this.mapService.addMapFeature(featureDto, userId);
+      console.log(insertedFeature);
+
       await this.usersService.addUserExperience(userId, 1000);
       return insertedFeature;
     } catch (e) {
@@ -259,7 +243,7 @@ export class MapController {
   @ApiResponse({ status: 200, type: MapFeature, description: 'Объект карты' })
   @UseGuards(MapFeatureGuard)
   @Get('feature/:id')
-  async getMapFeature(@Param('id') id: string): Promise<MapFeature> {
+  async getMapFeature(@Param('id') id: string): Promise<Feature<GeometryProp, MapFeatureProps>> {
     if (!id) {
       throw new BadRequestException();
     }
@@ -271,7 +255,7 @@ export class MapController {
     }
 
     try {
-      mapFeature.user.passwordHash = undefined;
+      mapFeature.properties.user.passwordHash = undefined;
       return mapFeature;
     } catch (e) {
       throw new InternalServerErrorException(e);

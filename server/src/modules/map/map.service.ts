@@ -1,13 +1,15 @@
-import { CategoryDto } from './dto/category.dto';
-import { Category, CategoryDocument } from './entities/category.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateFeatureDataDto } from './dto/create-feature.dto';
+import { Feature } from 'geojson';
+import { isValidObjectId, Model } from 'mongoose';
+import { CategoryDto } from './dto/category.dto';
+import { CreateFeaturePropsDto } from './dto/create-feature.dto';
 import { FeatureTypeDto } from './dto/feature-type.dto';
+import { Category, CategoryDocument } from './entities/category.entity';
 import { FeatureType, FeatureTypeDocument } from './entities/feature-type.entity';
 import { MapFeature, MapFeatureDocument } from './entities/map-feature.entity';
 import { AreaQuery } from './query/area.query';
+import { GeometryProp } from './types/map-data';
 import { Media } from './types/media';
 
 @Injectable()
@@ -33,7 +35,11 @@ export class MapService {
 
     // //      zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
     // return this.mapFeatureModel.find(filter);
-    return this.mapFeatureModel.find();
+    return this.mapFeatureModel
+      .find()
+      .populate({ path: 'properties', populate: { path: 'type', model: FeatureType } })
+      .populate({ path: 'properties', populate: { path: 'category', model: Category } })
+      .exec();
   }
 
   /**
@@ -41,11 +47,13 @@ export class MapService {
    * @param {MapFeature} mapFeature - данные про объект на карте
    * @returns {MapFeature} - добавленный объект
    */
-  async addMapFeature(mapFeatureDto: CreateFeatureDataDto, userId: string): Promise<MapFeature> {
-    console.log(mapFeatureDto);
+  async addMapFeature(mapFeatureDto: Feature<GeometryProp, CreateFeaturePropsDto>, userId: string): Promise<MapFeature> {
+    const mapFeature = new this.mapFeatureModel({
+      ...mapFeatureDto,
+      properties: { ...mapFeatureDto.properties, user: userId, createdAt: Date.now() },
+    });
 
-    const mapFeature = new this.mapFeatureModel({ ...mapFeatureDto, user: userId, createdAt: Date.now() });
-    return (await mapFeature.save()).populate({ path: 'type' });
+    return await mapFeature.save();
   }
 
   /**

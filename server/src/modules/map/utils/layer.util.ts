@@ -1,4 +1,4 @@
-import { Layer } from '../types/layer';
+import { Layer } from '../types/map-data';
 
 export class LayerUtil {
   static formatZoom(layer: Layer) {
@@ -6,13 +6,14 @@ export class LayerUtil {
       let jsonPaint = JSON.stringify(layer.paint);
       const minz = layer.minzoom;
       const maxz = layer.maxzoom;
+
       jsonPaint = jsonPaint
-        .replaceAll(`\"$minz\"`, minz.toString())
-        .replaceAll(`\"$minz+1\"`, (minz + 1).toString())
-        .replaceAll(`\"$minz-1\"`, (minz - 1).toString())
-        .replaceAll(`\"$maxz\"`, maxz.toString())
-        .replaceAll(`\"$maxz+1\"`, (maxz + 1).toString())
-        .replaceAll(`\"$maxz-1\"`, (maxz - 1).toString());
+        .replace(/\"$minz\"/g, minz.toString())
+        .replace(/\"$minz+1\"/g, (minz + 1).toString())
+        .replace(/\"$minz-1\"/g, (minz - 1).toString())
+        .replace(/\"$maxz\"/g, maxz.toString())
+        .replace(/\"$maxz+1\"/g, (maxz + 1).toString())
+        .replace(/\"$maxz-1\"/g, (maxz - 1).toString());
 
       layer.paint = JSON.parse(jsonPaint);
     }

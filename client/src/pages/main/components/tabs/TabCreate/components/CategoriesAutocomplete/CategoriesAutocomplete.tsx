@@ -1,9 +1,9 @@
-import { editorStore } from '@/store/editor.store';
 import { ICategory } from '@/types/ICategory';
 import { Autocomplete, Box, TextField } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import MapService from '../../../../../../../services/map.service';
 
 interface CategoriesAutocompleteProps {
   errorText: string;
@@ -12,13 +12,15 @@ interface CategoriesAutocompleteProps {
 export const CategoriesAutocomplete: React.FC<CategoriesAutocompleteProps> = observer(({ errorText, onChange }) => {
   const { t } = useTranslation();
 
-  if (!editorStore.categories) {
-    editorStore.getCategories();
+  const [categories, setCategories] = useState<ICategory[] | null>(null);
+
+  if (!categories) {
+    MapService.getCategories().then(categories => setCategories(categories));
   }
 
   return (
     <Autocomplete
-      options={editorStore.categories ?? []}
+      options={categories ?? []}
       autoHighlight
       getOptionLabel={type => type.name}
       onChange={(event, value) => value && onChange(value)}
