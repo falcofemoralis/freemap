@@ -19,8 +19,9 @@ export class CreateFeaturePropsDto {
   name: string;
 
   @ApiProperty({ example: 'Lorem Ipsum Dolor', description: 'Описание' })
+  @IsOptional()
   @MaxLength(1200)
-  description: string;
+  description?: string;
 
   @ApiProperty({ example: 'qwerty', description: 'Адрес' })
   @IsOptional()

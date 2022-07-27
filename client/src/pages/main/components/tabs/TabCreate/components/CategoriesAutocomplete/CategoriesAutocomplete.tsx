@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import MapService from '../../../../../../../services/map.service';
 
 interface CategoriesAutocompleteProps {
-  errorText: string;
+  errorText?: string;
   onChange: (type: ICategory) => void;
 }
 export const CategoriesAutocomplete: React.FC<CategoriesAutocompleteProps> = observer(({ errorText, onChange }) => {

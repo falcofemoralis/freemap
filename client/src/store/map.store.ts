@@ -50,8 +50,8 @@ class MapStore {
 
   async addFeature(feature: Feature<GeometryProp, CreateFeatureProps>, files: File[]): Promise<FeatureCollection<GeometryProp, FeatureProps> | null> {
     const addedFeature = await MapService.addFeature(feature, files);
-    const source = this.mapData.sources.find(source => source.id == addedFeature.properties.type.id);
 
+    const source = this.mapData.sources.find(source => source.id == addedFeature.properties.type.id);
     if (source) {
       source.featureCollection.features.push(addedFeature);
       return source.featureCollection;

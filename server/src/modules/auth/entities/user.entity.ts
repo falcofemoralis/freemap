@@ -47,9 +47,9 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.virtual('id').get(function (this: UserDocument) {
-  return this._id.toHexString();
-});
+// UserSchema.virtual('id').get(function (this: UserDocument) {
+//   return this._id.toHexString();
+// });
 
 UserSchema.set('toJSON', {
   virtuals: true,

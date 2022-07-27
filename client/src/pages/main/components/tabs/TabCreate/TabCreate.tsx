@@ -36,17 +36,17 @@ interface ErrorData {
   type: string;
 }
 interface TabCreateProps {
+  open: boolean;
   onSubmit: () => void;
   onClose: () => void;
 }
-export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose }) => {
+export const TabCreate: React.FC<TabCreateProps> = observer(({ open, onSubmit, onClose }) => {
   const { t } = useTranslation();
   const { mainMap } = useContext(MapContext);
 
   const [isLoading, setLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [links, setLinks] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState<IFeatureType | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<ICategory>();
   const [errorData, setErrorData] = useState<ErrorData>({ coordinates: '', type: '' });
 
@@ -58,14 +58,13 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   } = useForm<FormData>();
 
   const nameForm = { required: t('NAME_REQUIRED') };
-  const descriptionForm = { required: t('DESCRIPTION_REQUIRED') };
 
   /**
    * Send created object to the server
    */
   const handleOnSubmit = handleSubmit(async data => {
-    if (!editorStore.selectedFeatureType || !selectedType) {
-      setErrorData({ ...errorData, type: t('CATEGORY_REQUIRED') });
+    if (!editorStore.selectedFeatureType) {
+      setErrorData({ ...errorData, type: t('TYPE_REQUIRED') });
       return;
     }
 
@@ -79,16 +78,14 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
     try {
       const createdFeature: Feature<GeometryProp, CreateFeatureProps> = {
         type: 'Feature',
-        properties: { type: selectedType.id, category: selectedCategory?.id, links, ...data },
+        properties: { type: editorStore.selectedFeatureType.id, category: selectedCategory?.id, links, ...data },
         geometry: toJS(editorStore.createdGeometry),
         id: new Date().getTime()
       };
 
-      console.log(createdFeature);
-
       const collection = await mapStore.addFeature(createdFeature, files);
       if (collection) {
-        (mainMap?.getSource(selectedType.id) as GeoJSONSource).setData(collection);
+        (mainMap?.getSource(editorStore.selectedFeatureType.id) as GeoJSONSource).setData(collection);
       }
 
       reset();
@@ -106,7 +103,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   const resetData = () => {
     setFiles([]);
     setLinks([]);
-    setSelectedType(null);
+    editorStore.setSelectedFeatureType(null);
     setLoading(false);
     setSelectedCategory(undefined);
   };
@@ -115,8 +112,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
    * Handle drawer close
    */
   const handleClose = () => {
-    reset();
-    resetData();
+    //reset();
+    //resetData();
     onClose();
   };
 
@@ -129,12 +126,12 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
   };
 
   const handleFilesChange = (data: File[]) => setFiles(data);
-  const handleFeatureTypeSelect = (type: IFeatureType | null) => setSelectedType(type);
+  const handleFeatureTypeSelect = (type: IFeatureType | null) => editorStore.setSelectedFeatureType(type);
   const handleLinksChange = (links: string[]) => setLinks(links);
   const handleCategorySelect = (category: ICategory) => setSelectedCategory(category);
 
   return (
-    <CustomDrawer open={editorStore.isFeature} onClose={handleClose}>
+    <CustomDrawer open={open} onClose={handleClose}>
       <Box component='form' onSubmit={handleOnSubmit} noValidate>
         <Grid container spacing={2}>
           <Grid className='tabCreate__item' item xs={12}>
@@ -164,16 +161,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              multiline
-              error={!!errors.description}
-              helperText={errors.description?.message ?? ''}
-              required
-              fullWidth
-              id='description'
-              label={t('DESCRIPTION')}
-              {...register('description', descriptionForm)}
-            />
+            <TextField multiline fullWidth id='description' label={t('DESCRIPTION')} {...register('description')} />
           </Grid>
           <Grid item xs={12}>
             <FeatureTypesAutocomplete
@@ -181,11 +169,11 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ onSubmit, onClose
               helperText={errorData.type}
               onChange={handleFeatureTypeSelect}
               drawMode={editorStore.drawMode}
-              featureType={editorStore.selectedFeatureType}
+              defaultValue={editorStore.selectedFeatureType}
             />
           </Grid>
           <Grid item xs={12}>
-            <CategoriesAutocomplete errorText={errorData.type} onChange={handleCategorySelect} />
+            <CategoriesAutocomplete onChange={handleCategorySelect} />
           </Grid>
           <Grid item xs={12}>
             <TextField

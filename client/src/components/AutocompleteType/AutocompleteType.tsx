@@ -12,11 +12,11 @@ interface FeatureTypesAutocompleteProps {
   helperText?: string;
   onChange: (type: IFeatureType | null) => void;
   drawMode: GeometryConstant | string | undefined | null;
-  featureType?: IFeatureType | undefined | null;
+  defaultValue?: IFeatureType | undefined | null;
   sx?: SxProps<Theme> | undefined;
 }
 export const FeatureTypesAutocomplete: React.FC<FeatureTypesAutocompleteProps> = observer(
-  ({ className, error, helperText, onChange, drawMode, featureType, sx }) => {
+  ({ className, error, helperText, onChange, drawMode, defaultValue, sx }) => {
     const { t } = useTranslation();
     const [featureTypes, setFeatureTypes] = useState<IFeatureType[] | null>(null);
 
@@ -25,8 +25,8 @@ export const FeatureTypesAutocomplete: React.FC<FeatureTypesAutocompleteProps> =
     }
 
     const getDefaultValue = () => {
-      if (featureType) {
-        return featureType;
+      if (defaultValue) {
+        return defaultValue;
       }
 
       return null;

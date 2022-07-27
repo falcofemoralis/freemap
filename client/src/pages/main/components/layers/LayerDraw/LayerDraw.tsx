@@ -8,12 +8,18 @@ import CheckIcon from '@mui/icons-material/Check';
 import { Box, IconButton } from '@mui/material';
 import { LineString, Polygon, Position } from 'geojson';
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 interface LayerDrawProps {
   onCancel: () => void;
+  onComplete: () => void;
 }
-export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onCancel }) => {
+export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onCancel, onComplete }) => {
+  console.log('LayerDraw');
+
   const { mainMap } = useContext(MapContext);
   const [draw, setDraw] = useState<MapboxDraw | null>(null);
 
@@ -44,17 +50,42 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onCancel }) => {
       const coordinates: Position[][] = [];
 
       for (const feature of features) {
-        coordinates.push((feature.geometry as LineString).coordinates);
+        const lineCoordinates = (feature.geometry as LineString).coordinates;
+        lineCoordinates.pop();
+        coordinates.push(lineCoordinates);
       }
 
       editorStore.setCreatedGeometry({ type: GeometryConstant.MULTI_LINE_STRING, coordinates });
     }
+
+    onComplete();
   };
+
+  /**
+   * Init key listener
+   */
+  useEffect(() => {
+    const escapeListener = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onCancel();
+      } else if (event.key === 'p') {
+        draw?.changeMode('draw_polygon');
+      }
+    };
+    window.addEventListener('keyup', escapeListener);
+
+    return () => {
+      if (draw) {
+        mainMap?.removeControl(draw);
+      }
+      window.removeEventListener('keyup', escapeListener);
+    };
+  }, [draw]);
 
   /**
    * Init draw object if drawing is active
    */
-  if (editorStore.isDrawing && !draw) {
+  if (!draw) {
     let isLine = false;
     let isPolygon = false;
     let mode;
@@ -87,39 +118,23 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onCancel }) => {
     });
     mainMap?.addControl(mapboxDraw, 'bottom-right');
 
-    const escapeListener = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onCancel();
-        setDraw(null);
-        mainMap?.removeControl(mapboxDraw);
-        window.removeEventListener('keyup', escapeListener);
-      } else if (event.key === 'p') {
-        mapboxDraw.changeMode('draw_polygon');
-      }
-    };
-    window.addEventListener('keyup', escapeListener);
-
     setDraw(mapboxDraw);
-  } else if (!editorStore.isDrawing && draw) {
-    mainMap?.removeControl(draw);
-    setDraw(null);
   }
 
-  if (editorStore.isDrawing) {
-    return (
-      <Box>
-        {/* <IconButton className='editorBtn' size='large' onClick={undo}>
+  return (
+    <Box>
+      <IconButton className='editorBtn' size='large' onClick={onCancel}>
+        <HighlightOffIcon />
+      </IconButton>
+      <IconButton className='editorBtn' size='large' onClick={() => console.log('undo')}>
         <UndoIcon />
       </IconButton>
-      <IconButton className='editorBtn' size='large' onClick={redo}>
+      <IconButton className='editorBtn' size='large' onClick={() => console.log('redo')}>
         <RedoIcon />
-      </IconButton> */}
-        <IconButton className='editorBtn' size='large' onClick={onCompleteDrawing}>
-          <CheckIcon />
-        </IconButton>
-      </Box>
-    );
-  } else {
-    return null;
-  }
+      </IconButton>
+      <IconButton className='editorBtn' size='large' onClick={onCompleteDrawing}>
+        <CheckIcon />
+      </IconButton>
+    </Box>
+  );
 });

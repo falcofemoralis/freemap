@@ -105,9 +105,11 @@ export const MapFeatureSchema = SchemaFactory.createForClass(MapFeature);
 MapFeatureSchema.set('toJSON', {
   virtuals: true,
   transform: (doc, ret) => {
+    ret.properties.id = ret._id;
     delete ret._id;
     delete ret.__v;
-    ret.files?.map((file) => {
+
+    ret.properties.files?.map((file) => {
       file.name = `${process.env.DOMAIN}/api/map/feature/media/${file.name}`;
       return file;
     });

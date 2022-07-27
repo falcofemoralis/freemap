@@ -13,7 +13,7 @@ export interface CreateFeatureProps {
   type: string;
   category?: string;
   name: string;
-  description: string;
+  description?: string;
   address?: string;
   links?: string[];
   phone?: string;

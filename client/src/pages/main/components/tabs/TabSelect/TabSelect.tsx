@@ -182,6 +182,7 @@ const TabSelectDrawer: React.FC<DrawerTabProps> = ({ featureId }) => {
           <Comments comments={comments} featureId={id} />
         </Grid>
       </Grid>
+
       <Viewer zIndex={5000} activeIndex={activeImage} visible={viewerOpen} images={getViewerImages(files)} onClose={() => setViewerOpen(false)} />
     </Box>
   );

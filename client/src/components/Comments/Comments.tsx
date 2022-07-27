@@ -10,7 +10,7 @@ interface CommentsProps {
   featureId: string;
 }
 export const Comments: React.FC<CommentsProps> = ({ comments, featureId }) => {
-  const sortedComment = comments.sort((el1, el2) => el2.createdAt - el1.createdAt);
+  const sortedComment = (comments ?? []).sort((el1, el2) => el2.createdAt - el1.createdAt);
   const allComments: IComment[] = [];
 
   const getReplies = (replies: IComment[], indent: number) => {

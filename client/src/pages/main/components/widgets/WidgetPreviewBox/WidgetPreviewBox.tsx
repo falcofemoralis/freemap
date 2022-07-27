@@ -1,3 +1,4 @@
+import MapConstant from '@/constants/map.constant';
 import { MapContext } from '@/MapContext';
 import { mapStore } from '@/store/map.store';
 import { Paper } from '@mui/material';
@@ -22,7 +23,7 @@ export const WidgetPreviewBox = () => {
 
     const previewMapboxMap = new mapboxgl.Map({
       container: node,
-      style: mapStore.mapType as string,
+      style: (mapStore.mapType == MapConstant.OSM ? MapConstant.GOOGLE : MapConstant.OSM) as string,
       center: mainMap?.getCenter(),
       zoom: mainMap?.getZoom()
     });
@@ -50,17 +51,18 @@ export const WidgetPreviewBox = () => {
    * Change current type of preview map
    */
   const changeMapType = async () => {
-    const mapType = (await mapStore.toggleMapType()) as string;
+    const mapType = mapStore.toggleMapType();
 
-    mainMap?.setStyle(mapType);
-    previewMap?.setStyle(mapType);
+    mainMap?.setStyle(mapType as string);
+    previewMap?.setStyle((mapType == MapConstant.OSM ? MapConstant.GOOGLE : MapConstant.OSM) as string);
 
     // readd map features
     mainMap?.once('styledata', () => {
       for (const source of mapStore.mapData.sources) {
         mainMap?.addSource(source.id, {
           type: 'geojson',
-          data: source.featureCollection
+          data: source.featureCollection,
+          promoteId: 'id'
         });
       }
 

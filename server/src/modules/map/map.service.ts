@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Feature } from 'geojson';
-import { isValidObjectId, Model } from 'mongoose';
+import { Model } from 'mongoose';
+import { User } from '../auth/entities/user.entity';
+import { UserComment } from '../comments/entities/user-comment';
 import { CategoryDto } from './dto/category.dto';
 import { CreateFeaturePropsDto } from './dto/create-feature.dto';
 import { FeatureTypeDto } from './dto/feature-type.dto';
@@ -35,11 +37,14 @@ export class MapService {
 
     // //      zoom: { $gte: areaQuery.zoom - 3, $lte: areaQuery.zoom + 3 },
     // return this.mapFeatureModel.find(filter);
-    return this.mapFeatureModel
-      .find()
-      .populate({ path: 'properties', populate: { path: 'type', model: FeatureType } })
-      .populate({ path: 'properties', populate: { path: 'category', model: Category } })
-      .exec();
+    return this.mapFeatureModel.find().populate({
+      path: 'properties',
+      populate: [
+        { path: 'type', model: FeatureType, select: 'id' },
+        { path: 'category', model: Category, select: 'id' },
+        { path: 'user', model: User, select: 'id' },
+      ],
+    });
   }
 
   /**
@@ -53,7 +58,15 @@ export class MapService {
       properties: { ...mapFeatureDto.properties, user: userId, createdAt: Date.now() },
     });
 
-    return await mapFeature.save();
+    await mapFeature.save();
+    return mapFeature.populate({
+      path: 'properties',
+      populate: [
+        { path: 'type', model: 'FeatureType', select: 'id' },
+        { path: 'category', model: 'Category', select: 'id' },
+        { path: 'user', model: 'User', select: 'id' },
+      ],
+    });
   }
 
   /**
@@ -68,7 +81,7 @@ export class MapService {
     for (const file of files) {
       mediaFiles.push({ name: file, createdAt: Date.now(), createdBy: userId });
     }
-    await this.mapFeatureModel.findOneAndUpdate({ _id: id }, { $push: { files: { $each: mediaFiles } } }, { new: true });
+    await this.mapFeatureModel.findOneAndUpdate({ _id: id }, { $push: { 'properties.files': { $each: mediaFiles } } }, { new: true });
     return mediaFiles.map((file) => {
       file.name = `${process.env.DOMAIN}/api/map/feature/media/${file.name}`;
       return file;
@@ -80,14 +93,29 @@ export class MapService {
    * @param id - id объекта
    */
   async getMapFeatureById(id: string): Promise<MapFeature> {
-    return this.mapFeatureModel.findById(id);
+    return this.mapFeatureModel.findById(id).populate({
+      path: 'properties',
+      populate: [
+        { path: 'type', model: FeatureType, select: 'id' },
+        { path: 'category', model: Category, select: 'id name icon' },
+        { path: 'user', model: User, select: '-email -isMailing' },
+        { path: 'comments', model: UserComment },
+      ],
+    });
+  }
+
+  /**
+   * Получение всех слоев типа объекта
+   */
+  async getFeatureTypesLayers(): Promise<Array<FeatureType>> {
+    return this.featureTypeModel.find();
   }
 
   /**
    * Получение всех типов объекта
    */
   async getFeatureTypes(): Promise<Array<FeatureType>> {
-    return this.featureTypeModel.find();
+    return this.featureTypeModel.find().select('-layers');
   }
 
   /**
@@ -119,6 +147,17 @@ export class MapService {
    * @returns {MapFeature} - последние amount добавленных объектов
    */
   async getNewestFeatures(amount: number): Promise<Array<MapFeature>> {
-    return this.mapFeatureModel.find().sort({ _id: -1 }).limit(amount);
+    return this.mapFeatureModel
+      .find()
+      .sort({ _id: -1 })
+      .limit(amount)
+      .populate({
+        path: 'properties',
+        populate: [
+          { path: 'type', model: FeatureType },
+          { path: 'category', model: Category, select: 'id name icon' },
+          { path: 'user', model: User, select: '-email -isMailing' },
+        ],
+      });
   }
 }

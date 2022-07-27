@@ -22,47 +22,25 @@ export const LayerData = () => {
       for (const source of mapData.sources) {
         mainMap.addSource(source.id, {
           type: 'geojson',
-          data: source.featureCollection
+          data: source.featureCollection,
+          promoteId: 'id'
         });
       }
 
       for (const layer of mapData.layers) {
-        mainMap.addLayer(layer as mapboxgl.AnyLayer);
+        if (mapData.sources.find(s => s.id == layer.source)) {
+          mainMap.addLayer(layer as mapboxgl.AnyLayer);
+        }
 
         if (layer.id.includes('label')) {
           continue;
         }
 
-        /*
-          mapboxMap.on('mousemove', layer.id, e => {
-            if (editorStore.isDrawing) {
-              return;
-            }
-  
-            if (e && e.features && e.features.length > 0) {
-              let i = 0;
-              let feature = e.features[i];
-  
-              while (!isPolygonWithBoundary(feature)) {
-                i++;
-                if (i >= e.features.length) {
-                  return;
-                }
-                feature = e.features[i];
-              }
-  
-              hoverFeature(feature, layer);
-            }
-          });
-  
-          mapboxMap.on('mouseleave', layer.id, () => {
-            unHoverFeature(layer);
-          });
-          */
-
         mainMap.on('click', layer.id, e => {
           if (editorStore.isDrawing) return;
           if (e && e.features && e.features.length > 0) {
+            console.log(e.features);
+
             mapStore.setSelectedFeatureId((e.features[0].properties as FeatureProps).id);
           }
         });

@@ -56,7 +56,7 @@ export class MapController {
   @Get()
   async getMapData(@Query() areaQuery: AreaQuery): Promise<MapData> {
     const mapFeatures = await this.mapService.getAllMapFeatures(areaQuery);
-    const types = await this.mapService.getFeatureTypes();
+    const types = await this.mapService.getFeatureTypesLayers();
     const layers: LayerSource[] = [];
     const sources: Source[] = [];
 
@@ -88,7 +88,7 @@ export class MapController {
   @ApiResponse({ status: 200, type: [MapData], description: 'Массив фич' })
   @Get('wikimapia')
   async getWikimapiaData(@Query() wikimapiaQuery: WikimapiaQuery) {
-    const types = await this.mapService.getFeatureTypes();
+    const types = await this.mapService.getFeatureTypesLayers();
     const type = types.find((t) => t.name == 'Wikimapia');
     const featureCollection: FeatureCollection<GeometryProp, Partial<MapFeatureProps>> = {
       type: 'FeatureCollection',
