@@ -122,7 +122,7 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ open, onSubmit, o
    */
   const getCoordinatesAsText = () => {
     const geometry = toJS(editorStore.createdGeometry);
-    return editorStore.isFeature && toText(getCenter(geometry?.coordinates, geometry?.type));
+    return geometry && toText(getCenter(geometry?.coordinates, geometry?.type));
   };
 
   const handleFilesChange = (data: File[]) => setFiles(data);

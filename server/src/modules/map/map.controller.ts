@@ -120,15 +120,46 @@ export class MapController {
       );
     }
 
+    // const timer = (time) => new Promise((res) => setTimeout(res, time));
+
+    // await requests[0];
+    // console.log('1');
+
+    // await timer(2000);
+
+    // await requests[1];
+    // console.log('2');
+
+    // await timer(9000);
+
+    // await requests[2];
+    // console.log('3');
+
+    // await timer(9000);
+
+    // await requests[3];
+    // console.log('4');
+
+    // console.log('all');
+
     const responses = await Promise.all([...requests]);
+    // Promise.all(requests).then(
+    //   this.httpService.axiosRef.spr axios.spread((...allData) => {
+    //     console.log({ allData });
+    //   })
+    // );
+
     for (const { data } of responses) {
       const wikimapiaData = WikimapiaApi.parse(data);
+      console.log(wikimapiaData);
 
       for (const feature of wikimapiaData.features) {
         const geometry: Polygon = {
           type: 'Polygon',
-          coordinates: [],
+          coordinates: [[]],
         };
+        console.log(geometry);
+
         for (const p of feature.polygon) {
           geometry.coordinates[0].push([p.lng, p.lat]);
         }

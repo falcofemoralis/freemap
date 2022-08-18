@@ -57,6 +57,12 @@ export const LayerData = () => {
     const bounds = mainMap.getBounds();
     const coords = [bounds.getWest(), bounds.getNorth()];
 
+    mainMap.once('sourcedata', () => {
+      console.log('updated');
+
+      mapStore.performingUpdate = false;
+    });
+
     return await mapStore.updateMapData(
       bounds.toArray(),
       Number.parseInt(mainMap.getZoom().toFixed(0)),

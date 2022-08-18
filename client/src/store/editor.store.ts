@@ -22,10 +22,6 @@ class EditorStore {
     this.isDrawing = !this.isDrawing;
   }
 
-  get isFeature() {
-    return this.createdGeometry != null;
-  }
-
   setDrawMode(type: GeometryType | null) {
     this.drawMode = type;
   }

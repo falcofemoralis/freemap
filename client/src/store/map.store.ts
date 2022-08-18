@@ -5,6 +5,7 @@ import MapService from '../services/map.service';
 import { HashUtil } from '../utils/HashUtil';
 import { FeatureProps, GeometryProp, IMapData } from './../types/IMapData';
 import { CreateFeatureProps } from '../types/IMapData';
+import { TileTypes } from '@/constants/tiles.type';
 
 class MapStore {
   mapData: IMapData;
@@ -21,13 +22,17 @@ class MapStore {
 
   async updateMapData(bounds: number[][], zoom: number, center: number[], h: number, w: number): Promise<IMapData | undefined> {
     if (this.performingUpdate) {
+      console.log('//');
+
       return;
     }
 
     this.performingUpdate = true;
+    console.log('start load');
+
     this.mapData = await MapService.getMapData(bounds);
-    //this.mapData.sources.push(await MapService.getWikimapiaData(center, zoom, h, w, TileTypes.OBJECTS));
-    this.performingUpdate = false;
+    this.mapData.sources.push(await MapService.getWikimapiaData(center, zoom, h, w, TileTypes.OBJECTS));
+    console.log('loaded');
 
     return this.mapData;
   }

@@ -50,7 +50,6 @@ export default class MapService {
       const { data } = await axiosInstance.get<Source>(
         `${this.API_URL}/wikimapia?lat=${center[1]}&lng=${center[0]}&zoom=${zoom + 1}&h=${h}&w=${w}&type=${type.toString()}`
       );
-      //const { data } = await axiosInstance.get<Source>(`${this.API_URL}/wikimapia?lat=${47.844803}&lng=${35.198693}&zoom=${15}&h=${h}&w=${w}`);
 
       return data;
     } catch (e: AxiosError | unknown) {
