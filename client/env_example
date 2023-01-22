@@ -1,0 +1,3 @@
+REACT_APP_GOOGLE_CLIENT_ID=// google public OAuth token
+REACT_APP_MAP_TOKEN=// mapbox gl token
+REACT_APP_SERVER_URL=http://localhost:3001
