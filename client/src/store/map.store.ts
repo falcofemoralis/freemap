@@ -31,7 +31,7 @@ class MapStore {
     console.log('start load');
 
     this.mapData = await MapService.getMapData(bounds);
-    this.mapData.sources.push(await MapService.getWikimapiaData(center, zoom, h, w, TileTypes.OBJECTS));
+    // this.mapData.sources.push(await MapService.getWikimapiaData(center, zoom, h, w, TileTypes.OBJECTS));
     console.log('loaded');
 
     return this.mapData;

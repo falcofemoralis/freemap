@@ -34,7 +34,6 @@ export class FilesService {
     for (const file of files) {
       try {
         const fileName = v4();
-        console.log(options);
 
         await this.uploadFile(file.buffer, fileName, FileType.ORIGINAL, options.maxWidth, options.subfolder);
         await this.uploadFile(file.buffer, fileName, FileType.THUMBNAIL, options.previewMaxWidth, options.subfolder);
@@ -84,7 +83,7 @@ export class FilesService {
 
         files.push({ buffer: Buffer.from((<any>result).fileBinary, 'base64'), filename: name, mimeType: FILE_TYPE });
       } catch (e: any) {
-        //console.log(e);
+        // console.log(e);
         throw e;
       }
     }

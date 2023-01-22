@@ -191,8 +191,6 @@ export class MapController {
     try {
       const userId = (req.user as UserPayload).id;
       const insertedFeature = await this.mapService.addMapFeature(featureDto, userId);
-      console.log(insertedFeature);
-
       await this.usersService.addUserExperience(userId, 1000);
       return insertedFeature;
     } catch (e) {

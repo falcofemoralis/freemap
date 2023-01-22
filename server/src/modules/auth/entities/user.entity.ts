@@ -56,7 +56,7 @@ UserSchema.set('toJSON', {
   transform: (doc, ret) => {
     delete ret._id;
     delete ret.__v;
-    ret.userAvatar = ret.userAvatar ? `${process.env.DOMAIN}/api/auth/profile/avatar/${ret.userAvatar}` : ret.googleAvatar;
+    ret.userAvatar = ret.googleAvatar ? ret.googleAvatar : `${process.env.DOMAIN}/api/auth/profile/avatar/${ret.userAvatar}`;
     delete ret.googleAvatar;
     delete ret.passwordHash;
   },

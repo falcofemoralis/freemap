@@ -8,8 +8,8 @@ export const EditorAlert = observer(() => {
   const { t } = useTranslation();
 
   return (
-    <Snackbar open={editorStore.alert} onClose={editorStore.toggleAlert} autoHideDuration={2000}>
-      <Alert className='editorAlert' elevation={5} onClose={editorStore.toggleAlert} severity='info' variant='filled'>
+    <Snackbar open={editorStore.alert} onClose={() => editorStore.toggleAlert()} autoHideDuration={2000}>
+      <Alert className='editorAlert' elevation={5} onClose={() => editorStore.toggleAlert()} severity='info' variant='filled'>
         {t('AUTH_REQUIRED')}
       </Alert>
     </Snackbar>
