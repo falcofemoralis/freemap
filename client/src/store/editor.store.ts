@@ -2,6 +2,7 @@ import { GeometryProp } from './../types/IMapData';
 import { GeometryType } from '@/types/IMapData';
 import { makeAutoObservable } from 'mobx';
 import { IFeatureType } from '../types/IFeatureType';
+import { EditType } from '@/constants/edit.type';
 
 class EditorStore {
   drawMode: GeometryType | null = null;
@@ -9,6 +10,7 @@ class EditorStore {
   createdGeometry: GeometryProp | null = null;
   isDrawing = false;
   alert = false;
+  editType: EditType | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -32,6 +34,10 @@ class EditorStore {
 
   toggleAlert() {
     this.alert = !this.alert;
+  }
+
+  setEditType(editType: EditType) {
+    this.editType = editType;
   }
 }
 

@@ -4,3 +4,4 @@ CLIENT_ID=// google OAuth token
 DOMAIN=http://localhost:3001
 JWT_SECRET=
 DROPBOX_TOKEN=// dropbox token with file read\write permission
+MAPFLOW_TOKEN=

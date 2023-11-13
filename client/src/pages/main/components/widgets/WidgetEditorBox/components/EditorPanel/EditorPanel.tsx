@@ -7,9 +7,11 @@ import { IconButton } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { GeometryType } from '@/types/IMapData';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import { EditType } from '@/constants/edit.type';
 
 interface EditorPanelProps {
-  onSelect: (type: GeometryType) => void;
+  onSelect: (type: GeometryType, editType?: EditType) => void;
 }
 export const EditorPanel: React.FC<EditorPanelProps> = observer(({ onSelect }) => {
   return (
@@ -22,6 +24,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = observer(({ onSelect }) =
       </IconButton>
       <IconButton className='editorBtn' size='large' onClick={() => onSelect(GeometryConstant.MULTI_POLYGON)} disabled={editorStore.isDrawing}>
         <HighlightAltOutlinedIcon />
+      </IconButton>
+      <IconButton className='editorBtn' size='large' onClick={() => onSelect(GeometryConstant.POLYGON, EditType.AI)} disabled={editorStore.isDrawing}>
+        <PsychologyIcon />
       </IconButton>
     </>
   );

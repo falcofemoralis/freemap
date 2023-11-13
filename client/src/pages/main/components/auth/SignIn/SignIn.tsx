@@ -104,7 +104,7 @@ export const SignIn: React.FC<SignInProps> = ({ onSwitch, onClose }) => {
                 onSuccess={handleGoogleLogin}
                 onFailure={handleGoogleFailure}
                 cookiePolicy='single_host_origin'
-              ></GoogleLogin>
+              />
             </Grid>
             <Grid className='signIn__account' item>
               <Link className='signIn__accountBtn' variant='body2' onClick={onSwitch}>

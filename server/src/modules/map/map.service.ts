@@ -1,15 +1,18 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { Model } from 'mongoose';
 import { User } from '../auth/entities/user.entity';
 import { UserComment } from '../comments/entities/user-comment';
+import { Processing } from '../users/types/prosessing';
+import { ProcessingStatus } from './../users/types/prosessing';
 import { CategoryDto } from './dto/category.dto';
 import { CreateFeaturePropsDto } from './dto/create-feature.dto';
 import { FeatureTypeDto } from './dto/feature-type.dto';
 import { Category, CategoryDocument } from './entities/category.entity';
 import { FeatureType, FeatureTypeDocument } from './entities/feature-type.entity';
-import { MapFeature, MapFeatureDocument } from './entities/map-feature.entity';
+import { MapFeature, MapFeatureDocument, MapFeatureProps } from './entities/map-feature.entity';
 import { AreaQuery } from './query/area.query';
 import { GeometryProp } from './types/map-data';
 import { Media } from './types/media';
@@ -23,6 +26,7 @@ export class MapService {
     private featureTypeModel: Model<FeatureTypeDocument>,
     @InjectModel(Category.name)
     private categoryModel: Model<CategoryDocument>,
+    private readonly httpService: HttpService,
   ) {}
 
   /**
@@ -159,5 +163,84 @@ export class MapService {
           { path: 'user', model: User, select: '-email -isMailing' },
         ],
       });
+  }
+
+  async addProcessedMapFeatures(
+    collection: FeatureCollection<GeometryProp, MapFeatureProps>,
+    userId: string,
+    mapFeatureDto: Feature<GeometryProp, CreateFeaturePropsDto>,
+  ) {
+    const featuresDocument = [];
+
+    collection.features.forEach((feature) => {
+      featuresDocument.push(
+        new this.mapFeatureModel({
+          ...mapFeatureDto,
+          ...feature,
+          properties: { ...mapFeatureDto.properties, ...feature.properties, user: userId, createdAt: Date.now() },
+        }),
+      );
+    });
+
+    await this.mapFeatureModel.insertMany(featuresDocument);
+  }
+
+  buildProcessingData({ type, coordinates }) {
+    return {
+      name: 'Mapping with Mapflow AI',
+      wdName: type,
+      geometry: {
+        type: 'Polygon',
+        coordinates: coordinates,
+      },
+      params: {},
+      meta: {
+        URL: 'Mapflow.ai',
+      },
+    };
+  }
+
+  async performAnalyzeRequest({ data }): Promise<Processing> {
+    console.log(`Basic ${process.env.MAPFLOW_TOKEN}`);
+
+    const res = await this.httpService.axiosRef({
+      method: 'POST',
+      data,
+      url: `https://api.mapflow.ai/rest/processings`,
+      decompress: true,
+      headers: {
+        Authorization: `Basic ${process.env.MAPFLOW_TOKEN}`,
+      },
+    });
+
+    return res.data;
+  }
+
+  async performAnalyzeRequestStatus({ data, processingId }): Promise<ProcessingStatus> {
+    const res = await this.httpService.axiosRef({
+      method: 'GET',
+      data,
+      url: `https://api.mapflow.ai/rest/processings/${processingId}`,
+      decompress: true,
+      headers: {
+        Authorization: `Basic ${process.env.MAPFLOW_TOKEN}`,
+      },
+    });
+
+    return res.data.status;
+  }
+
+  async performAnalyzeRequestResult({ data, processingId }): Promise<FeatureCollection<GeometryProp, MapFeatureProps>> {
+    const res = await this.httpService.axiosRef({
+      method: 'GET',
+      data,
+      url: `https://api.mapflow.ai/rest/processings/${processingId}/result`,
+      decompress: true,
+      headers: {
+        Authorization: `Basic ${process.env.MAPFLOW_TOKEN}`,
+      },
+    });
+
+    return res.data;
   }
 }

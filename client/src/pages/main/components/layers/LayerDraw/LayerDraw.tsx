@@ -37,15 +37,12 @@ export const LayerDraw: React.FC<LayerDrawProps> = observer(({ onCancel, onCompl
       editorStore.setCreatedGeometry({ type: GeometryConstant.POLYGON, coordinates });
     } else if (editorStore.drawMode == GeometryConstant.MULTI_POLYGON) {
       const coordinates: Position[][][] = [];
-      //const bboxes: number[][] = []; // for test
 
       for (const feature of features) {
         coordinates.push((feature.geometry as Polygon).coordinates);
-        //bboxes.push(bbox(feature.geometry as Polygon));
       }
 
       editorStore.setCreatedGeometry({ type: GeometryConstant.MULTI_POLYGON, coordinates });
-      //console.log(JSON.stringify(bboxes));
     } else if (editorStore.drawMode == GeometryConstant.MULTI_LINE_STRING) {
       const coordinates: Position[][] = [];
 

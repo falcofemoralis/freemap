@@ -21,11 +21,13 @@ import { Response } from 'express';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import { FeatureTypeDto } from 'src/modules/map/dto/feature-type.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ProcessingStatus } from '../users/types/prosessing';
 import { WikimapiaApi } from './../../libs/wikimapia.api';
 import { UserPayload } from './../auth/guards/jwt-auth.guard';
 import { FilesService } from './../files/files.service';
 import { FileOptionsQuery } from './../files/query/media.query';
 import { UsersService } from './../users/users.service';
+import { ANALAZYING_TIMEOUT } from './constants/processing.type';
 import { CategoryDto } from './dto/category.dto';
 import { CreateFeaturePropsDto } from './dto/create-feature.dto';
 import { Category } from './entities/category.entity';
@@ -39,6 +41,7 @@ import { WikimapiaQuery } from './query/wikimapia.query';
 import { GeometryProp, LayerSource, MapData, Source } from './types/map-data';
 import { Media } from './types/media';
 import { LayerUtil } from './utils/layer.util';
+import { timer } from './utils/timer.util';
 
 const MEDIA_FOLDER = 'media';
 @ApiTags('map')
@@ -71,7 +74,7 @@ export class MapController {
         features: [],
       };
 
-      featureCollection.features.push(...mapFeatures.filter((feature) => feature.properties.type.id == type.id));
+      featureCollection.features.push(...mapFeatures.filter((feature) => feature.properties.type?.id == type.id));
       if (featureCollection.features.length > 0) {
         sources.push({ id: type.id, featureCollection });
       }
@@ -273,5 +276,57 @@ export class MapController {
     }
 
     return this.mapService.getNewestFeatures(amount);
+  }
+
+  getAnalyzeRequestType() {
+    return '🏠 Buildings';
+  }
+
+  @ApiOperation({ summary: 'Analyze added object' })
+  @ApiHeader({ name: 'auth', description: 'Токен пользователя' })
+  @ApiResponse({ status: 201, type: MapFeature, description: 'Map feature' })
+  @UseGuards(JwtAuthGuard)
+  @Post('feature/analyze')
+  async analyzeMapFeature(
+    @Body() featureDto: Feature<GeometryProp, CreateFeaturePropsDto>,
+    @Request() req,
+  ): Promise<FeatureCollection<GeometryProp, MapFeatureProps>> {
+    const userId = (req.user as UserPayload).id;
+
+    console.log('buildProcessingData');
+
+    const processingData = this.mapService.buildProcessingData({
+      type: this.getAnalyzeRequestType(),
+      coordinates: featureDto.geometry.coordinates,
+    });
+
+    console.log(processingData);
+
+    console.log('performAnalyzeRequest');
+
+    const processing = await this.mapService.performAnalyzeRequest({ data: processingData });
+
+    console.log(processing);
+
+    let status = processing.status;
+    while (status === ProcessingStatus.IN_PROGRESS) {
+      await timer(ANALAZYING_TIMEOUT);
+
+      const processingStatus = await this.mapService.performAnalyzeRequestStatus({
+        processingId: processing.id,
+        data: processingData,
+      });
+
+      status = processingStatus;
+    }
+
+    const featureCollection = await this.mapService.performAnalyzeRequestResult({
+      processingId: processing.id,
+      data: processingData,
+    });
+
+    await this.mapService.addProcessedMapFeatures(featureCollection, userId, featureDto);
+
+    return featureCollection;
   }
 }

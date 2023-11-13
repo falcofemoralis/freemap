@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+.env
 /back-openfreemap/dist
 /back-openfreemap/.env
 /back-openfreemap/uploaded

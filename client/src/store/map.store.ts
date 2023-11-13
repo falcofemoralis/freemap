@@ -64,6 +64,17 @@ class MapStore {
 
     return null;
   }
+
+  async analyzeFeature(feature: Feature<GeometryProp, CreateFeatureProps>): Promise<FeatureCollection<GeometryProp, FeatureProps> | null> {
+    const collection = await MapService.analyzeFeature(feature);
+    const source = this.mapData.sources.find(source => source.id == feature.properties.type);
+    if (source) {
+      source.featureCollection.features.push(...collection.features);
+      return source.featureCollection;
+    }
+
+    return null;
+  }
 }
 
 export const mapStore = new MapStore();

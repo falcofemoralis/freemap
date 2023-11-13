@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { CategoriesAutocomplete } from './components/CategoriesAutocomplete/CategoriesAutocomplete';
 import { CreateFeatureProps } from '../../../../../types/IMapData';
 import './TabCreate.scss';
+import { EditType } from '@/constants/edit.type';
 
 interface FormData {
   name: string;
@@ -83,7 +84,8 @@ export const TabCreate: React.FC<TabCreateProps> = observer(({ open, onSubmit, o
         id: new Date().getTime()
       };
 
-      const collection = await mapStore.addFeature(createdFeature, files);
+      const collection =
+        editorStore.editType === EditType.REGULAR ? await mapStore.addFeature(createdFeature, files) : await mapStore.analyzeFeature(createdFeature);
       if (collection) {
         (mainMap?.getSource(editorStore.selectedFeatureType.id) as GeoJSONSource).setData(collection);
       }

@@ -3,7 +3,7 @@ import { GeometryProp } from './../types/IMapData';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FeatureProps } from '@/types/IMapData';
 import { AxiosError } from 'axios';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { errorStore } from '../store/error.store';
 import { ICategory } from '../types/ICategory';
 import { IMapData, Source, CreateFeatureProps } from '../types/IMapData';
@@ -100,5 +100,19 @@ export default class MapService {
   static async getNewestFeatures(amount: number): Promise<Array<Feature<GeometryProp, FeatureProps>>> {
     const { data } = await axiosInstance.get<Array<Feature<GeometryProp, FeatureProps>>>(`${this.API_URL}/newest/${amount}`);
     return data;
+  }
+
+  static async analyzeFeature(feature: Feature<GeometryProp, CreateFeatureProps>): Promise<FeatureCollection<GeometryProp, FeatureProps>> {
+    try {
+      const { data } = await axiosInstance.post<FeatureCollection<GeometryProp, FeatureProps>>(`${this.API_URL}/feature/analyze`, feature, {
+        headers: headers()
+      });
+      // authStore.updateUserLvl();
+
+      return data;
+    } catch (e: AxiosError | unknown) {
+      errorStore.errorHandle(e);
+      throw e;
+    }
   }
 }

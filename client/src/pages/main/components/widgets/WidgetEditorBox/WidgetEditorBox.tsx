@@ -11,6 +11,7 @@ import { EditorPanel } from './components/EditorPanel/EditorPanel';
 import { TypesDialog } from './components/TypesDialog/TypesDialog';
 import './WidgetEditorBox.scss';
 import { observer } from 'mobx-react-lite';
+import { EditType } from '@/constants/edit.type';
 
 export const WidgetEditorBox = observer(() => {
   const [typesDialogOpen, setTypesDialogOpen] = useState(false);
@@ -20,14 +21,21 @@ export const WidgetEditorBox = observer(() => {
    * Handle geometry type select from editor panel box
    * @param type - geometry type
    */
-  const onEditTypeSelect = (type: GeometryType | null) => {
+  const onEditTypeSelect = (type: GeometryType, editType: EditType = EditType.REGULAR) => {
     if (!authStore.isAuth) {
       editorStore.toggleAlert();
       return;
     }
 
-    setTypesDialogOpen(true);
     editorStore.setDrawMode(type);
+    editorStore.setEditType(editType);
+
+    if (editType === EditType.AI) {
+      editorStore.toggleDrawing();
+      return;
+    }
+
+    setTypesDialogOpen(true);
   };
 
   /**
